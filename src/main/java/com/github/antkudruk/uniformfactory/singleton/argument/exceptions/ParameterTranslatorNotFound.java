@@ -18,7 +18,6 @@ package com.github.antkudruk.uniformfactory.singleton.argument.exceptions;
 
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 
-// TODO: msg
 /**
  * Thrown when we face an argument in the origin method that has a type that doesn't
  * have an appropriate mapper.
