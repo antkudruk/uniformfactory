@@ -1,0 +1,9 @@
+rootProject.name = 'uniformFactory'
+include 'gradle-plugin-test'
+include 'gradle-listing-1-test'
+include 'gradle-listing-2-test'
+include 'gradle-listing-3-test'
+include 'gradle-listing-4-test'
+include 'gradle-listing-6-test'
+include 'gradle-listing-7-test'
+

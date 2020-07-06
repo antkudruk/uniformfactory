@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.10.6"
+}
+
+group 'hz.xorlab'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(path: ":")
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.6'
+
+    compile group: 'net.bytebuddy', name: 'byte-buddy-gradle-plugin', version: '1.10.6'
+}
+
+byteBuddy {
+    transformation {
+        plugin = "PluginLoader"
+    }
+}
