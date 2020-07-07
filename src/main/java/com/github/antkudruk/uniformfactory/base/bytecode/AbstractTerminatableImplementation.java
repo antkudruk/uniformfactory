@@ -18,6 +18,10 @@ package com.github.antkudruk.uniformfactory.base.bytecode;
 
 import net.bytebuddy.implementation.Implementation;
 
+/**
+ * Bytecode implementation that may terminate method with {@code return}
+ * statement if it's the last
+ */
 public abstract class AbstractTerminatableImplementation implements Implementation.Composable {
 
     private final boolean terminate;

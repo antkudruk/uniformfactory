@@ -48,6 +48,9 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
         validate();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Method getWrapperMethod() {
         return wrapperMethod;

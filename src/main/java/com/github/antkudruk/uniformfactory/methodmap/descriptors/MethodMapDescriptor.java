@@ -72,6 +72,9 @@ public class MethodMapDescriptor<A extends Annotation> extends AbstractMethodDes
         validate();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings("unchecked")
     @Override
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
