@@ -33,11 +33,14 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 /**
  * Generates bytecode implementing the following instructios:
+ *
+ * <pre>
  * {@code
  *     void invoke(OriginType origin) {
  *         this.intermediateWrapperField = new IntermediateWrapperType(origin);
  *     }
  * }
+ * </pre>
  *
  * {@code IntermediateWrapperType} should have at least one constructor
  * taking a parameter of the {@code OriginType}

@@ -41,8 +41,9 @@ import java.lang.reflect.Field;
 import java.util.function.Function;
 
 /**
- * Generates bytecode for returns fields field value, even if the field is private.
+ * Generates bytecode that returns fields field value, even if the field is private.
  *
+ * <pre>
  * {@code
  *      public void invoke() {
  *          field.setAccessible(true);
@@ -51,6 +52,7 @@ import java.util.function.Function;
  *          return resultTranslatorLambda.apply(fieldValue);
  *      }
  * }
+ * </pre>
  *
  */
 public class FieldAccessImplementation implements Implementation {
