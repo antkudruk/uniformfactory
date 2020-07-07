@@ -12,5 +12,6 @@ public class MapperTest {
         OriginImpl origin = new OriginImpl();
         assertEquals("2", ((Origin)origin).getWrapper().processFirst(10));
         assertEquals("100", ((Origin)origin).getWrapper().processSecond(10));
+        assert false;
     }
 }
