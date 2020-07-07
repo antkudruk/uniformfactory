@@ -35,11 +35,13 @@ import java.util.function.Function;
  *
  * Generates bytecode for the following statement
  *
+ * <pre>
  * {@code
  *      public void intercept() {
  *          wrapperField = wrapperConstructorField.invoke(new Object[]{this});
  *      }
  * }
+ * </pre>
  */
 public class InitFieldWithConstructorFieldUsingThisImplementation implements Implementation {
 

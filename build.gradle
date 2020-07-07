@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'signing'
 }
 
 group 'com.github.antkudruk'
@@ -52,16 +53,44 @@ publishing {
                         email = 'antkudruk@gmail.com'
                     }
                 }
+                /*
                 scm {
                     // TODO: Clarify
                     //            https://github.com/antkudruk/uniform-enhancer.git
                     // connection = 'scm:git:git://example.com/my-library.git'
                     // developerConnection = 'scm:git:ssh://example.com/my-library.git'
                     url = 'https://github.com/antkudruk/uniformfactory'
-                }
+                }*/
             }
         }
     }
 }
 
+jar {
+    manifest {
+        attributes(
+                'Built-By'       : System.properties['user.name'],
+                'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+
+                'Created-By'     : "Gradle ${gradle.gradleVersion}",
+                'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+                'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
+                'Bundle-License' : "http://www.apache.org/licenses/LICENSE-2.0.txt",
+                'Bundle-SymbolicName': "com.github.antkudruk.uniformfactory",
+                'Bundle-Name'    : "Uniform Factory",
+                'Bundle-Version' : "0.0.1"
+        )
+    }
+}
+
 apply plugin: 'maven-publish'
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}

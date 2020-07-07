@@ -41,6 +41,7 @@ import java.util.List;
  *
  * Generates bytecode for the following instructions.
  *
+ * <pre>
  * {@code
  *      void intercept(OriginType origin) {
  *          List temp = new ArrayList();
@@ -53,6 +54,7 @@ import java.util.List;
  *          this.field = Collections.unmodifiableList(temp);
  *      }
  * }
+ * </pre>
  *
  */
 public class InitListImplementation extends AbstractImplementation {

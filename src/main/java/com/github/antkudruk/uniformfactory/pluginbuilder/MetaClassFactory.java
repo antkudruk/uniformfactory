@@ -28,6 +28,10 @@ public interface MetaClassFactory<W> {
     /**
      * Returns <b>Wrapper Object Generator</b> for each {@code originClass}.
      * Wrapper Object Generator is a function that creates a wrapper object for origin object.
+     *
+     * @param originClass Origin class
+     * @param <O> Origin class
+     * @return Metaclass - a function to generate wrapper objects.
      */
     <O> Function<O, ? extends W> generateMetaClass(Class<O>  originClass);
 }
