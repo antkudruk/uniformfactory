@@ -21,8 +21,26 @@ import net.bytebuddy.description.type.TypeDescription;
 
 import java.lang.reflect.Method;
 
+/**
+ * Describes how to implement each wrapper method.
+ */
 public interface MethodDescriptor {
+
+    /**
+     *
+     * @return Wrapper method described by this descriptor.
+     */
     Method getWrapperMethod();
+
+    /**
+     * Explores {@code originType} and returns the appropriate method
+     * enhancer that provides access to the needed class members.
+     *
+     * @param originType Type of origin class to generate wrapper for.
+     * @return Enhancer for a specified {@code originType}
+     * @throws ClassGeneratorException Thrown if the {@code originClass} \
+     *                          doesn't meet the enhancer requirements.
+     */
     Enhancer getEnhancer(TypeDescription originType)
             throws ClassGeneratorException;
 }

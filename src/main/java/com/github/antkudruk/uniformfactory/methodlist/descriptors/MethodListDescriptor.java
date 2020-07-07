@@ -63,6 +63,9 @@ public class MethodListDescriptor<A extends Annotation> extends AbstractMethodDe
         validate();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
         List<DynamicType.Unloaded> functionalMapperClasses = new ArrayList<>();

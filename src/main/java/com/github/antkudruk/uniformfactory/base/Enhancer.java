@@ -19,8 +19,32 @@ package com.github.antkudruk.uniformfactory.base;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.Implementation;
 
+/**
+ * Adds functionality related to a particular wrapper method to a wrapper class.
+ *
+ * Enhancer implementations are generated for each origin class and therefore
+ * aware of exact origin class members they operate with.
+ */
 public interface Enhancer {
+
+    /**
+     * Enhances wrapper class constructor.
+     * The method normally adds initiation on fields accessible by the method.
+     *
+     * @param existingImplementation Builder for wrapper constructor implementation.
+     * @return Constructor implementation enhanced with the method related initiation.
+     */
     Implementation.Composable addInitiation(
             Implementation.Composable existingImplementation);
-    <N> DynamicType.Builder<N> addMethod(DynamicType.Builder<N> bbBuilder);
+
+    /**
+     * Adds class members required for the method.
+     * That members include the method itself and may include adding some
+     * fields accessed by the method.
+     *
+     * @param bbBuilder Builder for wrapper class description
+     * @param <W> Wrapper class
+     * @return Wrapper class builder enhanced with the wrapper method.
+     */
+    <W> DynamicType.Builder<W> addMethod(DynamicType.Builder<W> bbBuilder);
 }

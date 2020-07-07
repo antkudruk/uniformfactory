@@ -58,6 +58,9 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
         validate();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Enhancer getEnhancer(TypeDescription originClass)
             throws ClassGeneratorException {
