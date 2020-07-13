@@ -45,6 +45,7 @@ import java.util.Map;
  *
  * Generates bytecode for the following instructions.
  *
+ * <pre>
  * {@code
  *      void intercept(OriginType origin) {
  *          Map temp = new HashMap();
@@ -57,6 +58,7 @@ import java.util.Map;
  *          this.field = Collections.unmodifiableMap(temp);
  *      }
  * }
+ * </pre>
  *
  */
 public class InitMapImplementation extends AbstractImplementation {

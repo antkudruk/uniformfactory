@@ -36,11 +36,13 @@ import net.bytebuddy.matcher.ElementMatchers;
  * Initiates static field with the name {@code fieldName} using default
  * constructor of the class {@code classFactoryGenerator}.
  *
+ * <pre>
  * {@code
  *      void invoke() {
  *          field = new ClassFactory();
  *      }
  * }
+ * </pre>
  */
 public class InitFieldWithDefaultConstructorImplementation implements Implementation {
 

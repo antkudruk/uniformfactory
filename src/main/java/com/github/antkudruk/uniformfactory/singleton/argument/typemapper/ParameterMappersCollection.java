@@ -41,7 +41,7 @@ import java.util.function.Function;
  *     </li>
  *     <li>
  *         {@code ParameterMappersCollection} has <b>repeating</b> translator
- *         (@code t->t}) and <b>toString</b> translator ({@code Object::toString})
+ *         (@code t-&gt;t}) and <b>toString</b> translator ({@code Object::toString})
  *         by default.
  *     </li>
  * </ul>
@@ -69,13 +69,17 @@ public class ParameterMappersCollection<A> {
     }
 
     /**
+     * Adds parameter translator from originClass to the wrapper argument type.
+     *
+     * @param originClass A case of origin parameter type
+     * @param translator Translates the origin class to wrapper parameter class.
      * @return This object as a builder.
      */
     public ParameterMappersCollection<A> add(
-            TypeDescription originClass, Function<A, ?> mapper) {
+            TypeDescription originClass, Function<A, ?> translator) {
 
         parameterTranslators.add(new ParameterMapperDescriptor<>(
-                originClass, mapper));
+                originClass, translator));
 
         return this;
     }

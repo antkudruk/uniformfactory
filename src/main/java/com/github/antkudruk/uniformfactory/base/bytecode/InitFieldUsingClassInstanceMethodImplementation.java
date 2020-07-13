@@ -37,6 +37,7 @@ import net.bytebuddy.matcher.ElementMatchers;
  * Generates translator from <b>origin</b> to <b>wrapper</b> object and
  * assigns it to the static field {@code field}.
  *
+ * <pre>
  * {@code
  *
  *     static Function <Origin, Wrapper> translator;
@@ -45,6 +46,7 @@ import net.bytebuddy.matcher.ElementMatchers;
  *          translator = SingletonHolder.INSTANCE.generateMetaClass(this.getClass());
  *     }
  * }
+ * </pre>
  */
 public class InitFieldUsingClassInstanceMethodImplementation implements Implementation {
 

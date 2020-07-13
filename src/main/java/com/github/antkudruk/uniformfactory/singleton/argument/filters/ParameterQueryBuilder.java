@@ -40,7 +40,7 @@ public class ParameterQueryBuilder implements ParameterFilter {
     /**
      * Selects only these parameters that can be cast to the specified class.
      * <p>
-     * Shortcut for add(new ParameterTypeFilter<>( . . . ))
+     * Shortcut for add(new ParameterTypeFilter&lt;&gt;( . . . ))
      *
      * @param parameterClass Expected type
      * @return This object as a builder.
@@ -53,7 +53,7 @@ public class ParameterQueryBuilder implements ParameterFilter {
     /**
      * Selects only these parameters annotated by the particular annotation.
      * <p>
-     * Shortcut for add(new AnnotationParameterFilter<>( . . .  ))
+     * Shortcut for add(new AnnotationParameterFilter&lt;&gt;( . . .  ))
      *
      * @param annotationClass Expected annotation.
      * @param <A>             Class of the annotation.
