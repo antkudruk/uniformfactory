@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven'  // TODO: Is that plugin realy needed?
     id 'maven-publish'
     id 'signing'
 }
@@ -25,7 +26,7 @@ dependencies {
             'org.powermock:powermock-module-junit4:2.0.4',
             'org.powermock:powermock-api-mockito2:2.0.4'
 }
-
+/*
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -60,11 +61,12 @@ publishing {
                     // connection = 'scm:git:git://example.com/my-library.git'
                     // developerConnection = 'scm:git:ssh://example.com/my-library.git'
                     url = 'https://github.com/antkudruk/uniformfactory'
-                }*/
+                }* /
             }
         }
     }
 }
+*/
 
 jar {
     manifest {
@@ -93,4 +95,59 @@ task sourcesJar(type: Jar) {
 task javadocJar(type: Jar) {
     from javadoc
     classifier = 'javadoc'
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'Uniform Factory'
+                packaging 'jar'
+                // TODO:  optionally artifactId can be defined here
+                artifactId = 'uniformfactory'
+
+                description 'Simplifies working with annotated class members'
+                url 'https://github.com/antkudruk/uniformfactory'
+
+                scm {
+                    connection 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
+                    developerConnection 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
+                    url 'https://oss.sonatype.org/content/repositories/snapshots'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'antkudruk'
+                        name 'Anton Kudruk'
+                        email 'antkudruk@gmail.com'
+                    }
+                }
+            }
+        }
+    }
 }
