@@ -65,55 +65,57 @@ signing {
     sign configurations.archives
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+if(hasProperty('ossrhUsername') && hasProperty('ossrhPassword')) {
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            pom.project {
-                name 'Uniform Factory'
-                packaging 'jar'
-                artifactId = 'uniform-factory'
-
-                description 'Simplifies working with annotated class members'
-                url 'https://github.com/antkudruk/uniformFactory'
-
-                organization {
-                    name 'com.github.antkudruk'
-                    url 'https://github.com/antkudruk'
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
                 }
 
-                issueManagement {
-                    system 'GitHub'
-                    url 'https://github.com/antkudruk/uniformFactory/issues'
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
                 }
 
-                scm {
-                    connection 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
-                    developerConnection 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
-                    url 'https://oss.sonatype.org/content/repositories/snapshots'
-                }
+                pom.project {
+                    name 'Uniform Factory'
+                    packaging 'jar'
+                    artifactId = 'uniform-factory'
 
-                licenses {
-                    license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    description 'Simplifies working with annotated class members'
+                    url 'https://github.com/antkudruk/uniformFactory'
+
+                    organization {
+                        name 'com.github.antkudruk'
+                        url 'https://github.com/antkudruk'
                     }
-                }
 
-                developers {
-                    developer {
-                        id 'antkudruk'
-                        name 'Anton Kudruk'
-                        email 'antkudruk@gmail.com'
+                    issueManagement {
+                        system 'GitHub'
+                        url 'https://github.com/antkudruk/uniformFactory/issues'
+                    }
+
+                    scm {
+                        connection 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
+                        developerConnection 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
+                        url 'https://oss.sonatype.org/content/repositories/snapshots'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'antkudruk'
+                            name 'Anton Kudruk'
+                            email 'antkudruk@gmail.com'
+                        }
                     }
                 }
             }
