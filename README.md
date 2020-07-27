@@ -136,18 +136,11 @@ wrapper classes properly.
 
 ### Installing Uniform Factory into your project
 
-To install **Uniform Factory** into your project, you can build the library and 
-include it into your project.
+You can download **Uniform Factory** into your project from Maven Central.
 
 ```
-repositories {
-   flatDir {
-       dirs 'path/to/the/jar'
-   }
-}
-
 dependencies {
-   implementation name: 'uniformFactory'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.0.1'
 }
 ```
 
