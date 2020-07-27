@@ -1,14 +1,17 @@
 plugins {
-    id 'java'
-    id 'maven'  // TODO: Is that plugin realy needed?
+    id 'java-library'
+    id 'maven'
     id 'maven-publish'
     id 'signing'
 }
 
-group 'com.github.antkudruk'
-version '0.0.1'
+// The current version
+def libraryVersion='0.0.1'
 
-sourceCompatibility = 1.11
+group 'com.github.antkudruk'
+version libraryVersion
+
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -19,54 +22,13 @@ configurations {
 }
 
 dependencies {
-    compileOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.6'
+    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.6'
 
     testCompile 'junit:junit:4.12',
             'org.powermock:powermock-core:2.0.4',
             'org.powermock:powermock-module-junit4:2.0.4',
             'org.powermock:powermock-api-mockito2:2.0.4'
 }
-/*
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-
-            groupId = 'com.github.antkudruk'
-            artifactId = 'uniformfactory'
-            version = '0.0.1'
-
-            from components.java
-
-            pom {
-                name = 'Uniform Factory'
-                description = 'Simplifies working with annotated class members'
-                url = 'http://github.com/'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'antkudruk'
-                        name = 'Anton Kudruk'
-                        email = 'antkudruk@gmail.com'
-                    }
-                }
-                /*
-                scm {
-                    // TODO: Clarify
-                    //            https://github.com/antkudruk/uniform-enhancer.git
-                    // connection = 'scm:git:git://example.com/my-library.git'
-                    // developerConnection = 'scm:git:ssh://example.com/my-library.git'
-                    url = 'https://github.com/antkudruk/uniformfactory'
-                }* /
-            }
-        }
-    }
-}
-*/
 
 jar {
     manifest {
@@ -80,12 +42,10 @@ jar {
                 'Bundle-License' : "http://www.apache.org/licenses/LICENSE-2.0.txt",
                 'Bundle-SymbolicName': "com.github.antkudruk.uniformfactory",
                 'Bundle-Name'    : "Uniform Factory",
-                'Bundle-Version' : "0.0.1"
+                'Bundle-Version' : libraryVersion
         )
     }
 }
-
-apply plugin: 'maven-publish'
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
@@ -121,11 +81,20 @@ uploadArchives {
             pom.project {
                 name 'Uniform Factory'
                 packaging 'jar'
-                // TODO:  optionally artifactId can be defined here
-                artifactId = 'uniformfactory'
+                artifactId = 'uniform-factory'
 
                 description 'Simplifies working with annotated class members'
-                url 'https://github.com/antkudruk/uniformfactory'
+                url 'https://github.com/antkudruk/uniformFactory'
+
+                organization {
+                    name 'com.github.antkudruk'
+                    url 'https://github.com/antkudruk'
+                }
+
+                issueManagement {
+                    system 'GitHub'
+                    url 'https://github.com/antkudruk/uniformFactory/issues'
+                }
 
                 scm {
                     connection 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
