@@ -138,15 +138,29 @@ wrapper classes properly.
 
 You can download **Uniform Factory** into your project from Maven Central.
 
+Here is an example for Gradle
+
 ```
 dependencies {
    compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.0.1'
 }
 ```
 
+and for Maven
+
+```
+<dependency>
+    <groupId>com.github.antkudruk</groupId>
+    <artifactId>uniform-factory</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+
 **Uniform Factory** is written to be applied in ByteBuddy Gradle Plugin to 
 generate uniformed **wrapper** classes. Just import and apply  
 `byte-buddy-gradle-plugin` and specify your plugin class.
+
+Here is an example for Gradle
 
 ```
 plugins {
@@ -159,6 +173,30 @@ byteBuddy {
         plugin = // Specify reference to your plugin class here, see the next chapter
     }
 }
+```
+
+and in Maven
+
+```
+    <plugin>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy-maven-plugin</artifactId>
+        <version>1.10.6</version>
+        <executions>
+            <execution>
+                <goals>
+                    <goal>transform</goal>
+                </goals>
+            </execution>
+        </executions>
+        <configuration>
+            <transformations>
+                <transformation>
+                    <plugin><!-- Specify your plugin class reference here --></plugin>
+                </transformation>
+            </transformations>
+        </configuration>
+    </plugin>
 ```
 
 Let's take a look at some examples.
