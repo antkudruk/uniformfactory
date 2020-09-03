@@ -27,6 +27,7 @@ import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.StaticConstr
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.SelectClassCriteriaNotDefinedException;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.build.Plugin;
+import net.bytebuddy.description.annotation.AnnotationDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
@@ -87,6 +88,17 @@ public class WrapperPlugin<W> implements Plugin {
         this.classGeneratorSingletonContainer = createSingletonHolder(classFactoryGenerator);
     }
 
+    /**
+     * Creates the plugin to build wrappers.
+     *
+     * @param originInterface Interface to implement by the origin class
+     * @param getWrapperMethodName Origin method to ter the wrapper
+     * @param wrapperClass Interface to implement by wrappers
+     * @param typeMarker Annotation to mark origin classes
+     * @param wrapperFieldName Field name to store wrappers
+     * @param classFactoryGeneratorFieldName Field name to store wrapper class generators
+     * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
+     */
     public WrapperPlugin(
             Class originInterface,
             String getWrapperMethodName,
@@ -100,7 +112,11 @@ public class WrapperPlugin<W> implements Plugin {
                 originInterface,
                 getWrapperMethodName,
                 wrapperClass,
-                typeDefinitions -> typeDefinitions.getDeclaredAnnotations().isAnnotationPresent(typeMarker),
+                typeDefinitions -> typeDefinitions
+                        .getDeclaredAnnotations()
+                        .stream()
+                        .map(AnnotationDescription::getAnnotationType)
+                        .anyMatch(new TypeDescription.ForLoadedType(typeMarker)::equals),
                 wrapperFieldName,
                 classFactoryGeneratorFieldName,
                 classFactoryGenerator);
@@ -118,6 +134,23 @@ public class WrapperPlugin<W> implements Plugin {
                 getSingleMethod(originInterface),
                 wrapperClass,
                 typeMarker,
+                pluginName + "Wrapper",
+                pluginName + "WrapperGenerator",
+                classFactoryGenerator);
+    }
+
+    public WrapperPlugin(
+            Class originInterface,
+            Class<W> wrapperClass,
+            Predicate<TypeDescription> selectTypeCriteria,
+            String pluginName,
+            Class<? extends MetaClassFactory<W>> classFactoryGenerator) {
+
+        this(
+                originInterface,
+                getSingleMethod(originInterface),
+                wrapperClass,
+                selectTypeCriteria,
                 pluginName + "Wrapper",
                 pluginName + "WrapperGenerator",
                 classFactoryGenerator);
@@ -158,7 +191,6 @@ public class WrapperPlugin<W> implements Plugin {
                 pluginName + "WrapperGenerator",
                 classFactoryGenerator);
     }
-
 
     public WrapperPlugin(Builder<W> builder) {
         this(
@@ -194,8 +226,13 @@ public class WrapperPlugin<W> implements Plugin {
             TypeDescription typeDescription,
             ClassFileLocator classFileLocator) {
 
-        return builder
-                .implement(originInterface)
+        DynamicType.Builder<?> b = builder;
+
+        if(!typeDescription.getInterfaces().contains(new TypeDescription.ForLoadedType(originInterface))) {
+            b = b.implement(originInterface);
+        }
+
+        return b
                 .defineField(wrapperFieldName, wrapperClass, Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)
                 .defineField(classFactoryGeneratorFieldName, Function.class, Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC)
                 .invokable(ElementMatchers.isTypeInitializer())
@@ -237,7 +274,7 @@ public class WrapperPlugin<W> implements Plugin {
 
     @Override
     public boolean matches(TypeDescription target) {
-        return selectTypeCriteria.test(target);
+        return !target.isInterface() && !target.isAnnotation() && selectTypeCriteria.test(target);
     }
 
     public static class Builder<W> {
