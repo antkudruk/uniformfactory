@@ -308,6 +308,80 @@ Object origin = new OriginImpl();
 Wrapper wrapper = ((Origin)origin).getWrapper();
 ```
 
+#### Using explicit interface to enhance objects with wrappers
+
+You can avoid class cast made in the previous example the following way
+
+* Add `@Marker` annotation to the `Origin` interface.
+
+* Add a default implementation to the `Origin` interface to prevent compilation
+error. This default implementation should basically throw an exception, but you
+may implement the different logic.
+
+```
+@Marker
+public interface Origin {
+    default Wrapper getWrapper() {
+        throw new RuntimeException("Wrapper method hasn't been implemented.");
+    }
+}
+```
+
+* Add `@Inherited` to the Marker annotation. This will implicitly add the 
+`@Marker` annotation to each object implementing `Origin` interface.
+
+```
+@Retention(RetentionPolicy.CLASS)
+@Target(ElementType.TYPE)
+@Inherited
+public @interface Marker { }
+```
+
+* Add `Origin` interface to the interfaces list of each origin class.
+
+```
+@Marker
+public class OriginImpl implements Origin {
+}
+```
+After that, the `OriginImpl` class is going to have an implementation for 
+`getWrapper()` method that returns the appropriate wrapper. 
+
+```
+OriginImpl origin = new OriginImpl();
+Wrapper wrapper = origin.getWrapper();
+```
+
+This way, if you implement `getWrapper()` method explicitly, your 
+implementation it's not going to be overridden by the plugin. 
+
+#### Select type criteria
+
+You may want to add wrappers to classes satisfying a custom criteria, for 
+example, matching class names to a special regular expression. 
+**UniformFactory** provides a flexible way to select particular classes for 
+that.
+
+Let's implement a plugin to add wrappers to methods that explicitly implement
+the `Origin` interface, but using custom class selection criteria.
+
+```
+public class PluginImpl extends WrapperPlugin<Wrapper> {
+    public PluginImpl() {
+        super(
+                Origin.class,
+                Wrapper.class,
+                // Class selection criteria
+                td -> td.getInterfaces()
+                        .stream()
+                        .map(TypeDefinition::asErasure)
+                        .anyMatch(new TypeDescription.ForLoadedType(Origin.class)::equals),
+                "examplePlugin",
+                ClassFactoryGeneratorImpl.class);
+    }
+}
+```
+
 ### Method Singleton
 
 Let's enhance our empty `Wrapper` class.
