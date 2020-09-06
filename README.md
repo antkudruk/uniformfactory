@@ -152,7 +152,7 @@ and for Maven
 <dependency>
     <groupId>com.github.antkudruk</groupId>
     <artifactId>uniform-factory</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
