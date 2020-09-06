@@ -142,7 +142,7 @@ Here is an example for Gradle
 
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.0.1'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.0.2'
 }
 ```
 
