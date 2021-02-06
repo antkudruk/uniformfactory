@@ -18,9 +18,9 @@ public class CalendarClassFactory {
         try {
             classFactory = new ClassFactory.Builder<>(Interval.class)
                     .addMethodDescriptor(new MethodSingletonDescriptor.ShortcutBuilder<>(
-                            Nested.class,
                             Interval.class.getMethod("getNested"),
                             List.class)
+                            .setMarkerAnnotation(Nested.class)
                             .build())
                     .build();
         } catch (NoSuchMethodException ex) {

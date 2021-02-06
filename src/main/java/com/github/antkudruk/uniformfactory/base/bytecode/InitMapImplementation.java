@@ -17,6 +17,7 @@
 package com.github.antkudruk.uniformfactory.base.bytecode;
 
 import com.github.antkudruk.uniformfactory.common.TypeDescriptionShortcuts;
+import com.github.antkudruk.uniformfactory.methodmap.enhancers.MemberEntry;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -25,7 +26,6 @@ import net.bytebuddy.implementation.bytecode.Duplication;
 import net.bytebuddy.implementation.bytecode.Removal;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.implementation.bytecode.TypeCreation;
-import net.bytebuddy.implementation.bytecode.constant.TextConstant;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
 import net.bytebuddy.implementation.bytecode.member.MethodInvocation;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
@@ -65,12 +65,12 @@ public class InitMapImplementation extends AbstractImplementation {
 
     private final String fieldName;
     private final TypeDescription originType;
-    private final Map<String, TypeDescription> functionalObjects;
+    private final List<MemberEntry> functionalObjects;
 
     public InitMapImplementation(
             String fieldName,
             TypeDescription originType,
-            Map<String, TypeDescription> functionalObjects
+            List<MemberEntry> functionalObjects
     ) {
         this(fieldName, originType, functionalObjects, true);
     }
@@ -78,7 +78,7 @@ public class InitMapImplementation extends AbstractImplementation {
     private InitMapImplementation(
             String fieldName,
             TypeDescription originType,
-            Map<String, TypeDescription> functionalObjects,
+            List<MemberEntry> functionalObjects,
             boolean isTerminating
     ) {
         super(isTerminating);
@@ -123,10 +123,10 @@ public class InitMapImplementation extends AbstractImplementation {
                     )
             ));
 
-            for (Map.Entry<String, TypeDescription> entry : functionalObjects.entrySet()) {
+            for (MemberEntry entry : functionalObjects) {
                 operands.addAll(getEachElementInstructions(
                         entry.getKey(),
-                        entry.getValue(),
+                        entry.getValue().getTypeDescription(),
                         instrumentedMethod));
             }
 
@@ -150,13 +150,13 @@ public class InitMapImplementation extends AbstractImplementation {
 
         // Adds value supposing the top of the stack points to the HashMap<>()
         private List<StackManipulation> getEachElementInstructions(
-                String key,
+                StackManipulation key,
                 TypeDescription partialValueType,
                 MethodDescription instrumentedMethod) {
 
             return Arrays.asList(
                     Duplication.SINGLE,
-                    new TextConstant(key),
+                    key,
                     TypeCreation.of(partialValueType),
                     Duplication.SINGLE,
 

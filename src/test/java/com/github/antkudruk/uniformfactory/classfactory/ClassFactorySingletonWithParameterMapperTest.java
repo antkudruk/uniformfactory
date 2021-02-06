@@ -116,10 +116,10 @@ public class ClassFactorySingletonWithParameterMapperTest {
         return new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
                         new MethodSingletonDescriptor.ShortcutBuilder<>(
-                                MethodMarker.class,
                                 Wrapper.class.getMethod("common", String.class, String.class),
                                 String.class
                         )
+                                .setMarkerAnnotation(MethodMarker.class)
                                 .parameterSource(String.class, 0)
                                 .applyToAnnotated(First.class)
                                 .finishParameterDescription()

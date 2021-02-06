@@ -14,11 +14,21 @@
    limitations under the License.
  */
 
-package com.github.antkudruk.uniformfactory.singleton.descriptors;
+package com.github.antkudruk.uniformfactory.seletor;
 
-public class AmbiguousMethodException extends WrapperException {
-    AmbiguousMethodException(Throwable cause) {
-        super("More than one class member selected for method singleton", cause);
+import net.bytebuddy.description.field.FieldDescription;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
+
+import java.util.Collections;
+import java.util.List;
+
+public interface MemberSelector {
+    default List<MethodDescription> getMethods(TypeDescription type) {
+        return Collections.emptyList();
+    }
+
+    default List<FieldDescription> getFields(TypeDescription type) {
+        return Collections.emptyList();
     }
 }
-

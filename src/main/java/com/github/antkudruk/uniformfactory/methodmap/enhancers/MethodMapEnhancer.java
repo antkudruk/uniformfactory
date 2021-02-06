@@ -25,6 +25,7 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.jar.asm.Opcodes;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -38,13 +39,13 @@ public class MethodMapEnhancer implements Enhancer {
     private final String fieldName;
     private final TypeDescription originType;
     private final Method wrapperMethod;
-    private final Map<String, DynamicType.Unloaded> functionalMap;
+    private final List<MemberEntry> functionalMap;
 
     public MethodMapEnhancer(
             String mapFieldName,
             TypeDescription originType,
             Method wrapperMethod,
-            Map<String, DynamicType.Unloaded> functionalMapperClasses) {
+            List<MemberEntry> functionalMapperClasses) {
 
         this.fieldName = mapFieldName;
         this.originType = originType;
@@ -56,11 +57,10 @@ public class MethodMapEnhancer implements Enhancer {
     public Implementation.Composable addInitiation(
             Implementation.Composable methodCall) {
 
-        return methodCall.andThen(new InitMapImplementation(fieldName,
+        return methodCall.andThen(new InitMapImplementation(
+                fieldName,
                 originType,
-                functionalMap.entrySet().stream().collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().getTypeDescription()))
+                functionalMap
         ));
     }
 
@@ -70,10 +70,6 @@ public class MethodMapEnhancer implements Enhancer {
                 .defineField(fieldName, Map.class, Opcodes.ACC_PRIVATE)
                 .define(wrapperMethod)
                 .intercept(FieldAccessor.ofField(fieldName))
-                .require(functionalMap.values()
-                        .stream()
-                        .map(e -> (DynamicType)e)
-                        .collect(Collectors.toList())
-                );
+                .require(functionalMap.stream().map(MemberEntry::getValue).collect(Collectors.toList()));
     }
 }

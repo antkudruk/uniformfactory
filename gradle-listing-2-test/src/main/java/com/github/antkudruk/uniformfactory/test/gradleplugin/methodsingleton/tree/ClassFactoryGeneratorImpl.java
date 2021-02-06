@@ -10,10 +10,12 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<TreeEleme
     public ClassFactoryGeneratorImpl() throws ReflectiveOperationException {
         super(new ClassFactory.ShortcutBuilder<>(TreeElement.class)
 
-                .addMethodSingleton(Label.class, TreeElement.class.getMethod("getLabel"), String.class)
+                .addMethodSingleton(TreeElement.class.getMethod("getLabel"), String.class)
+                .setMarkerAnnotation(Label.class)
                 .endMethodDescription()
 
-                .addMethodSingleton(Nested.class, TreeElement.class.getMethod("nested"), List.class)
+                .addMethodSingleton(TreeElement.class.getMethod("nested"), List.class)
+                .setMarkerAnnotation(Nested.class)
                 .setDefaultValue(new ArrayList<>())
                 .endMethodDescription()
 

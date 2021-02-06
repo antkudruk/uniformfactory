@@ -24,14 +24,11 @@ import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodTo
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToFieldEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToMethodEnhancer;
 import net.bytebuddy.description.field.FieldDescription;
-import net.bytebuddy.description.field.FieldList;
 import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.description.method.MethodList;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.matcher.ElementMatchers;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -51,7 +48,7 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
     private final boolean hasDefaultValue;
     private final R defaultValue;
 
-    public MethodSingletonDescriptor(BuilderInterface<?, R> builder) {
+    public MethodSingletonDescriptor(BuilderInterface<R> builder) {
         super(builder);
         this.hasDefaultValue = builder.hasDefaultValue();
         this.defaultValue = builder.getDefaultValue();
@@ -65,17 +62,12 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
     public Enhancer getEnhancer(TypeDescription originClass)
             throws ClassGeneratorException {
 
-        MethodList<? extends MethodDescription> singletonOriginMethod =
-                originClass.getDeclaredMethods()
-                        .filter(ElementMatchers.isAnnotatedWith(markerAnnotation));
-
-        FieldList<? extends FieldDescription> singletonOriginField =
-                originClass.getDeclaredFields()
-                        .filter(ElementMatchers.isAnnotatedWith(markerAnnotation));
+        List<MethodDescription> singletonOriginMethod = memberSelector.getMethods(originClass);
+        List<FieldDescription> singletonOriginField = memberSelector.getFields(originClass);
 
         if ((singletonOriginMethod.size() > 1) || (singletonOriginField.size() > 1)
                 || !(singletonOriginMethod.isEmpty() || singletonOriginField.isEmpty())) {
-            throw new AmbiguousMethodException(markerAnnotation.getName(), null);
+            throw new AmbiguousMethodException(null);
         }
 
         if (!singletonOriginMethod.isEmpty()) {
@@ -106,8 +98,7 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
         throw new RuntimeException("No default value specified for method "
                 + wrapperMethod.getReturnType().getSimpleName()
                 + " " + wrapperMethod.getName()
-                + ". Either default value should be specified or a class member should be marked with @"
-                + markerAnnotation.getName() + " annotation.");
+                + ". Either default value should be specified or a member selected should provide one member.");
     }
 
     private void validate() {
@@ -116,21 +107,21 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
         }
     }
 
-    public interface BuilderInterface<M extends Annotation, R> extends AbstractMethodDescriptorImpl.BuilderInterface<M, R> {
+    public interface BuilderInterface<R> extends AbstractMethodDescriptorImpl.BuilderInterface<R> {
         boolean hasDefaultValue();
 
         R getDefaultValue();
     }
 
-    public static class Builder<M extends Annotation, R>
-            extends AbstractMethodDescriptorImpl.Builder<M, R, MethodSingletonDescriptor.Builder<M, R>>
-            implements BuilderInterface<M, R> {
+    public static class Builder<R>
+            extends AbstractMethodDescriptorImpl.Builder<R, MethodSingletonDescriptor.Builder<R>>
+            implements BuilderInterface<R> {
 
         private boolean hasDefaultValue;
         private R defaultValue;
 
-        public Builder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            super(markerAnnotation, wrapperMethod, methodResultType);
+        public Builder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
         }
 
         @Override
@@ -148,28 +139,28 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
             return defaultValue;
         }
 
-        public Builder<M, R> setDefaultValue(R defaultValue) {
+        public Builder<R> setDefaultValue(R defaultValue) {
             this.hasDefaultValue = true;
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder<M, R> dropDefaultValue() {
+        public Builder<R> dropDefaultValue() {
             this.hasDefaultValue = false;
             this.defaultValue = null;
             return this;
         }
     }
 
-    public static abstract class IntermediateShortcutBuilder<M extends Annotation, R, T extends IntermediateShortcutBuilder<M, R, T>>
-            extends AbstractMethodDescriptorImpl.ShortcutBuilder<M, R, T>
-            implements BuilderInterface<M, R> {
+    public static abstract class IntermediateShortcutBuilder<R, T extends IntermediateShortcutBuilder<R, T>>
+            extends AbstractMethodDescriptorImpl.ShortcutBuilder<R, T>
+            implements BuilderInterface<R> {
 
         private boolean hasDefaultValue;
         private R defaultValue;
 
-        public IntermediateShortcutBuilder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            super(markerAnnotation, wrapperMethod, methodResultType);
+        public IntermediateShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
         }
 
         @Override
@@ -202,11 +193,11 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
         }
     }
 
-    public static final class ShortcutBuilder<M extends Annotation, R>
-            extends IntermediateShortcutBuilder<M, R, ShortcutBuilder<M, R>> {
+    public static final class ShortcutBuilder<R>
+            extends IntermediateShortcutBuilder<R, ShortcutBuilder<R>> {
 
-        public ShortcutBuilder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            super(markerAnnotation, wrapperMethod, methodResultType);
+        public ShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
         }
     }
 }

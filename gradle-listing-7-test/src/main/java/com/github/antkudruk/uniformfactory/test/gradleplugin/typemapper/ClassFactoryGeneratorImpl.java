@@ -20,7 +20,8 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
 
-                .addMethodSingleton(FirstMethodMarker.class, Wrapper.class.getMethod("processFirst", Integer.class), String.class)
+                .addMethodSingleton(Wrapper.class.getMethod("processFirst", Integer.class), String.class)
+                .setMarkerAnnotation(FirstMethodMarker.class)
                 .setResultMapper(resultMapperCollection)
                 .parameterSource(Integer.class, 0)
                 .applyTo(new AnyParameterFilter())
@@ -28,7 +29,8 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
                 .finishParameterDescription()
                 .endMethodDescription()
 
-                .addMethodSingleton(SecondMethodMarker.class, Wrapper.class.getMethod("processSecond", Integer.class), String.class)
+                .addMethodSingleton(Wrapper.class.getMethod("processSecond", Integer.class), String.class)
+                .setMarkerAnnotation(SecondMethodMarker.class)
                 .setResultMapper(resultMapperCollection)
                 .parameterSource(Integer.class, 0)
                 .applyTo(new AnyParameterFilter())

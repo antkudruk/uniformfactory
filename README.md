@@ -301,7 +301,8 @@ method.
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
-            .addMethodSingleton(Identity.class, Wrapper.class.getMethod("getIdentity"), String.class)
+            .addMethodSingleton(Wrapper.class.getMethod("getIdentity"), String.class)
+            .setMarkerAnnotation(Identity.class)
             .addResultTranslator(Long.class, Object::toString)
             .endMethodDescription()
             .build());
@@ -418,11 +419,12 @@ an empty list of children.
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<TreeElement> {
     public ClassFactoryGeneratorImpl() throws ReflectiveOperationException {
         super(new ClassFactory.ShortcutBuilder<>(TreeElement.class)
-
-                .addMethodSingleton(Label.class, TreeElement.class.getMethod("getLabel"), String.class)
+                .addMethodSingleton(TreeElement.class.getMethod("getLabel"), String.class)
+                .setMarkerAnnotation(Label.class)
                 .endMethodDescription()
 
-                .addMethodSingleton(Nested.class, TreeElement.class.getMethod("nested"), List.class)
+                .addMethodSingleton(TreeElement.class.getMethod("nested"), List.class)
+                .setMarkerAnnotation(Nested.class)
                 .setDefaultValue(new ArrayList<>())
                 .endMethodDescription()
 
@@ -498,13 +500,12 @@ returning type of the **functional** interface.
 ```
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
-
+        this.classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
                 .addMethodList(
-                        Processor.Process.class,
                         Wrapper.class.getMethod("getProcessors"),
                         boolean.class
                 )
+                .setMarkerAnnotation(Processor.Process.class)
                 .setFunctionalInterface(Processor.class)
                 .addResultTranslator(void.class, t -> true)
                 .addResultTranslator(Long.class, t -> t >= 0)
@@ -537,10 +538,10 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         this.classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
                 .addMethodList(
-                        Processor.Process.class,
                         Wrapper.class.getMethod("getProcessors"),
                         boolean.class
                 )
+                .setMarkerAnnotation(Processor.Process.class)
                 .setFunctionalInterface(Processor.class)
 
                 .addResultTranslator(void.class, t -> true)
@@ -682,8 +683,8 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<PointWrap
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         super(new ClassFactory.ShortcutBuilder<>(PointWrapper.class)
 
-                .addMethodMap(CoordinateMarker.class, PointWrapper.class.getMethod("getCoords"), long.class)
-                .setKeyGetter(CoordinateMarker::value)
+                .addMethodMap(PointWrapper.class.getMethod("getCoords"), long.class)
+                .setMarkerAnnotation(CoordinateMarker.class, CoordinateMarker::value)
                 .setFunctionalInterface(Coordinate.class)
                 .parameterSource(Long.class, 0)
 
@@ -727,9 +728,9 @@ public class MethodTreeWrapperClassFactory {
         try {
             classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
 
-                    .addMethodMap(FunctionalElement.class, Wrapper.class.getMethod("getWrappers"), String.class)
+                    .addMethodMap(Wrapper.class.getMethod("getWrappers"), String.class)
+                    .setMarkerAnnotation(FunctionalElement.class, FunctionalElement::value)
                     .setFunctionalInterface(Fun.class)
-                    .setKeyGetter(FunctionalElement::value)
 
                     .parameterSource(String.class, 0)
                     .applyToAnnotated(First.class)

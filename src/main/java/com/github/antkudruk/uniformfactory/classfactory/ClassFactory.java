@@ -32,7 +32,6 @@ import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.MethodCall;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -192,26 +191,26 @@ public class ClassFactory<W> {
             super(wrapperInterface);
         }
 
-        public <M extends Annotation, R> MethodSingletonBuilder<M, R> addMethodSingleton(
-                Class<M> marker, Method wrapperMethod, Class<R> resultClass) {
-            return new MethodSingletonBuilder<>(marker, wrapperMethod, resultClass);
+        public <R> MethodSingletonBuilder<R> addMethodSingleton(
+                Method wrapperMethod, Class<R> resultClass) {
+            return new MethodSingletonBuilder<>(wrapperMethod, resultClass);
         }
 
-        public <M extends Annotation, R> MethodMapBuilder<M, R> addMethodMap(
-                Class<M> marker, Method wrapperMethod, Class<R> resultClass) {
-            return new MethodMapBuilder<>(marker, wrapperMethod, resultClass);
+        public <R> MethodMapBuilder<R> addMethodMap(
+                Method wrapperMethod, Class<R> resultClass) {
+            return new MethodMapBuilder<>(wrapperMethod, resultClass);
         }
 
-        public <M extends Annotation, R> MethodListBuilder<M, R> addMethodList(
-                Class<M> marker, Method wrapperMethod, Class<R> resultClass) {
-            return new MethodListBuilder<>(marker, wrapperMethod, resultClass);
+        public <R> MethodListBuilder<R> addMethodList(
+                Method wrapperMethod, Class<R> resultClass) {
+            return new MethodListBuilder<>(wrapperMethod, resultClass);
         }
 
-        public class MethodSingletonBuilder<M extends Annotation, R>
-                extends MethodSingletonDescriptor.IntermediateShortcutBuilder<M, R, MethodSingletonBuilder<M, R>> {
+        public class MethodSingletonBuilder<R>
+                extends MethodSingletonDescriptor.IntermediateShortcutBuilder<R, MethodSingletonBuilder<R>> {
 
-            MethodSingletonBuilder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-                super(markerAnnotation, wrapperMethod, methodResultType);
+            MethodSingletonBuilder(Method wrapperMethod, Class<R> methodResultType) {
+                super(wrapperMethod, methodResultType);
             }
 
             public ShortcutBuilder<W> endMethodDescription() {
@@ -220,11 +219,11 @@ public class ClassFactory<W> {
             }
         }
 
-        public class MethodMapBuilder<M extends Annotation, R>
-                extends MethodMapDescriptor.IntermediateShortcutBuilder<M, R, MethodMapBuilder<M, R>> {
+        public class MethodMapBuilder<R>
+                extends MethodMapDescriptor.IntermediateShortcutBuilder<R, MethodMapBuilder<R>> {
 
-            MethodMapBuilder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-                super(markerAnnotation, wrapperMethod, methodResultType);
+            MethodMapBuilder(Method wrapperMethod, Class<R> methodResultType) {
+                super(wrapperMethod, methodResultType);
             }
 
             public ShortcutBuilder<W> endMethodDescription() {
@@ -233,11 +232,11 @@ public class ClassFactory<W> {
             }
         }
 
-        public class MethodListBuilder<M extends Annotation, R>
-                extends MethodListDescriptor.IntermediateShortcutBuilder<M, R, MethodListBuilder<M, R>> {
+        public class MethodListBuilder<R>
+                extends MethodListDescriptor.IntermediateShortcutBuilder<R, MethodListBuilder<R>> {
 
-            MethodListBuilder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-                super(markerAnnotation, wrapperMethod, methodResultType);
+            MethodListBuilder(Method wrapperMethod, Class<R> methodResultType) {
+                super(wrapperMethod, methodResultType);
             }
 
             public ShortcutBuilder<W> endMethodDescription() {
