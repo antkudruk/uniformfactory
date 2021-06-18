@@ -19,7 +19,6 @@ public class PluginBuilderTest {
     private static final String GET_WRAPPER = "getWrapper";
     private static final String GET_WRAPPER_METHOD_NAME = "getWrapperMethodName";
     private static final String WRAPPER_CLASS = "wrapperClass";
-    private static final String SELECT_CLASS_CRITERIA = "selectTypeCriteria";
     private static final String WRAPPER = "wrapper";
     private static final String WRAPPER_FIELD_NAME = "wrapperFieldName";
     private static final String WRAPPER_CLASS_FACTORY = "wrapperClassFactory";
@@ -36,9 +35,6 @@ public class PluginBuilderTest {
                 GET_WRAPPER_METHOD_NAME));
         assertEquals(Wrapper.class, Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_CLASS));
-        // TODO: Check the method
-        // assertEquals(TypeMarker.class, Whitebox.getInternalState(wrapperPlugin,
-        //         SELECT_CLASS_CRITERIA));
         assertEquals(WRAPPER, Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_FIELD_NAME));
         assertEquals(WRAPPER_CLASS_FACTORY, Whitebox.getInternalState(wrapperPlugin,
@@ -60,9 +56,6 @@ public class PluginBuilderTest {
                 GET_WRAPPER_METHOD_NAME));
         assertEquals(Wrapper.class, Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_CLASS));
-        // TODO: Check the method
-        // assertEquals(TypeMarker.class, Whitebox.getInternalState(wrapperPlugin,
-        //        SELECT_CLASS_CRITERIA));
         assertEquals("customWrapperField", Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_FIELD_NAME));
         assertEquals("customWrapperConstructorField", Whitebox.getInternalState(wrapperPlugin,
@@ -85,9 +78,6 @@ public class PluginBuilderTest {
                 GET_WRAPPER_METHOD_NAME));
         assertEquals(Wrapper.class, Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_CLASS));
-        // TODO: Check the method
-        // assertEquals(TypeMarker.class, Whitebox.getInternalState(wrapperPlugin,
-        //         SELECT_CLASS_CRITERIA));
         assertEquals(WRAPPER, Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_FIELD_NAME));
         assertEquals(WRAPPER_CLASS_FACTORY, Whitebox.getInternalState(wrapperPlugin,
@@ -130,11 +120,10 @@ public class PluginBuilderTest {
         getDefaultBuilder().setOriginInterface(null).build();
     }
 
-    // TODO: Check the method
-    // @Test(expected = SelectClassCriteriaNotDefinedException.class)
-    // public void typeMarkerNotDefinedTest() {
-    //     getDefaultBuilder().setTypeMarker(null).build();
-    // }
+    @Test(expected = SelectClassCriteriaNotDefinedException.class)
+    public void typeMarkerNotDefinedTest() {
+        getDefaultBuilder().setSelectClassCriteria(null).build();
+    }
 
     private WrapperPlugin.Builder<Wrapper> getDefaultBuilder() {
         return new WrapperPlugin.Builder<>(Wrapper.class)
