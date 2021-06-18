@@ -24,9 +24,13 @@ import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.GetWrapperMe
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.GetWrapperMethodWrongTypeException;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.OriginInterfaceNotDefinedException;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.StaticConstructorGeneratorException;
-import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.TypeMarkerNotDefinedException;
+import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.SelectClassCriteriaNotDefinedException;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.build.Plugin;
+import net.bytebuddy.description.annotation.AnnotationDescription;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.method.ParameterDescription;
+import net.bytebuddy.description.type.TypeDefinition;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
@@ -39,6 +43,7 @@ import net.bytebuddy.matcher.ElementMatchers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Gradle plugin.
@@ -58,13 +63,86 @@ public class WrapperPlugin<W> implements Plugin {
     private final Class originInterface;
     private final String getWrapperMethodName;
     private final Class<W> wrapperClass;
-    private final Class<? extends Annotation> typeMarker;
+    private final Predicate<TypeDescription> selectTypeCriteria;
     private final String wrapperFieldName;
     private final String classFactoryGeneratorFieldName;
     private final Class<? extends MetaClassFactory<W>> classFactoryGenerator;
 
     private final DynamicType.Unloaded classGeneratorSingletonContainer;
 
+    /**
+     * Creates the plugin to build wrappers.
+     *
+     * @param originInterface Interface to implement by the origin class
+     * @param getWrapperMethodName Origin method to ter the wrapper
+     * @param wrapperClass Interface to implement by wrappers
+     * @param selectTypeCriteria Determines if the class has to be enhanced with the wrapper
+     * @param wrapperFieldName Field name to store wrappers
+     * @param classFactoryGeneratorFieldName Field name to store wrapper class generators
+     * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
+     */
+    public WrapperPlugin(
+            Class originInterface,
+            String getWrapperMethodName,
+            Class<W> wrapperClass,
+            Predicate<TypeDescription> selectTypeCriteria,
+            String wrapperFieldName,
+            String classFactoryGeneratorFieldName,
+            Class<? extends MetaClassFactory<W>> classFactoryGenerator) {
+
+        this.originInterface = originInterface;
+        this.getWrapperMethodName = getWrapperMethodName;
+        this.wrapperClass = wrapperClass;
+        this.selectTypeCriteria = selectTypeCriteria;
+        this.wrapperFieldName = checkFieldName(wrapperFieldName);
+        this.classFactoryGeneratorFieldName = checkFieldName(classFactoryGeneratorFieldName);
+        this.classFactoryGenerator = classFactoryGenerator;
+        this.classGeneratorSingletonContainer = createSingletonHolder(classFactoryGenerator);
+    }
+
+    /**
+     * Creates the plugin to build wrappers.
+     *
+     * @param originInterface Interface to implement by the origin class
+     * @param getWrapperMethodName Origin method to ter the wrapper
+     * @param wrapperClass Interface to implement by wrappers
+     * @param typeMarker Annotation to mark origin classes
+     * @param wrapperFieldName Field name to store wrappers
+     * @param classFactoryGeneratorFieldName Field name to store wrapper class generators
+     * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
+     */
+    public WrapperPlugin(
+            Class originInterface,
+            String getWrapperMethodName,
+            Class<W> wrapperClass,
+            Class<? extends Annotation> typeMarker,
+            String wrapperFieldName,
+            String classFactoryGeneratorFieldName,
+            Class<? extends MetaClassFactory<W>> classFactoryGenerator) {
+
+        this(
+                originInterface,
+                getWrapperMethodName,
+                wrapperClass,
+                typeDefinitions -> typeDefinitions
+                        .getDeclaredAnnotations()
+                        .stream()
+                        .map(AnnotationDescription::getAnnotationType)
+                        .anyMatch(new TypeDescription.ForLoadedType(typeMarker)::equals),
+                wrapperFieldName,
+                classFactoryGeneratorFieldName,
+                classFactoryGenerator);
+    }
+
+    /**
+     * Creates the plugin to build wrappers.
+     *
+     * @param originInterface Interface to implement by the origin class
+     * @param wrapperClass Interface to implement by wrappers
+     * @param typeMarker Annotation to mark origin classes
+     * @param pluginName Name of the plugin
+     * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
+     */
     public WrapperPlugin(
             Class originInterface,
             Class<W> wrapperClass,
@@ -82,6 +160,42 @@ public class WrapperPlugin<W> implements Plugin {
                 classFactoryGenerator);
     }
 
+    /**
+     * Creates the plugin to build wrappers.
+     *
+     * @param originInterface Interface to implement by the origin class
+     * @param wrapperClass Interface to implement by wrappers
+     * @param selectTypeCriteria Determines if the class has to be enhanced with the wrapper
+     * @param pluginName Name of the plugin
+     * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
+     */
+    public WrapperPlugin(
+            Class originInterface,
+            Class<W> wrapperClass,
+            Predicate<TypeDescription> selectTypeCriteria,
+            String pluginName,
+            Class<? extends MetaClassFactory<W>> classFactoryGenerator) {
+
+        this(
+                originInterface,
+                getSingleMethod(originInterface),
+                wrapperClass,
+                selectTypeCriteria,
+                pluginName + "Wrapper",
+                pluginName + "WrapperGenerator",
+                classFactoryGenerator);
+    }
+
+    /**
+     * Creates the plugin to build wrappers.
+     *
+     * @param originInterface Interface to implement by the origin class
+     * @param wrapperClass Interface to implement by wrappers
+     * @param typeMarker Annotation to mark origin classes
+     * @param wrapperFieldName Field name to store wrappers
+     * @param classFactoryGeneratorFieldName Field name to store wrapper class generators
+     * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
+     */
     public WrapperPlugin(
             Class originInterface,
             Class<W> wrapperClass,
@@ -100,6 +214,16 @@ public class WrapperPlugin<W> implements Plugin {
                 classFactoryGenerator);
     }
 
+    /**
+     * Creates the plugin to build wrappers.
+     *
+     * @param originInterface Interface to implement by the origin class
+     * @param getWrapperMethodName Origin method to ter the wrapper
+     * @param wrapperClass Interface to implement by wrappers
+     * @param typeMarker Annotation to mark origin classes
+     * @param pluginName Name of the plugin
+     * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
+     */
     public WrapperPlugin(
             Class originInterface,
             String getWrapperMethodName,
@@ -118,25 +242,18 @@ public class WrapperPlugin<W> implements Plugin {
                 classFactoryGenerator);
     }
 
-    public WrapperPlugin(
-            Class originInterface,
-            String getWrapperMethodName,
-            Class<W> wrapperClass,
-            Class<? extends Annotation> typeMarker,
-            String wrapperFieldName,
-            String classFactoryGeneratorFieldName,
-            Class<? extends MetaClassFactory<W>> classFactoryGenerator) {
-
-        this.originInterface = originInterface;
-        this.getWrapperMethodName = getWrapperMethodName;
-        this.wrapperClass = wrapperClass;
-        this.typeMarker = typeMarker;
-        this.wrapperFieldName = checkFieldName(wrapperFieldName);
-        this.classFactoryGeneratorFieldName = checkFieldName(classFactoryGeneratorFieldName);
-        this.classFactoryGenerator = classFactoryGenerator;
-        this.classGeneratorSingletonContainer = createSingletonHolder(classFactoryGenerator);
+    // TODO: Builder does not process default parameters unless it's build method called. Make the constructor work .
+    private WrapperPlugin(Builder<W> builder) {
+        this(
+                builder.originInterface,
+                builder.getWrapperMethodName,
+                builder.wrapperClass,
+                builder.selectClassCriteria,
+                builder.wrapperFieldName,
+                builder.wrapperClassFactoryFieldName,
+                builder.classFactoryGenerator
+        );
     }
-
 
     private static String checkFieldName(String pluginName) {
         if(pluginName.matches("[a-zA-Z0-9_]+")) {
@@ -154,34 +271,73 @@ public class WrapperPlugin<W> implements Plugin {
         }
     }
 
+    /**
+     * Called by ByteBuddy plugin to transform matching classes
+     * @param builder Builder to transform the class
+     * @param typeDescription Type description to analyse transformed class.
+     * @return New version of the builder to create transformed class.
+     */
     @Override
     public DynamicType.Builder<?> apply(
             DynamicType.Builder<?> builder,
             TypeDescription typeDescription,
             ClassFileLocator classFileLocator) {
 
-        return builder
-                .implement(originInterface)
-                .defineField(wrapperFieldName, wrapperClass, Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)
-                .defineField(classFactoryGeneratorFieldName, Function.class, Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC)
-                .invokable(ElementMatchers.isTypeInitializer())
-                .intercept(new InitFieldUsingClassInstanceMethodImplementation(
-                        classGeneratorSingletonContainer.getTypeDescription(),
-                        classFactoryGeneratorFieldName,
-                        classFactoryGenerator
-                ))
-                .invokable(ElementMatchers.isConstructor())
-                .intercept(SuperMethodCall.INSTANCE.andThen(
-                        new InitFieldWithConstructorFieldUsingThisImplementation(
-                                classFactoryGeneratorFieldName, wrapperFieldName)))
-                .define(new TypeDescription.ForLoadedType(originInterface)
-                        .getDeclaredMethods()
-                        .filter(ElementMatchers.named(getWrapperMethodName))
-                        .getOnly())
+        // Add interface if needed
+        if (!typeDescription.getInterfaces().contains(new TypeDescription.ForLoadedType(originInterface))) {
+            builder = builder.implement(originInterface);
+        }
 
-                .intercept(FieldAccessor.ofField(wrapperFieldName))
+        // Add method implementation if needed
+        MethodDescription originMethodReturningWrapper = new TypeDescription.ForLoadedType(originInterface)
+                .getDeclaredMethods()
+                .filter(ElementMatchers.named(getWrapperMethodName))
+                .getOnly();
 
-                .require(classGeneratorSingletonContainer);
+        if (implementsMethod(typeDescription, originMethodReturningWrapper)) {
+
+            builder = builder
+                    .defineField(wrapperFieldName, wrapperClass, Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)
+                    .defineField(classFactoryGeneratorFieldName, Function.class, Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC)
+                    .invokable(ElementMatchers.isTypeInitializer())
+                    .intercept(new InitFieldUsingClassInstanceMethodImplementation(
+                            classGeneratorSingletonContainer.getTypeDescription(),
+                            classFactoryGeneratorFieldName,
+                            classFactoryGenerator
+                    ))
+                    .invokable(ElementMatchers.isConstructor())
+                    .intercept(SuperMethodCall.INSTANCE.andThen(
+                            new InitFieldWithConstructorFieldUsingThisImplementation(
+                                    classFactoryGeneratorFieldName, wrapperFieldName)))
+                    .define(new TypeDescription.ForLoadedType(originInterface)
+                            .getDeclaredMethods()
+                            .filter(ElementMatchers.named(getWrapperMethodName))
+                            .getOnly())
+                    .intercept(FieldAccessor.ofField(wrapperFieldName));
+        }
+
+        return builder.require(classGeneratorSingletonContainer);
+    }
+
+    /**
+     * Checks if typeDescription implements the method originMethodReturningWrapper directly.
+     * @param typeDescription Type to look for the method
+     * @param originMethodReturningWrapper Method
+     * @return True if the method is found, false otherwise.
+     */
+    private boolean implementsMethod (TypeDescription typeDescription, MethodDescription originMethodReturningWrapper) {
+
+        TypeDescription[] argumentTypes = originMethodReturningWrapper
+                .getParameters()
+                .stream()
+                .map(ParameterDescription::getType)
+                .map(TypeDefinition::asErasure)
+                .toArray(TypeDescription[]::new);
+
+        return typeDescription.getDeclaredMethods()
+                .filter(ElementMatchers.named(originMethodReturningWrapper.getName()))
+                .filter(ElementMatchers.takesArguments(argumentTypes))
+                .isEmpty();
     }
 
     private DynamicType.Unloaded createSingletonHolder(Class<? extends MetaClassFactory<W>> classFactoryGenerator) {
@@ -203,15 +359,14 @@ public class WrapperPlugin<W> implements Plugin {
 
     @Override
     public boolean matches(TypeDescription target) {
-        return target.getDeclaredAnnotations()
-                .isAnnotationPresent(typeMarker);
+        return !target.isInterface() && !target.isAnnotation() && selectTypeCriteria.test(target);
     }
 
     public static class Builder<W> {
         private final Class<W> wrapperClass;
         private Class originInterface;
         private String getWrapperMethodName = null;
-        private Class<? extends Annotation> typeMarker;
+        private Predicate<TypeDescription> selectClassCriteria;
         private String wrapperFieldName = "wrapper";
         private String wrapperClassFactoryFieldName = "wrapperClassFactory";
         private Class<? extends MetaClassFactory<W>> classFactoryGenerator;
@@ -231,7 +386,12 @@ public class WrapperPlugin<W> implements Plugin {
         }
 
         public Builder<W> setTypeMarker(Class<? extends Annotation> typeMarker) {
-            this.typeMarker = typeMarker;
+            this.selectClassCriteria = (td) -> td.getDeclaredAnnotations().isAnnotationPresent(typeMarker);
+            return this;
+        }
+
+        public Builder<W> setSelectClassCriteria(Predicate<TypeDescription> selectClassCriteria) {
+            this.selectClassCriteria = selectClassCriteria;
             return this;
         }
 
@@ -256,8 +416,8 @@ public class WrapperPlugin<W> implements Plugin {
                 throw new OriginInterfaceNotDefinedException();
             }
 
-            if (typeMarker == null) {
-                throw new TypeMarkerNotDefinedException();
+            if (selectClassCriteria == null) {
+                throw new SelectClassCriteriaNotDefinedException();
             }
 
             if (classFactoryGenerator == null) {
@@ -292,7 +452,7 @@ public class WrapperPlugin<W> implements Plugin {
                     originInterface,
                     getWrapperMethodName,
                     wrapperClass,
-                    typeMarker,
+                    selectClassCriteria,
                     wrapperFieldName,
                     wrapperClassFactoryFieldName,
                     classFactoryGenerator
