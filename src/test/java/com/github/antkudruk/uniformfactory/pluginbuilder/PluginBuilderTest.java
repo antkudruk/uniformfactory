@@ -5,7 +5,7 @@ import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.GetWrapperMe
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.GetWrapperMethodWrongTypeException;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.OriginInterfaceNotDefinedException;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.StaticConstructorGeneratorException;
-import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.TypeMarkerNotDefinedException;
+import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.SelectClassCriteriaNotDefinedException;
 import org.junit.Test;
 import org.powermock.reflect.Whitebox;
 
@@ -19,7 +19,6 @@ public class PluginBuilderTest {
     private static final String GET_WRAPPER = "getWrapper";
     private static final String GET_WRAPPER_METHOD_NAME = "getWrapperMethodName";
     private static final String WRAPPER_CLASS = "wrapperClass";
-    private static final String TYPE_MARKER = "typeMarker";
     private static final String WRAPPER = "wrapper";
     private static final String WRAPPER_FIELD_NAME = "wrapperFieldName";
     private static final String WRAPPER_CLASS_FACTORY = "wrapperClassFactory";
@@ -36,8 +35,6 @@ public class PluginBuilderTest {
                 GET_WRAPPER_METHOD_NAME));
         assertEquals(Wrapper.class, Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_CLASS));
-        assertEquals(TypeMarker.class, Whitebox.getInternalState(wrapperPlugin,
-                TYPE_MARKER));
         assertEquals(WRAPPER, Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_FIELD_NAME));
         assertEquals(WRAPPER_CLASS_FACTORY, Whitebox.getInternalState(wrapperPlugin,
@@ -59,8 +56,6 @@ public class PluginBuilderTest {
                 GET_WRAPPER_METHOD_NAME));
         assertEquals(Wrapper.class, Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_CLASS));
-        assertEquals(TypeMarker.class, Whitebox.getInternalState(wrapperPlugin,
-                TYPE_MARKER));
         assertEquals("customWrapperField", Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_FIELD_NAME));
         assertEquals("customWrapperConstructorField", Whitebox.getInternalState(wrapperPlugin,
@@ -83,8 +78,6 @@ public class PluginBuilderTest {
                 GET_WRAPPER_METHOD_NAME));
         assertEquals(Wrapper.class, Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_CLASS));
-        assertEquals(TypeMarker.class, Whitebox.getInternalState(wrapperPlugin,
-                TYPE_MARKER));
         assertEquals(WRAPPER, Whitebox.getInternalState(wrapperPlugin,
                 WRAPPER_FIELD_NAME));
         assertEquals(WRAPPER_CLASS_FACTORY, Whitebox.getInternalState(wrapperPlugin,
@@ -127,9 +120,9 @@ public class PluginBuilderTest {
         getDefaultBuilder().setOriginInterface(null).build();
     }
 
-    @Test(expected = TypeMarkerNotDefinedException.class)
+    @Test(expected = SelectClassCriteriaNotDefinedException.class)
     public void typeMarkerNotDefinedTest() {
-        getDefaultBuilder().setTypeMarker(null).build();
+        getDefaultBuilder().setSelectClassCriteria(null).build();
     }
 
     private WrapperPlugin.Builder<Wrapper> getDefaultBuilder() {

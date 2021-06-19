@@ -15,8 +15,9 @@ public class SimpleWrapperClassFactory {
         try {
             classFactory = new ClassFactory.Builder<>(Wrapper.class)
                     .addMethodDescriptor(
-                            new MethodSingletonDescriptor.ShortcutBuilder<>(FieldValueSource.class,
+                            new MethodSingletonDescriptor.ShortcutBuilder<>(
                                     Wrapper.class.getMethod("getId"), String.class)
+                                    .setMarkerAnnotation(FieldValueSource.class)
                                     .addResultTranslator(Integer.class, Object::toString)
                                     .build()
                     )

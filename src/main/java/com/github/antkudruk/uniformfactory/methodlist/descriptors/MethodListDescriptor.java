@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 Anton Kudruk
+    Copyright 2020 - 2021 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,14 +29,12 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.MethodCall;
-import net.bytebuddy.matcher.ElementMatchers;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MethodListDescriptor<A extends Annotation> extends AbstractMethodDescriptorImpl {
+public class MethodListDescriptor<R> extends AbstractMethodDescriptorImpl {
 
     private static final String INTERMEDIATE_WRAPPER_FIELD_NAME = "intermediateWrapper";
 
@@ -44,7 +42,7 @@ public class MethodListDescriptor<A extends Annotation> extends AbstractMethodDe
     private final Method wrapperMethod;
     private final Method functionalClassMethod;
 
-    private MethodListDescriptor(BuilderInterface<A, ?> builder) {
+    private MethodListDescriptor(BuilderInterface<R> builder) {
         super(builder);
 
         wrapperMethod = builder.getWrapperMethod();
@@ -69,10 +67,7 @@ public class MethodListDescriptor<A extends Annotation> extends AbstractMethodDe
     @Override
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
         List<DynamicType.Unloaded> functionalMapperClasses = new ArrayList<>();
-
-        for (MethodDescription originMethod : originType.getDeclaredMethods()
-                .filter(ElementMatchers.isAnnotatedWith(markerAnnotation))) {
-
+        for (MethodDescription originMethod : memberSelector.getMethods(originType)) {
             DynamicType.Unloaded functionalWrapperClass
                     = ElementGenerator.INSTANCE.generate(
                     originType,
@@ -91,8 +86,7 @@ public class MethodListDescriptor<A extends Annotation> extends AbstractMethodDe
             functionalMapperClasses.add(functionalWrapperClass);
         }
 
-        for (FieldDescription field : originType.getDeclaredFields()
-                .filter(ElementMatchers.isAnnotatedWith(markerAnnotation))) {
+        for (FieldDescription field : memberSelector.getFields(originType)) {
 
             DynamicType.Unloaded functionalWrapperClass = ElementGenerator.INSTANCE.generate(
                     originType,
@@ -126,23 +120,23 @@ public class MethodListDescriptor<A extends Annotation> extends AbstractMethodDe
         }
     }
 
-    public interface BuilderInterface<M extends Annotation, R>
-            extends AbstractMethodDescriptorImpl.BuilderInterface<M, R> {
+    public interface BuilderInterface<R>
+            extends AbstractMethodDescriptorImpl.BuilderInterface<R> {
 
         Class getFunctionalInterface();
     }
 
-    public static class Builder<M extends Annotation, R>
-            extends AbstractMethodDescriptorImpl.Builder<M, R, Builder<M, R>>
-            implements BuilderInterface<M, R> {
+    public static class Builder<R>
+            extends AbstractMethodDescriptorImpl.Builder<R, Builder<R>>
+            implements BuilderInterface<R> {
 
         private Class functionalInterface;
 
-        public Builder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            super(markerAnnotation, wrapperMethod, methodResultType);
+        public Builder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
         }
 
-        public Builder<M, R> setFunctionalInterface(Class functionalInterface) {
+        public Builder<R> setFunctionalInterface(Class functionalInterface) {
             this.functionalInterface = functionalInterface;
             return this;
         }
@@ -153,19 +147,19 @@ public class MethodListDescriptor<A extends Annotation> extends AbstractMethodDe
         }
 
         @Override
-        public MethodListDescriptor<M> build() {
+        public MethodListDescriptor<R> build() {
             return new MethodListDescriptor<>(this);
         }
     }
 
-    public static abstract class IntermediateShortcutBuilder<M extends Annotation, R, T extends IntermediateShortcutBuilder<M, R, T>>
-            extends AbstractMethodDescriptorImpl.ShortcutBuilder<M, R, T>
-            implements BuilderInterface<M, R> {
+    public static abstract class IntermediateShortcutBuilder<R, T extends IntermediateShortcutBuilder<R, T>>
+            extends AbstractMethodDescriptorImpl.ShortcutBuilder<R, T>
+            implements BuilderInterface<R> {
 
         private Class functionalInterface;
 
-        public IntermediateShortcutBuilder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            super(markerAnnotation, wrapperMethod, methodResultType);
+        public IntermediateShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
         }
 
         @SuppressWarnings("unchecked")
@@ -180,16 +174,16 @@ public class MethodListDescriptor<A extends Annotation> extends AbstractMethodDe
         }
 
         @Override
-        public MethodListDescriptor<M> build() {
+        public MethodListDescriptor<R> build() {
             return new MethodListDescriptor<>(this);
         }
     }
 
-    public static final class ShortcutBuilder<M extends Annotation, R>
-            extends IntermediateShortcutBuilder<M, R, ShortcutBuilder<M, R>> {
+    public static final class ShortcutBuilder<R>
+            extends IntermediateShortcutBuilder<R, ShortcutBuilder<R>> {
 
-        public ShortcutBuilder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            super(markerAnnotation, wrapperMethod, methodResultType);
+        public ShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
         }
     }
 }

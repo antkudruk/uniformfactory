@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 Anton Kudruk
+    Copyright 2020 - 2021 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package com.github.antkudruk.uniformfactory.base;
 
 import com.github.antkudruk.uniformfactory.base.exception.NoWrapperMethodException;
 import com.github.antkudruk.uniformfactory.base.exception.NoMarkerAnnotationException;
+import com.github.antkudruk.uniformfactory.seletor.MemberSelector;
+import com.github.antkudruk.uniformfactory.seletor.MemberSelectorByAnnotation;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapper;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterUnion;
@@ -31,16 +33,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
+public abstract class AbstractMethodDescriptorImpl<R> implements MethodDescriptor {
 
-    protected final Class<? extends Annotation> markerAnnotation;
     protected final Method wrapperMethod;
-    protected final ResultMapperCollection resultMapper;
+    protected final ResultMapperCollection<R> resultMapper;
     protected final ParameterBindersSource parameterMapper;
+    protected final MemberSelector memberSelector;
 
-    public AbstractMethodDescriptorImpl(BuilderInterface<?, ?> builder) {
+    public AbstractMethodDescriptorImpl(BuilderInterface<R> builder) {
 
-        this.markerAnnotation = builder.getMarkerAnnotation();
+        this.memberSelector = builder.getMemberSelector();
         this.wrapperMethod = builder.getWrapperMethod();
         this.resultMapper = builder.getResultMapper();
         this.parameterMapper = builder.getParameterMapper();
@@ -58,7 +60,7 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
 
     private void validate() {
 
-        if (markerAnnotation == null) {
+        if (memberSelector == null) {
             throw new NoMarkerAnnotationException();
         }
 
@@ -67,8 +69,8 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
         }
     }
 
-    public interface BuilderInterface<M extends Annotation, R> {
-        Class<M> getMarkerAnnotation();
+    public interface BuilderInterface<R> {
+        MemberSelector getMemberSelector();
 
         Method getWrapperMethod();
 
@@ -77,17 +79,15 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
         ParameterBindersSource getParameterMapper();
     }
 
-    public static abstract class Builder<M extends Annotation, R, T
-            extends AbstractMethodDescriptorImpl.Builder<M, R, T>>
-            implements BuilderInterface<M, R> {
+    public static abstract class Builder<R, T extends AbstractMethodDescriptorImpl.Builder<R, T>>
+            implements BuilderInterface<R> {
 
-        private final Class<M> markerAnnotation;
+        private MemberSelector memberSelector;
         protected final Method wrapperMethod;
         private final List<PartialMapper> parameterMappers = new ArrayList<>();
         private ResultMapperCollection<R> resultMapper;
 
-        public Builder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            this.markerAnnotation = markerAnnotation;
+        public Builder(Method wrapperMethod, Class<R> methodResultType) {
             this.wrapperMethod = wrapperMethod;
             this.resultMapper = new ResultMapperCollection<>(methodResultType);
         }
@@ -105,14 +105,26 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
         }
 
         @SuppressWarnings("unchecked")
-        public T addParameterTranslator(PartialMapper mapper) {
-            parameterMappers.add(mapper);
-            return (T) this;
+        public <M extends Annotation> T setMarkerAnnotation(Class<M> marker) {
+            setMemberSelector(new MemberSelectorByAnnotation(marker));
+            return (T)this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T setMemberSelector(MemberSelector memberSelector) {
+            this.memberSelector = memberSelector;
+            return (T)this;
         }
 
         @Override
-        public Class<M> getMarkerAnnotation() {
-            return markerAnnotation;
+        public MemberSelector getMemberSelector() {
+            return memberSelector;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T addParameterTranslator(PartialMapper mapper) {
+            parameterMappers.add(mapper);
+            return (T) this;
         }
 
         @Override
@@ -133,12 +145,12 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
         public abstract AbstractMethodDescriptorImpl build();
     }
 
-    public static abstract class ShortcutBuilder<M extends Annotation, R, T extends AbstractMethodDescriptorImpl.ShortcutBuilder<M, R, T>>
-            extends Builder<M, R, T>
-            implements BuilderInterface<M, R> {
+    public static abstract class ShortcutBuilder<R, T extends AbstractMethodDescriptorImpl.ShortcutBuilder<R, T>>
+            extends Builder<R, T>
+            implements BuilderInterface<R> {
 
-        public ShortcutBuilder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            super(markerAnnotation, wrapperMethod, methodResultType);
+        public ShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
         }
 
         @SuppressWarnings("unchecked")

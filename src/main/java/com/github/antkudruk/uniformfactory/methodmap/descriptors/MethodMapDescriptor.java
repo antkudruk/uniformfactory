@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 Anton Kudruk
+    Copyright 2020 - 2021 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.github.antkudruk.uniformfactory.methodmap.descriptors;
 import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.methodcollection.ElementGenerator;
+import com.github.antkudruk.uniformfactory.methodmap.enhancers.MemberEntry;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.field.AccessFieldValue;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.method.AccessMethodInvocation;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
@@ -30,11 +31,15 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.MethodCall;
+import net.bytebuddy.implementation.bytecode.StackManipulation;
+import net.bytebuddy.implementation.bytecode.constant.TextConstant;
 import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -44,25 +49,26 @@ import java.util.function.Function;
  * Method defined with {@code MethodMapDescriptor} returns a map of objects that
  * have methods calling corresponding rigin method.
  *
- * @param <A> Annotation the wrapper method marked with
  */
-public class MethodMapDescriptor<A extends Annotation> extends AbstractMethodDescriptorImpl {
+public class MethodMapDescriptor<R> extends AbstractMethodDescriptorImpl {
 
     public static final String INTERMEDIATE_WRAPPER_FIELD_NAME = "intermediateWrapper";
 
-    private final Function<A, String> keyGetter;
+    private final Function<MethodDescription, StackManipulation> methodKeyGetter;
+    private final Function<FieldDescription, StackManipulation> fieldKeyGetter;
     private final Class functionalInterface;
     private final Method wrapperMethod;
     private final Method functionalClassMethod;
 
-    private MethodMapDescriptor(BuilderInterface<A, ?> builder) {
+    public MethodMapDescriptor(BuilderInterface<R> builder) {
         super(builder);
 
         wrapperMethod = builder.getWrapperMethod();
 
         this.functionalInterface = builder.getFunctionalInterface();
 
-        this.keyGetter = builder.getKeyGetter();
+        this.methodKeyGetter = builder.getMethodKeyGetter();
+        this.fieldKeyGetter = builder.getFieldKeyGetter();
 
         if (functionalInterface.getDeclaredMethods().length != 1) {
             throw new RuntimeException("Functional interface must contain exactly one method.");
@@ -79,59 +85,41 @@ public class MethodMapDescriptor<A extends Annotation> extends AbstractMethodDes
     @Override
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
 
-        Map<String, DynamicType.Unloaded> functionalMapperClasses = new HashMap<>();
+        List<MemberEntry> functionalMapperClasses = new ArrayList<>();
 
-        for (MethodDescription originMethod : originType.getDeclaredMethods()
-                .filter(ElementMatchers.isAnnotatedWith(markerAnnotation))) {
-
-            String k = keyGetter.apply((A) originMethod
-                    .getDeclaredAnnotations()
-                    .ofType(markerAnnotation).load());
-
-            if (functionalMapperClasses.containsKey(k)) {
-                throw new AmbiguousValueSourceException(null);
-            }
-
-            DynamicType.Unloaded functionalWrapperClass
-                    = ElementGenerator.INSTANCE.generate(
-                    originType,
-                    new TypeDescription.ForLoadedType(functionalInterface),
-                    AccessMethodInvocation.INSTANCE.generateClass(
+        for (MethodDescription originMethod : memberSelector.getMethods(originType)) {
+            functionalMapperClasses.add(new MemberEntry(
+                    methodKeyGetter.apply(originMethod),
+                    ElementGenerator.INSTANCE.generate(
                             originType,
-                            resultMapper.getTranslatorOrThrow(originMethod.getReturnType().asErasure()),
-                            originMethod,
-                            functionalClassMethod,
-                            parameterMapper.getParameterBinders(originMethod)
-                    ),
-                    MethodCall::withAllArguments,
-                    INTERMEDIATE_WRAPPER_FIELD_NAME
-            );
-
-            functionalMapperClasses.put(k, functionalWrapperClass);
+                            new TypeDescription.ForLoadedType(functionalInterface),
+                            AccessMethodInvocation.INSTANCE.generateClass(
+                                    originType,
+                                    resultMapper.getTranslatorOrThrow(originMethod.getReturnType().asErasure()),
+                                    originMethod,
+                                    functionalClassMethod,
+                                    parameterMapper.getParameterBinders(originMethod)
+                            ),
+                            MethodCall::withAllArguments,
+                            INTERMEDIATE_WRAPPER_FIELD_NAME
+                    )
+            ));
         }
 
-        for (FieldDescription field : originType.getDeclaredFields()
-                .filter(ElementMatchers.isAnnotatedWith(markerAnnotation))) {
-            String k = keyGetter.apply((A) field
-                    .getDeclaredAnnotations()
-                    .ofType(markerAnnotation).load());
-
-            if (functionalMapperClasses.containsKey(k)) {
-                throw new AmbiguousValueSourceException(null);
-            }
-
-            DynamicType.Unloaded functionalWrapperClass = ElementGenerator.INSTANCE.generate(
-                    originType,
-                    new TypeDescription.ForLoadedType(functionalInterface),
-                    AccessFieldValue.INSTANCE.generateClass(
+        for (FieldDescription field : memberSelector.getFields(originType)) {
+            functionalMapperClasses.add(new MemberEntry(
+                    fieldKeyGetter.apply(field),
+                    ElementGenerator.INSTANCE.generate(
                             originType,
-                            resultMapper.getTranslatorOrThrow(field.getType().asErasure()),
-                            field),
-                    m -> m,
-                    INTERMEDIATE_WRAPPER_FIELD_NAME
-            );
-
-            functionalMapperClasses.put(k, functionalWrapperClass);
+                            new TypeDescription.ForLoadedType(functionalInterface),
+                            AccessFieldValue.INSTANCE.generateClass(
+                                    originType,
+                                    resultMapper.getTranslatorOrThrow(field.getType().asErasure()),
+                                    field),
+                            m -> m,
+                            INTERMEDIATE_WRAPPER_FIELD_NAME
+                    )
+            ));
         }
 
         return new MethodMapEnhancer(
@@ -151,32 +139,45 @@ public class MethodMapDescriptor<A extends Annotation> extends AbstractMethodDes
         }
     }
 
-    public interface BuilderInterface<M extends Annotation, R>
-            extends AbstractMethodDescriptorImpl.BuilderInterface<M, R> {
+    public interface BuilderInterface<R>
+            extends AbstractMethodDescriptorImpl.BuilderInterface<R> {
 
         Class getFunctionalInterface();
-
-        Function<M, String> getKeyGetter();
+        Function<MethodDescription, StackManipulation>  getMethodKeyGetter();
+        Function<FieldDescription, StackManipulation>  getFieldKeyGetter();
     }
 
-    public static class Builder<M extends Annotation, R>
-            extends AbstractMethodDescriptorImpl.Builder<M, R, MethodMapDescriptor.Builder<M, R>>
-            implements BuilderInterface<M, R> {
+    public static class Builder<R>
+            extends AbstractMethodDescriptorImpl.Builder<R, MethodMapDescriptor.Builder<R>>
+            implements BuilderInterface<R> {
 
         private Class functionalInterface;
-        private Function<M, String> keyGetter;
+        private Function<MethodDescription, StackManipulation> methodKeyGetter;
+        private Function<FieldDescription, StackManipulation> fieldKeyGetter;
 
-        public Builder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            super(markerAnnotation, wrapperMethod, methodResultType);
+        public Builder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
         }
 
-        public Builder<M, R> setFunctionalInterface(Class functionalInterface) {
+        public Builder<R> setFunctionalInterface(Class functionalInterface) {
             this.functionalInterface = functionalInterface;
             return this;
         }
 
-        public Builder<M, R> setKeyGetter(Function<M, String> keyGetter) {
-            this.keyGetter = keyGetter;
+        public Builder<R> setMethodKeyGetter(Function<MethodDescription, StackManipulation> methodKeyGetter) {
+            this.methodKeyGetter = methodKeyGetter;
+            return this;
+        }
+
+        public Builder<R> setFieldKeyGetter(Function<FieldDescription, StackManipulation> fieldKeyGetter) {
+            this.fieldKeyGetter = fieldKeyGetter;
+            return this;
+        }
+
+        public <A extends Annotation> Builder<R> setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {
+            setMarkerAnnotation(marker);
+            setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(md.getDeclaredAnnotations().ofType(marker).load())));
+            setFieldKeyGetter(fd -> new TextConstant(keyGetter.apply(fd.getDeclaredAnnotations().ofType(marker).load())));
             return this;
         }
 
@@ -186,25 +187,31 @@ public class MethodMapDescriptor<A extends Annotation> extends AbstractMethodDes
         }
 
         @Override
-        public Function<M, String> getKeyGetter() {
-            return keyGetter;
+        public Function<MethodDescription, StackManipulation> getMethodKeyGetter() {
+            return methodKeyGetter;
         }
 
         @Override
-        public MethodMapDescriptor<M> build() {
+        public Function<FieldDescription, StackManipulation> getFieldKeyGetter() {
+            return fieldKeyGetter;
+        }
+
+        @Override
+        public MethodMapDescriptor<R> build() {
             return new MethodMapDescriptor<>(this);
         }
     }
 
-    public static abstract class IntermediateShortcutBuilder<M extends Annotation, R, T extends IntermediateShortcutBuilder<M, R, T>>
-            extends AbstractMethodDescriptorImpl.ShortcutBuilder<M, R, T>
-            implements BuilderInterface<M, R> {
+    public static abstract class IntermediateShortcutBuilder<R, T extends IntermediateShortcutBuilder<R, T>>
+            extends AbstractMethodDescriptorImpl.ShortcutBuilder<R, T>
+            implements BuilderInterface<R> {
 
         private Class functionalInterface;
-        private Function<M, String> keyGetter;
+        private Function<MethodDescription, StackManipulation> methodKeyGetter;
+        private Function<FieldDescription, StackManipulation> fieldKeyGetter;
 
-        public IntermediateShortcutBuilder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            super(markerAnnotation, wrapperMethod, methodResultType);
+        public IntermediateShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
         }
 
         @SuppressWarnings("unchecked")
@@ -213,9 +220,20 @@ public class MethodMapDescriptor<A extends Annotation> extends AbstractMethodDes
             return (T) this;
         }
 
-        @SuppressWarnings("unchecked")
-        public T setKeyGetter(Function<M, String> keyGetter) {
-            this.keyGetter = keyGetter;
+        public T setMethodKeyGetter(Function<MethodDescription, StackManipulation> methodKeyGetter) {
+            this.methodKeyGetter = methodKeyGetter;
+            return (T) this;
+        }
+
+        public T setFieldKeyGetter(Function<FieldDescription, StackManipulation> fieldKeyGetter) {
+            this.fieldKeyGetter = fieldKeyGetter;
+            return (T) this;
+        }
+
+        public <A extends Annotation> T setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {
+            setMarkerAnnotation(marker);
+            setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(md.getDeclaredAnnotations().ofType(marker).load())));
+            setFieldKeyGetter(fd -> new TextConstant(keyGetter.apply(fd.getDeclaredAnnotations().ofType(marker).load())));
             return (T) this;
         }
 
@@ -225,21 +243,26 @@ public class MethodMapDescriptor<A extends Annotation> extends AbstractMethodDes
         }
 
         @Override
-        public Function<M, String> getKeyGetter() {
-            return keyGetter;
+        public Function<MethodDescription, StackManipulation> getMethodKeyGetter() {
+            return methodKeyGetter;
         }
 
         @Override
-        public MethodMapDescriptor<M> build() {
+        public Function<FieldDescription, StackManipulation> getFieldKeyGetter() {
+            return fieldKeyGetter;
+        }
+
+        @Override
+        public MethodMapDescriptor<R> build() {
             return new MethodMapDescriptor<>(this);
         }
     }
 
-    public static final class ShortcutBuilder<M extends Annotation, R>
-            extends IntermediateShortcutBuilder<M, R, ShortcutBuilder<M, R>> {
+    public static final class ShortcutBuilder<R>
+            extends IntermediateShortcutBuilder<R, ShortcutBuilder<R>> {
 
-        public ShortcutBuilder(Class<M> markerAnnotation, Method wrapperMethod, Class<R> methodResultType) {
-            super(markerAnnotation, wrapperMethod, methodResultType);
+        public ShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
         }
     }
 }

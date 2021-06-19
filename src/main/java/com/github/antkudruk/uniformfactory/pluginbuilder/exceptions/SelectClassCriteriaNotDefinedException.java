@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 Anton Kudruk
+    Copyright 2020 - 2021 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package com.github.antkudruk.uniformfactory.pluginbuilder.exceptions;
 
-public class TypeMarkerNotDefinedException extends PluginBuilderException {
-    public TypeMarkerNotDefinedException() {
+public class SelectClassCriteriaNotDefinedException extends PluginBuilderException {
+    public SelectClassCriteriaNotDefinedException() {
         super("Type marker is not defined");
     }
 }

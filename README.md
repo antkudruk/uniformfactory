@@ -138,15 +138,29 @@ wrapper classes properly.
 
 You can download **Uniform Factory** into your project from Maven Central.
 
+Here is an example for Gradle
+
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.0.1'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.1.0'
 }
+```
+
+and for Maven
+
+```
+<dependency>
+    <groupId>com.github.antkudruk</groupId>
+    <artifactId>uniform-factory</artifactId>
+    <version>0.1.0</version>
+</dependency>
 ```
 
 **Uniform Factory** is written to be applied in ByteBuddy Gradle Plugin to 
 generate uniformed **wrapper** classes. Just import and apply  
 `byte-buddy-gradle-plugin` and specify your plugin class.
+
+Here is an example for Gradle
 
 ```
 plugins {
@@ -159,6 +173,30 @@ byteBuddy {
         plugin = // Specify reference to your plugin class here, see the next chapter
     }
 }
+```
+
+and in Maven
+
+```
+    <plugin>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy-maven-plugin</artifactId>
+        <version>1.10.6</version>
+        <executions>
+            <execution>
+                <goals>
+                    <goal>transform</goal>
+                </goals>
+            </execution>
+        </executions>
+        <configuration>
+            <transformations>
+                <transformation>
+                    <plugin><!-- Specify your plugin class reference here --></plugin>
+                </transformation>
+            </transformations>
+        </configuration>
+    </plugin>
 ```
 
 Let's take a look at some examples.
@@ -270,6 +308,80 @@ Object origin = new OriginImpl();
 Wrapper wrapper = ((Origin)origin).getWrapper();
 ```
 
+#### Using explicit interface to enhance objects with wrappers
+
+You can avoid class cast made in the previous example the following way
+
+* Add `@Marker` annotation to the `Origin` interface.
+
+* Add a default implementation to the `Origin` interface to prevent compilation
+error. This default implementation should basically throw an exception, but you
+may implement the different logic.
+
+```
+@Marker
+public interface Origin {
+    default Wrapper getWrapper() {
+        throw new RuntimeException("Wrapper method hasn't been implemented.");
+    }
+}
+```
+
+* Add `@Inherited` to the Marker annotation. This will implicitly add the 
+`@Marker` annotation to each object implementing `Origin` interface.
+
+```
+@Retention(RetentionPolicy.CLASS)
+@Target(ElementType.TYPE)
+@Inherited
+public @interface Marker { }
+```
+
+* Add `Origin` interface to the interfaces list of each origin class.
+
+```
+@Marker
+public class OriginImpl implements Origin {
+}
+```
+After that, the `OriginImpl` class is going to have an implementation for 
+`getWrapper()` method that returns the appropriate wrapper. 
+
+```
+OriginImpl origin = new OriginImpl();
+Wrapper wrapper = origin.getWrapper();
+```
+
+This way, if you implement `getWrapper()` method explicitly, your 
+implementation it's not going to be overridden by the plugin. 
+
+#### Select type criteria
+
+You may want to add wrappers to classes satisfying a custom criteria, for 
+example, matching class names to a special regular expression. 
+**UniformFactory** provides a flexible way to select particular classes for 
+that.
+
+Let's implement a plugin to add wrappers to methods that explicitly implement
+the `Origin` interface, but using custom class selection criteria.
+
+```
+public class PluginImpl extends WrapperPlugin<Wrapper> {
+    public PluginImpl() {
+        super(
+                Origin.class,
+                Wrapper.class,
+                // Class selection criteria
+                td -> td.getInterfaces()
+                        .stream()
+                        .map(TypeDefinition::asErasure)
+                        .anyMatch(new TypeDescription.ForLoadedType(Origin.class)::equals),
+                "examplePlugin",
+                ClassFactoryGeneratorImpl.class);
+    }
+}
+```
+
 ### Method Singleton
 
 Let's enhance our empty `Wrapper` class.
@@ -301,7 +413,8 @@ method.
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
-            .addMethodSingleton(Identity.class, Wrapper.class.getMethod("getIdentity"), String.class)
+            .addMethodSingleton(Wrapper.class.getMethod("getIdentity"), String.class)
+            .setMarkerAnnotation(Identity.class)
             .addResultTranslator(Long.class, Object::toString)
             .endMethodDescription()
             .build());
@@ -418,11 +531,12 @@ an empty list of children.
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<TreeElement> {
     public ClassFactoryGeneratorImpl() throws ReflectiveOperationException {
         super(new ClassFactory.ShortcutBuilder<>(TreeElement.class)
-
-                .addMethodSingleton(Label.class, TreeElement.class.getMethod("getLabel"), String.class)
+                .addMethodSingleton(TreeElement.class.getMethod("getLabel"), String.class)
+                .setMarkerAnnotation(Label.class)
                 .endMethodDescription()
 
-                .addMethodSingleton(Nested.class, TreeElement.class.getMethod("nested"), List.class)
+                .addMethodSingleton(TreeElement.class.getMethod("nested"), List.class)
+                .setMarkerAnnotation(Nested.class)
                 .setDefaultValue(new ArrayList<>())
                 .endMethodDescription()
 
@@ -498,13 +612,12 @@ returning type of the **functional** interface.
 ```
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
-
+        this.classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
                 .addMethodList(
-                        Processor.Process.class,
                         Wrapper.class.getMethod("getProcessors"),
                         boolean.class
                 )
+                .setMarkerAnnotation(Processor.Process.class)
                 .setFunctionalInterface(Processor.class)
                 .addResultTranslator(void.class, t -> true)
                 .addResultTranslator(Long.class, t -> t >= 0)
@@ -537,10 +650,10 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         this.classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
                 .addMethodList(
-                        Processor.Process.class,
                         Wrapper.class.getMethod("getProcessors"),
                         boolean.class
                 )
+                .setMarkerAnnotation(Processor.Process.class)
                 .setFunctionalInterface(Processor.class)
 
                 .addResultTranslator(void.class, t -> true)
@@ -682,8 +795,8 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<PointWrap
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         super(new ClassFactory.ShortcutBuilder<>(PointWrapper.class)
 
-                .addMethodMap(CoordinateMarker.class, PointWrapper.class.getMethod("getCoords"), long.class)
-                .setKeyGetter(CoordinateMarker::value)
+                .addMethodMap(PointWrapper.class.getMethod("getCoords"), long.class)
+                .setMarkerAnnotation(CoordinateMarker.class, CoordinateMarker::value)
                 .setFunctionalInterface(Coordinate.class)
                 .parameterSource(Long.class, 0)
 
@@ -727,9 +840,9 @@ public class MethodTreeWrapperClassFactory {
         try {
             classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
 
-                    .addMethodMap(FunctionalElement.class, Wrapper.class.getMethod("getWrappers"), String.class)
+                    .addMethodMap(Wrapper.class.getMethod("getWrappers"), String.class)
+                    .setMarkerAnnotation(FunctionalElement.class, FunctionalElement::value)
                     .setFunctionalInterface(Fun.class)
-                    .setKeyGetter(FunctionalElement::value)
 
                     .parameterSource(String.class, 0)
                     .applyToAnnotated(First.class)
@@ -828,7 +941,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 ## License
 
 ```
-Copyright 2020 Anton Kudruk
+Copyright 2020 - 2021 Anton Kudruk
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
