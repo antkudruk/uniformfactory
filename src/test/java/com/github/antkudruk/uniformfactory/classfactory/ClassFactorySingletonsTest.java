@@ -117,9 +117,9 @@ public class ClassFactorySingletonsTest {
     private ClassFactory<Wrapper> getClassFactory() throws NoSuchMethodException {
         return new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(new MethodSingletonDescriptor.Builder<>(
-                        Marker.class,
                         Wrapper.class.getMethod("getIdentity"),
                         String.class)
+                        .setMarkerAnnotation(Marker.class)
                         .addResultTranslator(Long.class, Object::toString)
                         .build()
                 )
@@ -129,9 +129,9 @@ public class ClassFactorySingletonsTest {
     private ClassFactory<Wrapper> getClassFactoryWithDefault(String defaultValue) throws NoSuchMethodException {
         return new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(new MethodSingletonDescriptor.Builder<>(
-                        Marker.class,
                         Wrapper.class.getMethod("getIdentity"),
                         String.class)
+                        .setMarkerAnnotation(Marker.class)
                         .addResultTranslator(Long.class, Object::toString)
                         .setDefaultValue(defaultValue)
                         .build()

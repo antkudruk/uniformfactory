@@ -14,10 +14,21 @@
    limitations under the License.
  */
 
-package com.github.antkudruk.uniformfactory.pluginbuilder.exceptions;
+package com.github.antkudruk.uniformfactory.seletor;
 
-public class OriginInterfaceNotDefinedException extends PluginBuilderException {
-    public OriginInterfaceNotDefinedException() {
-        super("Origin  interface is not defined.");
+import net.bytebuddy.description.field.FieldDescription;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
+
+import java.util.Collections;
+import java.util.List;
+
+public interface MemberSelector {
+    default List<MethodDescription> getMethods(TypeDescription type) {
+        return Collections.emptyList();
+    }
+
+    default List<FieldDescription> getFields(TypeDescription type) {
+        return Collections.emptyList();
     }
 }

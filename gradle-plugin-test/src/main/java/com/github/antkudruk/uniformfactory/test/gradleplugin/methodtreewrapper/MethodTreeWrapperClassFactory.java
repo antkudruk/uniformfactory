@@ -15,9 +15,9 @@ public class MethodTreeWrapperClassFactory {
         try {
             classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
 
-                    .addMethodMap(FunctionalElement.class, Wrapper.class.getMethod("getWrappers"), String.class)
+                    .addMethodMap(Wrapper.class.getMethod("getWrappers"), String.class)
+                    .setMarkerAnnotation(FunctionalElement.class, FunctionalElement::value)
                     .setFunctionalInterface(Fun.class)
-                    .setKeyGetter(FunctionalElement::value)
 
                     .parameterSource(String.class, 0)
                     .applyToAnnotated(First.class)

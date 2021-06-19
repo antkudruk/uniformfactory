@@ -90,16 +90,16 @@ public class ClassFactoryTwoSingletonsTest {
     private ClassFactory<Wrapper> getClassFactory() throws NoSuchMethodException {
         return new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(new MethodSingletonDescriptor.Builder<>(
-                        First.class,
                         Wrapper.class.getMethod("getFirst"),
                         String.class)
+                        .setMarkerAnnotation(First.class)
                         .addResultTranslator(Long.class, Object::toString)
                         .build()
                 )
                 .addMethodDescriptor(new MethodSingletonDescriptor.Builder<>(
-                        Second.class,
                         Wrapper.class.getMethod("getSecond"),
                         String.class)
+                        .setMarkerAnnotation(Second.class)
                         .addResultTranslator(Long.class, Object::toString)
                         .build()
                 )

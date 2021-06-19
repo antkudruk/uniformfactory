@@ -13,9 +13,10 @@ public class WrapperMetaClassFactory extends DefaultMetaClassFactory<Wrapper> {
     static {
         try {
             classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
-                    .addMethodSingleton(MethodMarker.class,
+                    .addMethodSingleton(
                             Wrapper.class.getMethod("common", String.class, String.class),
                             String.class)
+                    .setMarkerAnnotation(MethodMarker.class)
 
                     .parameterSource(String.class, 0)
                     .applyToAnnotated(First.class)

@@ -81,8 +81,8 @@ public class MethodListTest {
     public void test() throws ReflectiveOperationException, ClassGeneratorException {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
-                        new MethodListDescriptor.ShortcutBuilder<>(MethodMarker.class, Wrapper.class.getMethod("getFunctionsList"), String.class)
-
+                        new MethodListDescriptor.ShortcutBuilder<>(Wrapper.class.getMethod("getFunctionsList"), String.class)
+                                .setMarkerAnnotation(MethodMarker.class)
                                 .setFunctionalInterface(Fun.class)
 
                                 .parameterSource(String.class, 0)
@@ -126,8 +126,10 @@ public class MethodListTest {
     @Test
     public void test1() throws ReflectiveOperationException, ClassGeneratorException {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
-                .addMethodDescriptor(new MethodListDescriptor.ShortcutBuilder<>(MethodMarker.class,
+                .addMethodDescriptor(new MethodListDescriptor.ShortcutBuilder<>(
                         Wrapper.class.getMethod("getFunctionsList"), String.class)
+
+                        .setMarkerAnnotation(MethodMarker.class)
 
                         .setFunctionalInterface(Fun.class)
 
@@ -173,10 +175,10 @@ public class MethodListTest {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
                         new MethodListDescriptor.Builder<>(
-                                MethodMarker.class,
                                 Wrapper.class.getMethod("getFunctionsList"),
                                 String.class)
 
+                                .setMarkerAnnotation(MethodMarker.class)
                                 .setFunctionalInterface(Fun.class)
 
                                 .addParameterTranslator(new PartialMapperImpl(
@@ -221,7 +223,8 @@ public class MethodListTest {
 
     @Test(expected = WrongTypeException.class)
     public void inappropriateMethodReturnType() throws ReflectiveOperationException {
-        new MethodListDescriptor.Builder<>(MethodMarker.class, WrapperOfMaps.class.getMethod("getFunctionsList"), String.class)
+        new MethodListDescriptor.Builder<>(WrapperOfMaps.class.getMethod("getFunctionsList"), String.class)
+                .setMarkerAnnotation(MethodMarker.class)
                 .setFunctionalInterface(Fun.class)
                 .build();
     }

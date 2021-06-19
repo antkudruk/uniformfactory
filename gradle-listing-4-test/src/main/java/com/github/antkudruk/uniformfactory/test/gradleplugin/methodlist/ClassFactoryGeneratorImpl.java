@@ -17,10 +17,10 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         this.classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
                 .addMethodList(
-                        Processor.Process.class,
                         Wrapper.class.getMethod("getProcessors"),
                         boolean.class
                 )
+                .setMarkerAnnotation(Processor.Process.class)
                 .setFunctionalInterface(Processor.class)
 
                 .addResultTranslator(void.class, t -> true)

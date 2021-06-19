@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 Anton Kudruk
+    Copyright 2020 - 2021 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package com.github.antkudruk.uniformfactory.singleton.descriptors;
 
 public class AmbiguousMethodException extends WrapperException {
-    AmbiguousMethodException(String annotationName, Throwable cause) {
-        super("More than one method for " + annotationName, cause);
+    AmbiguousMethodException(Throwable cause) {
+        super("More than one class member selected for method singleton", cause);
     }
 }
 
