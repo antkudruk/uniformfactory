@@ -327,8 +327,13 @@ public interface Origin {
 }
 ```
 
-* Add `@Inherited` to the Marker annotation. This will implicitly add the 
-`@Marker` annotation to each object implementing `Origin` interface.
+* Add `@Inherited` to the Marker annotation. 
+
+Java doesn't support interface inheritance itself. However **Uniform Factory** 
+enables this inheritance. Only for **Marker Interfaces** though. 
+
+Indeed, only existence of the annotation is required to implement wrapper or 
+not. So there is no problem of multiple inheritance here.
 
 ```
 @Retention(RetentionPolicy.CLASS)

@@ -27,7 +27,6 @@ import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.StaticConstr
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.SelectClassCriteriaNotDefinedException;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.build.Plugin;
-import net.bytebuddy.description.annotation.AnnotationDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.method.ParameterDescription;
 import net.bytebuddy.description.type.TypeDefinition;
@@ -41,6 +40,7 @@ import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Inherited;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -124,11 +124,7 @@ public class WrapperPlugin<W> implements Plugin {
                 originInterface,
                 getWrapperMethodName,
                 wrapperClass,
-                typeDefinitions -> typeDefinitions
-                        .getDeclaredAnnotations()
-                        .stream()
-                        .map(AnnotationDescription::getAnnotationType)
-                        .anyMatch(new TypeDescription.ForLoadedType(typeMarker)::equals),
+                typeDefinition -> isApplicable(typeMarker, typeDefinition),
                 wrapperFieldName,
                 classFactoryGeneratorFieldName,
                 classFactoryGenerator);
@@ -269,6 +265,37 @@ public class WrapperPlugin<W> implements Plugin {
         } else {
             throw new RuntimeException(functionalClass.getSimpleName() + " should contain one and only one method.");
         }
+    }
+
+    /**
+     * Looks for the annotation not only in the current class, but in all implementing interfaces.
+     *
+     * @param typeMarker Annotation type to look for
+     * @param typeDefinitions Type to look for the annotation in
+     * @return
+     */
+    private static boolean isApplicable(
+            Class<? extends Annotation> typeMarker,
+            TypeDescription typeDefinitions) {
+        return typeMarker.getAnnotation(Inherited.class) != null
+                ? isApplicableRecursive(typeMarker, typeDefinitions)
+                : typeDefinitions
+                        .getDeclaredAnnotations()
+                        .isAnnotationPresent(typeMarker);
+    }
+
+    private static boolean isApplicableRecursive(
+            Class<? extends Annotation> typeMarker,
+            TypeDescription typeDefinitions) {
+
+        boolean thisTypeMatches = typeDefinitions
+                .getDeclaredAnnotations()
+                .isAnnotationPresent(typeMarker);
+
+        return thisTypeMatches || typeDefinitions
+                .getInterfaces()
+                .stream()
+                .anyMatch(iface -> isApplicableRecursive(typeMarker, iface.asErasure()));
     }
 
     /**
