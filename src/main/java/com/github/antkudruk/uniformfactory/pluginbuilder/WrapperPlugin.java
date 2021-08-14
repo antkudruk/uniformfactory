@@ -81,7 +81,7 @@ public class WrapperPlugin implements Plugin {
                 .stream()
                 .collect(Collectors.toMap(
                         WrapperDescriptor::getFieldName,
-                        e -> createSingletonHolder(e.getWrappers())));
+                        e -> createSingletonHolder(e.getWrapperClassFactory())));
     }
 
     /**
@@ -338,40 +338,44 @@ public class WrapperPlugin implements Plugin {
             builder = builder.implement(originInterface);
         }
 
-
         for(WrapperDescriptor<?> wrapperDescriptor: wrappers) {
+
+            String getWrapperMethodName = wrapperDescriptor.getMethodName();
+            String wrapperFieldName = wrapperDescriptor.getFieldName();
+            Class<?> wrapperClass = wrapperDescriptor.getWrapperClass();
+            String classFactoryGeneratorFieldName = wrapperDescriptor.getClassFactoryGeneratorFieldName();
+            Class<? extends MetaClassFactory<?>> classFactoryGenerator = wrapperDescriptor.getWrapperClassFactory();
+
             // Add method implementation if needed
             MethodDescription originMethodReturningWrapper = new TypeDescription.ForLoadedType(originInterface)
                     .getDeclaredMethods()
-                    .filter(ElementMatchers.named(wrapperDescriptor.getMethodName()))
+                    .filter(ElementMatchers.named(getWrapperMethodName))
                     .getOnly();
-
-            String classFactoryGeneratorFieldName = wrapperDescriptor.getClassFactoryGeneratorFieldName();
 
             if (implementsMethod(typeDescription, originMethodReturningWrapper)) {
 
                 builder = builder
-                        .defineField(wrapperDescriptor.getFieldName(), wrapperDescriptor.getWrapperClass(), Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)
+                        .defineField(wrapperFieldName, wrapperClass, Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)
                         .defineField(classFactoryGeneratorFieldName, Function.class, Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC)
                         .invokable(ElementMatchers.isTypeInitializer())
                         .intercept(new InitFieldUsingClassInstanceMethodImplementation(
-                                classGeneratorSingletonContainer.get(wrapperDescriptor.getFieldName()).getTypeDescription(),
+                                classGeneratorSingletonContainer.get(wrapperFieldName).getTypeDescription(),
                                 classFactoryGeneratorFieldName,
-                                wrapperDescriptor.getWrappers()
+                                classFactoryGenerator
                         ))
                         .invokable(ElementMatchers.isConstructor())
                         .intercept(SuperMethodCall.INSTANCE.andThen(
                                 new InitFieldWithConstructorFieldUsingThisImplementation(
-                                        classFactoryGeneratorFieldName, wrapperDescriptor.getFieldName())))
+                                        classFactoryGeneratorFieldName, wrapperFieldName)))
                         .define(new TypeDescription.ForLoadedType(originInterface)
                                 .getDeclaredMethods()
-                                .filter(ElementMatchers.named(wrapperDescriptor.getMethodName()))
+                                .filter(ElementMatchers.named(getWrapperMethodName))
                                 .getOnly())
-                        .intercept(FieldAccessor.ofField(wrapperDescriptor.getFieldName()));
+                        .intercept(FieldAccessor.ofField(wrapperFieldName));
             }
         }
 
-        return builder.require(classGeneratorSingletonContainer.values().toArray(new DynamicType.Unloaded[0]));
+        return builder.require(classGeneratorSingletonContainer.values().toArray(new DynamicType.Default.Unloaded[0]));
     }
 
     /**

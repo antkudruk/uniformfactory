@@ -5,19 +5,19 @@ public class WrapperDescriptor<W> {
     private final String fieldName;
     private final String classFactoryGeneratorFieldName;
     private final Class<W> wrapperClass;
-    private final Class<? extends MetaClassFactory<W>> wrappers;
+    private final Class<? extends MetaClassFactory<W>> wrapperClassFactory;
 
     public WrapperDescriptor(
             String methodName,
             String fieldName,
             String classFactoryGeneratorFieldName,
             Class<W> wrapperClass,
-            Class<? extends MetaClassFactory<W>> wrappers) {
+            Class<? extends MetaClassFactory<W>> wrapperClassFactory) {
         this.methodName = methodName;
         this.fieldName = fieldName;
         this.classFactoryGeneratorFieldName = classFactoryGeneratorFieldName;
         this.wrapperClass = wrapperClass;
-        this.wrappers = wrappers;
+        this.wrapperClassFactory = wrapperClassFactory;
     }
 
     public String getMethodName() {
@@ -36,7 +36,7 @@ public class WrapperDescriptor<W> {
         return wrapperClass;
     }
 
-    public Class<? extends MetaClassFactory<W>> getWrappers() {
-        return wrappers;
+    public Class<? extends MetaClassFactory<W>> getWrapperClassFactory() {
+        return wrapperClassFactory;
     }
 }
