@@ -4,7 +4,7 @@ import com.github.antkudruk.uniformfactory.pluginbuilder.WrapperPlugin;
 import net.bytebuddy.description.type.TypeDefinition;
 import net.bytebuddy.description.type.TypeDescription;
 
-public class PluginImpl extends WrapperPlugin<Wrapper> {
+public class PluginImpl extends WrapperPlugin {
     public PluginImpl() {
         super(
                 Origin.class,

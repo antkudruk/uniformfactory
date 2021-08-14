@@ -2,7 +2,7 @@ package com.github.antkudruk.uniformfactory.test.gradleplugin.empty;
 
 import com.github.antkudruk.uniformfactory.pluginbuilder.WrapperPlugin;
 
-public class EmptyWrapperPluginImpl extends WrapperPlugin<ClassFactoryGeneratorImpl.Wrapper> {
+public class EmptyWrapperPluginImpl extends WrapperPlugin {
 
 
     public EmptyWrapperPluginImpl( ) {
