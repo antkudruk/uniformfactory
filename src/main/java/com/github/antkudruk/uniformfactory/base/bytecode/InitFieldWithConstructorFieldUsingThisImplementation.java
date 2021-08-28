@@ -19,8 +19,6 @@ package com.github.antkudruk.uniformfactory.base.bytecode;
 import com.github.antkudruk.uniformfactory.common.TypeDescriptionShortcuts;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.scaffold.InstrumentedType;
-import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
@@ -43,27 +41,43 @@ import java.util.function.Function;
  * }
  * </pre>
  */
-public class InitFieldWithConstructorFieldUsingThisImplementation implements Implementation {
+public class InitFieldWithConstructorFieldUsingThisImplementation extends AbstractImplementation {
 
     private final String originToWrapperGeneratorFieldName;
     private final String wrapperFieldName;
 
     /**
-     *
      * @param originToWrapperGeneratorFieldName Name for the field containing constructor.
-     * @param wrapperFieldName Name for the field to initiate wrapper.
+     * @param wrapperFieldName                  Name for the field to initiate wrapper.
      */
     public InitFieldWithConstructorFieldUsingThisImplementation(
             String originToWrapperGeneratorFieldName,
             String wrapperFieldName) {
+        this(originToWrapperGeneratorFieldName, wrapperFieldName, true);
+    }
+
+    private InitFieldWithConstructorFieldUsingThisImplementation(
+            String originToWrapperGeneratorFieldName,
+            String wrapperFieldName,
+            boolean isTerminating) {
+        super(isTerminating);
+        System.out.println(" ### originToWrapperGeneratorFieldName = " + originToWrapperGeneratorFieldName
+                + " wrapperFieldName = " + wrapperFieldName + " isTerminating = " + isTerminating);
         this.originToWrapperGeneratorFieldName = originToWrapperGeneratorFieldName;
         this.wrapperFieldName = wrapperFieldName;
     }
 
     @Override
+    protected AbstractTerminatableImplementation cloneNotTerminated() {
+        return new InitFieldWithConstructorFieldUsingThisImplementation(
+                originToWrapperGeneratorFieldName,
+                wrapperFieldName,
+                false);
+    }
+
+    @Override
     public ByteCodeAppender appender(Target implementationTarget) {
         return (methodVisitor, implementationContext, instrumentedMethod) -> {
-
             FieldDescription wrapperConstructorField
                     = TypeDescriptionShortcuts.deepFindStaticField(
                     instrumentedMethod.getDeclaringType().asErasure(),
@@ -85,15 +99,12 @@ public class InitFieldWithConstructorFieldUsingThisImplementation implements Imp
                                     .filter(ElementMatchers.named("apply"))
                                     .getOnly()),
                     FieldAccess.forField(wrapperField).write(),
-                    MethodReturn.VOID
+                    InitFieldWithConstructorFieldUsingThisImplementation.this.isTerminating()
+                            ? MethodReturn.VOID
+                            : StackManipulation.Trivial.INSTANCE
             ).apply(methodVisitor, implementationContext)
                     .getMaximalSize(),
                     instrumentedMethod.getStackSize());
         };
-    }
-
-    @Override
-    public InstrumentedType prepare(InstrumentedType instrumentedType) {
-        return instrumentedType;
     }
 }
