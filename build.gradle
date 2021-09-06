@@ -22,7 +22,7 @@ configurations {
 }
 
 dependencies {
-    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.6'
+    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.5'
 
     testCompile 'junit:junit:4.12',
             'org.powermock:powermock-core:2.0.4',
