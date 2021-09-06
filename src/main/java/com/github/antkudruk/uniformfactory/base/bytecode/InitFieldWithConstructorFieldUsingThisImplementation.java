@@ -21,6 +21,7 @@ import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
+import net.bytebuddy.implementation.bytecode.assign.TypeCasting;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
 import net.bytebuddy.implementation.bytecode.member.MethodInvocation;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
@@ -61,8 +62,6 @@ public class InitFieldWithConstructorFieldUsingThisImplementation extends Abstra
             String wrapperFieldName,
             boolean isTerminating) {
         super(isTerminating);
-        System.out.println(" ### originToWrapperGeneratorFieldName = " + originToWrapperGeneratorFieldName
-                + " wrapperFieldName = " + wrapperFieldName + " isTerminating = " + isTerminating);
         this.originToWrapperGeneratorFieldName = originToWrapperGeneratorFieldName;
         this.wrapperFieldName = wrapperFieldName;
     }
@@ -98,6 +97,7 @@ public class InitFieldWithConstructorFieldUsingThisImplementation extends Abstra
                                     .getDeclaredMethods()
                                     .filter(ElementMatchers.named("apply"))
                                     .getOnly()),
+                    TypeCasting.to(wrapperField.getType()), // TODO: Can get rid?
                     FieldAccess.forField(wrapperField).write(),
                     InitFieldWithConstructorFieldUsingThisImplementation.this.isTerminating()
                             ? MethodReturn.VOID

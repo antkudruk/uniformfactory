@@ -8,4 +8,5 @@ include 'gradle-listing-3-test'
 include 'gradle-listing-4-test'
 include 'gradle-listing-6-test'
 include 'gradle-listing-7-test'
+include 'gradle-listing-8-test'
 

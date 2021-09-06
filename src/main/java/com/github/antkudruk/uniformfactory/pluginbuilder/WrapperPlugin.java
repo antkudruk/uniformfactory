@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 
 /**
  * Gradle plugin.
+ *
  * Generates wrapper objects for each origin object the following way:
  * For each class marked with {@code typeMarker} annotation it instantiates
  * {@code classFactoryGenerator} class and calls
@@ -77,7 +78,7 @@ public class WrapperPlugin implements Plugin {
         this.originInterface = originInterface;
         this.selectTypeCriteria = selectTypeCriteria;
         this.wrappers = wrappers;
-        classGeneratorSingletonContainer = wrappers
+        this.classGeneratorSingletonContainer = wrappers
                 .stream()
                 .collect(Collectors.toMap(
                         WrapperDescriptor::getFieldName,
