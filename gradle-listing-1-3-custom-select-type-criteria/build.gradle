@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.0.6"
+    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.10.6"
 }
 
 group 'hz.xorlab'

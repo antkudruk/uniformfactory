@@ -165,7 +165,7 @@ Here is an example for Gradle
 ```
 plugins {
     id 'java'
-    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.11.15"
+    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.10.6"
 }
 
 byteBuddy {
@@ -181,7 +181,7 @@ and in Maven
     <plugin>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy-maven-plugin</artifactId>
-        <version>1.11.15</version>
+        <version>1.10.6</version>
         <executions>
             <execution>
                 <goals>
