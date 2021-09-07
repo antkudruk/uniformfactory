@@ -33,6 +33,7 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.MethodCall;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -77,10 +78,8 @@ public class ClassFactory<W> {
                     entry.getValue().getEnhancer(originClass));
         }
 
-        @SuppressWarnings("unchecked")
-        DynamicType.Builder<W> bbBuilder = (DynamicType.Builder<W>) new ByteBuddy()
-                .subclass(Object.class, ConstructorStrategy.Default.NO_CONSTRUCTORS)
-                .implement(wrapperInterface)
+        DynamicType.Builder<W> bbBuilder = new ByteBuddy()
+                .subclass(wrapperInterface, ConstructorStrategy.Default.NO_CONSTRUCTORS)
                 .defineConstructor(Visibility.PUBLIC)
                 .withParameters(originClass)
                 .intercept(composeConstructor(enhancers.values()))
@@ -133,6 +132,7 @@ public class ClassFactory<W> {
 
         List<String> missingMethodNames = describedMethods
                 .stream()
+                .filter(d -> Modifier.isAbstract(d.getModifiers()))
                 .filter(d -> !interfaceMethods.contains(d))
                 .map(Method::getName)
                 .collect(Collectors.toList());
@@ -147,8 +147,12 @@ public class ClassFactory<W> {
             Collection<Enhancer> enhancers) {
 
         try {
-            Implementation.Composable composable = MethodCall
-                    .invoke(Object.class.getConstructor())
+            Implementation.Composable composable =
+
+                    MethodCall
+                    .invoke(wrapperInterface.isInterface()
+                                    ? Object.class.getConstructor()
+                                    : wrapperInterface.getConstructor())
                     .andThen(FieldAccessor.ofField(Constants.ORIGIN_FIELD_NAME).setsArgumentAt(0));
 
             for (Enhancer enhancer : enhancers) {

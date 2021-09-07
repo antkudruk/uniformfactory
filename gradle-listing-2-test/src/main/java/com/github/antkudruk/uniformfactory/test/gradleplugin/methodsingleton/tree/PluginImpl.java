@@ -2,7 +2,7 @@ package com.github.antkudruk.uniformfactory.test.gradleplugin.methodsingleton.tr
 
 import com.github.antkudruk.uniformfactory.pluginbuilder.WrapperPlugin;
 
-public class PluginImpl extends WrapperPlugin<TreeElement> {
+public class PluginImpl extends WrapperPlugin {
     public PluginImpl( ) {
         super(
                 HasTreeElement.class,

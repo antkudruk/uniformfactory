@@ -16,7 +16,7 @@ dependencies {
     compile project(path: ":")
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile 'org.powermock:powermock-api-mockito2:2.0.4'
-    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.6'
+    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.5'
 
     compile group: 'net.bytebuddy', name: 'byte-buddy-gradle-plugin', version: '1.10.6'
 }
