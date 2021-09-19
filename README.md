@@ -315,6 +315,8 @@ Object origin = new OriginImpl();
 Wrapper wrapper = ((Origin)origin).getWrapper();
 ```
 
+You can find an example that implements an empty wrapper [here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-1-1-test)
+
 ### Using Explicit Interface as an Adapter
 
 You can avoid class cast made in the previous example the following way:
@@ -453,6 +455,9 @@ public class PluginImpl extends WrapperPlugin {
     }
 }
 ``` 
+
+You can find an example of an abstract class as an adapter 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-8-test)
 
 ## Generate Adapter that Implements Method Singleton
 
@@ -640,6 +645,9 @@ Company company = new Company();
                 .nested().get(1).getTreeElement()
                 .nested().get(0).getTreeElement().getLabel());
 ```
+
+You can find an example of a tree 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-2-test)
 
 ## Generate Wrappers that Provides List Of Methods
 

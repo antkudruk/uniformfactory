@@ -6,7 +6,7 @@ plugins {
 }
 
 // The current version
-def libraryVersion='0.1.1'
+def libraryVersion='0.1.2'
 
 group 'com.github.antkudruk'
 version libraryVersion
@@ -22,7 +22,7 @@ configurations {
 }
 
 dependencies {
-    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.6'
+    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.5'
 
     testCompile 'junit:junit:4.12',
             'org.powermock:powermock-core:2.0.4',
