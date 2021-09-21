@@ -28,6 +28,19 @@ import net.bytebuddy.implementation.Implementation;
 public interface Enhancer {
 
     /**
+     * Adds static initialization.
+     *
+     * Your enhancer may require static fields. This method is introduced for
+     * the sake of static fields initialization.
+     *
+     * @param existingImplementation Existing static initialization
+     * @return Updated static initialization
+     */
+    default Implementation.Composable addStaticInitiation(Implementation.Composable existingImplementation) {
+        return existingImplementation;
+    }
+
+    /**
      * Enhances wrapper class constructor.
      * The method normally adds initiation on fields accessible by the method.
      *

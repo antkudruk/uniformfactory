@@ -1,6 +1,6 @@
-# Generating Adapters Based On Annotations in Java
+# Library for Generating Adapters Based On Annotations in Java
 
-Adapters are classes implementing a common interface for to manipulate different 
+Adapters are classes implementing a common interface to manipulate different 
 classes the common way. **UniformFactory** tool generates adapters automatically
 based on the annotations at their members.
 
