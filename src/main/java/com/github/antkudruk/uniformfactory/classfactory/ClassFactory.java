@@ -34,7 +34,6 @@ import net.bytebuddy.implementation.MethodCall;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,16 +77,18 @@ public class ClassFactory<W> {
                     entry.getValue().getEnhancer(originClass));
         }
 
+        EnhancerBasedEnhancer enhancerBasedEnhancer = new EnhancerBasedEnhancer(enhancers.values());
+
         DynamicType.Builder<W> bbBuilder = new ByteBuddy()
                 .subclass(wrapperInterface, ConstructorStrategy.Default.NO_CONSTRUCTORS)
                 .defineConstructor(Visibility.PUBLIC)
                 .withParameters(originClass)
-                .intercept(composeConstructor(enhancers.values()))
+                .intercept(enhancerBasedEnhancer.addInitiation(
+                        initialConstructorImplementation()
+                ))
                 .defineProperty(Constants.ORIGIN_FIELD_NAME, originClass, true);
 
-        for (Enhancer enhancer : enhancers.values()) {
-            bbBuilder = enhancer.addMethod(bbBuilder);
-        }
+        bbBuilder = enhancerBasedEnhancer.addMethod(bbBuilder);
 
         return bbBuilder.make();
     }
@@ -143,23 +144,12 @@ public class ClassFactory<W> {
         }
     }
 
-    private Implementation.Composable composeConstructor(
-            Collection<Enhancer> enhancers) {
-
+    private Implementation.Composable initialConstructorImplementation() {
         try {
-            Implementation.Composable composable =
-
-                    MethodCall
-                    .invoke(wrapperInterface.isInterface()
-                                    ? Object.class.getConstructor()
-                                    : wrapperInterface.getConstructor())
+            return MethodCall.invoke(wrapperInterface.isInterface()
+                    ? Object.class.getConstructor()
+                    : wrapperInterface.getConstructor())
                     .andThen(FieldAccessor.ofField(Constants.ORIGIN_FIELD_NAME).setsArgumentAt(0));
-
-            for (Enhancer enhancer : enhancers) {
-                composable = enhancer.addInitiation(composable);
-            }
-
-            return composable;
         } catch (NoSuchMethodException ex) {
             // Object class is guaranteed to have default constructor
             throw new RuntimeException(ex);

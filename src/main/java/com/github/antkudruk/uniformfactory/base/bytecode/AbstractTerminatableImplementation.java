@@ -54,7 +54,8 @@ public abstract class AbstractTerminatableImplementation implements Implementati
         return new Compound.Composable(cloneNotTerminated(), implementation);
     }
 
-    boolean isTerminating() {
+    @SuppressWarnings("WeakerAccess")
+    protected final boolean isTerminating() {
         return terminate;
     }
 }

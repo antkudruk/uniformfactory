@@ -21,8 +21,6 @@ import com.github.antkudruk.uniformfactory.pluginbuilder.MetaClassFactory;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.scaffold.InstrumentedType;
-import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.implementation.bytecode.constant.ClassConstant;
@@ -48,7 +46,7 @@ import net.bytebuddy.matcher.ElementMatchers;
  * }
  * </pre>
  */
-public class InitFieldUsingClassInstanceMethodImplementation implements Implementation {
+public class InitFieldUsingClassInstanceMethodImplementation extends AbstractImplementation {
 
     private final TypeDescription singletonHolder;
     private final String fieldName;
@@ -58,6 +56,15 @@ public class InitFieldUsingClassInstanceMethodImplementation implements Implemen
             TypeDescription singletonHolder,
             String fieldName,
             Class<? extends MetaClassFactory<?>> classFactoryGenerator) {
+        this(singletonHolder, fieldName, classFactoryGenerator, true);
+    }
+
+    private InitFieldUsingClassInstanceMethodImplementation(
+            TypeDescription singletonHolder,
+            String fieldName,
+            Class<? extends MetaClassFactory<?>> classFactoryGenerator,
+            boolean terminate) {
+        super(terminate);
         this.singletonHolder = singletonHolder;
         this.fieldName = fieldName;
         this.classFactoryGenerator = classFactoryGenerator;
@@ -69,8 +76,12 @@ public class InitFieldUsingClassInstanceMethodImplementation implements Implemen
     }
 
     @Override
-    public InstrumentedType prepare(InstrumentedType instrumentedType) {
-        return instrumentedType;
+    protected AbstractTerminatableImplementation cloneNotTerminated() {
+        return new InitFieldUsingClassInstanceMethodImplementation(
+                singletonHolder,
+                fieldName,
+                classFactoryGenerator,
+                false);
     }
 
     public class Appender implements ByteCodeAppender {
@@ -102,7 +113,7 @@ public class InitFieldUsingClassInstanceMethodImplementation implements Implemen
                             .getOnly()),
                     // Assign tofield
                     FieldAccess.forField(wrapperInstanceField).write(),
-                    MethodReturn.VOID
+                    isTerminating() ? MethodReturn.VOID : StackManipulation.Trivial.INSTANCE
             ).apply(methodVisitor, implementationContext)
                     .getMaximalSize(),
                     instrumentedMethod.getStackSize());

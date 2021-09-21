@@ -49,7 +49,7 @@ public class InitFieldWithConstructorFieldUsingThisImplementation extends Abstra
 
     /**
      * @param originToWrapperGeneratorFieldName Name for the field containing constructor.
-     * @param wrapperFieldName                  Name for the field to initiate wrapper.
+     * @param wrapperFieldName Name for the field to initiate wrapper.
      */
     public InitFieldWithConstructorFieldUsingThisImplementation(
             String originToWrapperGeneratorFieldName,
@@ -60,8 +60,8 @@ public class InitFieldWithConstructorFieldUsingThisImplementation extends Abstra
     private InitFieldWithConstructorFieldUsingThisImplementation(
             String originToWrapperGeneratorFieldName,
             String wrapperFieldName,
-            boolean isTerminating) {
-        super(isTerminating);
+            boolean terminate) {
+        super(terminate);
         this.originToWrapperGeneratorFieldName = originToWrapperGeneratorFieldName;
         this.wrapperFieldName = wrapperFieldName;
     }
@@ -99,9 +99,7 @@ public class InitFieldWithConstructorFieldUsingThisImplementation extends Abstra
                                     .getOnly()),
                     TypeCasting.to(wrapperField.getType()), // TODO: Can get rid?
                     FieldAccess.forField(wrapperField).write(),
-                    InitFieldWithConstructorFieldUsingThisImplementation.this.isTerminating()
-                            ? MethodReturn.VOID
-                            : StackManipulation.Trivial.INSTANCE
+                    isTerminating() ? MethodReturn.VOID : StackManipulation.Trivial.INSTANCE
             ).apply(methodVisitor, implementationContext)
                     .getMaximalSize(),
                     instrumentedMethod.getStackSize());

@@ -16,9 +16,10 @@
 
 package com.github.antkudruk.uniformfactory.pluginbuilder;
 
-import com.github.antkudruk.uniformfactory.base.bytecode.InitFieldUsingClassInstanceMethodImplementation;
-import com.github.antkudruk.uniformfactory.base.bytecode.InitFieldWithConstructorFieldUsingThisImplementation;
+import com.github.antkudruk.uniformfactory.base.bytecode.EmptyImplementation;
 import com.github.antkudruk.uniformfactory.base.bytecode.InitFieldWithDefaultConstructorImplementation;
+import com.github.antkudruk.uniformfactory.classfactory.EnhancerBasedEnhancer;
+import com.github.antkudruk.uniformfactory.classfactory.WrapperEnhancer;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.AmbiguousGetWrapperMethodException;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.GetWrapperMethodNotExistsException;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.GetWrapperMethodWrongTypeException;
@@ -34,7 +35,6 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.scaffold.subclass.ConstructorStrategy;
-import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.SuperMethodCall;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatchers;
@@ -45,7 +45,6 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -69,6 +68,7 @@ public class WrapperPlugin implements Plugin {
     private final List<WrapperDescriptor<?>> wrappers;
     private final Map<String, DynamicType.Unloaded> classGeneratorSingletonContainer;
 
+    @SuppressWarnings("WeakerAccess")
     public WrapperPlugin(
             Class originInterface,
             Predicate<TypeDescription> selectTypeCriteria,
@@ -82,7 +82,8 @@ public class WrapperPlugin implements Plugin {
                 .stream()
                 .collect(Collectors.toMap(
                         WrapperDescriptor::getFieldName,
-                        e -> createSingletonHolder(e.getWrapperClassFactory())));
+                        e -> createSingletonHolder(e.getWrapperClassFactory())
+                ));
     }
 
     /**
@@ -97,6 +98,7 @@ public class WrapperPlugin implements Plugin {
      * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
      * @param <W> Wrapper type
      */
+    @SuppressWarnings("WeakerAccess")
     public <W> WrapperPlugin(
             Class originInterface,
             String getWrapperMethodName,
@@ -129,8 +131,9 @@ public class WrapperPlugin implements Plugin {
      * @param wrapperFieldName Field name to store wrappers
      * @param classFactoryGeneratorFieldName Field name to store wrapper class generators
      * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
-     * @param <W> Wrapper type
+     * @param <W> Adapter class
      */
+    @SuppressWarnings("WeakerAccess")
     public <W> WrapperPlugin(
             Class originInterface,
             String getWrapperMethodName,
@@ -158,8 +161,9 @@ public class WrapperPlugin implements Plugin {
      * @param typeMarker Annotation to mark origin classes
      * @param pluginName Name of the plugin
      * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
-     * @param <W> Wrapper type
+     * @param <W> Adapter class
      */
+    @SuppressWarnings("unused")
     public <W> WrapperPlugin(
             Class originInterface,
             Class<W> wrapperClass,
@@ -185,8 +189,9 @@ public class WrapperPlugin implements Plugin {
      * @param selectTypeCriteria Determines if the class has to be enhanced with the wrapper
      * @param pluginName Name of the plugin
      * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
-     * @param <W> Wrapper type
+     * @param <W> Adapter class
      */
+    @SuppressWarnings("unused")
     public <W> WrapperPlugin(
             Class originInterface,
             Class<W> wrapperClass,
@@ -213,8 +218,9 @@ public class WrapperPlugin implements Plugin {
      * @param wrapperFieldName Field name to store wrappers
      * @param classFactoryGeneratorFieldName Field name to store wrapper class generators
      * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
-     * @param <W> Wrapper type
+     * @param <W> Adapter class
      */
+    @SuppressWarnings("unused")
     public <W> WrapperPlugin(
             Class originInterface,
             Class<W> wrapperClass,
@@ -242,8 +248,9 @@ public class WrapperPlugin implements Plugin {
      * @param typeMarker Annotation to mark origin classes
      * @param pluginName Name of the plugin
      * @param classFactoryGenerator Class factory generator class. You'll have it's singleton instance created.
-     * @param <W> Wrapper type
+     * @param <W> Adapter class
      */
+    @SuppressWarnings("unused")
     public <W> WrapperPlugin(
             Class originInterface,
             String getWrapperMethodName,
@@ -263,6 +270,7 @@ public class WrapperPlugin implements Plugin {
     }
 
     // TODO: Builder does not process default parameters unless it's build method called. Make the constructor work .
+    @SuppressWarnings("unused")
     private <W> WrapperPlugin(Builder<W> builder) {
         this(
                 builder.originInterface,
@@ -275,6 +283,7 @@ public class WrapperPlugin implements Plugin {
         );
     }
 
+    @SuppressWarnings("unused")
     private static String checkFieldName(String pluginName) {
         if(pluginName.matches("[a-zA-Z0-9_]+")) {
             return pluginName;
@@ -296,7 +305,7 @@ public class WrapperPlugin implements Plugin {
      *
      * @param typeMarker Annotation type to look for
      * @param typeDefinitions Type to look for the annotation in
-     * @return
+     * @return Decision if the Gradle plugin has to apply this transformation
      */
     private static boolean isApplicable(
             Class<? extends Annotation> typeMarker,
@@ -355,28 +364,34 @@ public class WrapperPlugin implements Plugin {
 
             if (implementsMethod(typeDescription, originMethodReturningWrapper)) {
 
+                // TODO: Move this enhancer into a separate class (probably, name it AdapterEnhancer )
+                EnhancerBasedEnhancer enhancerBasedEnhancer = new EnhancerBasedEnhancer(
+                        Collections.singletonList(new WrapperEnhancer(
+                                        originInterface,
+                                        classFactoryGenerator,
+                                        classGeneratorSingletonContainer
+                                                .get(wrapperFieldName)
+                                                .getTypeDescription(),
+                                        classFactoryGeneratorFieldName,
+                                        wrapperClass,
+                                        wrapperFieldName,
+                                        getWrapperMethodName
+                                )
+                        )
+                );
+
                 builder = builder
-                        .defineField(wrapperFieldName, wrapperClass, Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)
-                        .defineField(classFactoryGeneratorFieldName, Function.class, Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC)
                         .invokable(ElementMatchers.isTypeInitializer())
-                        .intercept(new InitFieldUsingClassInstanceMethodImplementation(
-                                classGeneratorSingletonContainer.get(wrapperFieldName).getTypeDescription(),
-                                classFactoryGeneratorFieldName,
-                                classFactoryGenerator
-                        ))
+                        .intercept(enhancerBasedEnhancer.addStaticInitiation(new EmptyImplementation()))
+
                         .invokable(ElementMatchers.isConstructor())
-                        .intercept(SuperMethodCall.INSTANCE.andThen(
-                                new InitFieldWithConstructorFieldUsingThisImplementation(
-                                        classFactoryGeneratorFieldName, wrapperFieldName)))
-                        .define(new TypeDescription.ForLoadedType(originInterface)
-                                .getDeclaredMethods()
-                                .filter(ElementMatchers.named(getWrapperMethodName))
-                                .getOnly())
-                        .intercept(FieldAccessor.ofField(wrapperFieldName));
+                        .intercept(enhancerBasedEnhancer.addInitiation(SuperMethodCall.INSTANCE));
+
+                builder = enhancerBasedEnhancer.addMethod(builder);
             }
         }
 
-        return builder.require(classGeneratorSingletonContainer.values().toArray(new DynamicType.Default.Unloaded[0]));
+        return builder.require(classGeneratorSingletonContainer.values().toArray(new DynamicType.Unloaded[0]));
     }
 
     /**
