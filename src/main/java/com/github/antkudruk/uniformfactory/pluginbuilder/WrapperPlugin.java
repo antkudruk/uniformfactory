@@ -16,6 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.pluginbuilder;
 
+import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.base.bytecode.EmptyImplementation;
 import com.github.antkudruk.uniformfactory.base.bytecode.InitFieldWithDefaultConstructorImplementation;
 import com.github.antkudruk.uniformfactory.classfactory.EnhancerBasedEnhancer;
@@ -348,50 +349,51 @@ public class WrapperPlugin implements Plugin {
             builder = builder.implement(originInterface);
         }
 
-        for(WrapperDescriptor<?> wrapperDescriptor: wrappers) {
+        List<Enhancer> enhancer = wrappers
+                .stream()
+                .filter(e -> shouldImplement(typeDescription, e.getMethodName()))
+                .map(this::getWrapperEnhancer)
+                .collect(Collectors.toList());
 
-            String getWrapperMethodName = wrapperDescriptor.getMethodName();
-            String wrapperFieldName = wrapperDescriptor.getFieldName();
-            Class<?> wrapperClass = wrapperDescriptor.getWrapperClass();
-            String classFactoryGeneratorFieldName = wrapperDescriptor.getClassFactoryGeneratorFieldName();
-            Class<? extends MetaClassFactory<?>> classFactoryGenerator = wrapperDescriptor.getWrapperClassFactory();
+        EnhancerBasedEnhancer enhancerBasedEnhancer = new EnhancerBasedEnhancer(enhancer);
 
-            // Add method implementation if needed
-            MethodDescription originMethodReturningWrapper = new TypeDescription.ForLoadedType(originInterface)
-                    .getDeclaredMethods()
-                    .filter(ElementMatchers.named(getWrapperMethodName))
-                    .getOnly();
-
-            if (implementsMethod(typeDescription, originMethodReturningWrapper)) {
-
-                // TODO: Move this enhancer into a separate class (probably, name it AdapterEnhancer )
-                EnhancerBasedEnhancer enhancerBasedEnhancer = new EnhancerBasedEnhancer(
-                        Collections.singletonList(new WrapperEnhancer(
-                                        originInterface,
-                                        classFactoryGenerator,
-                                        classGeneratorSingletonContainer
-                                                .get(wrapperFieldName)
-                                                .getTypeDescription(),
-                                        classFactoryGeneratorFieldName,
-                                        wrapperClass,
-                                        wrapperFieldName,
-                                        getWrapperMethodName
-                                )
-                        )
-                );
-
-                builder = builder
-                        .invokable(ElementMatchers.isTypeInitializer())
-                        .intercept(enhancerBasedEnhancer.addStaticInitiation(new EmptyImplementation()))
-
-                        .invokable(ElementMatchers.isConstructor())
-                        .intercept(enhancerBasedEnhancer.addInitiation(SuperMethodCall.INSTANCE));
-
-                builder = enhancerBasedEnhancer.addMethod(builder);
-            }
-        }
+        builder = builder
+                .invokable(ElementMatchers.isTypeInitializer())
+                .intercept(enhancerBasedEnhancer.addStaticInitiation(new EmptyImplementation()))
+                .invokable(ElementMatchers.isConstructor())
+                .intercept(enhancerBasedEnhancer.addInitiation(SuperMethodCall.INSTANCE));
+        builder = enhancerBasedEnhancer.addMethod(builder);
 
         return builder.require(classGeneratorSingletonContainer.values().toArray(new DynamicType.Unloaded[0]));
+    }
+
+    private boolean shouldImplement(TypeDescription typeDescription, String getWrapperMethodName) {
+        MethodDescription originMethodReturningWrapper = new TypeDescription.ForLoadedType(originInterface)
+                .getDeclaredMethods()
+                .filter(ElementMatchers.named(getWrapperMethodName))
+                .getOnly();
+
+        return implementsMethod(typeDescription, originMethodReturningWrapper);
+    }
+
+    private Enhancer getWrapperEnhancer(WrapperDescriptor<?> wrapperDescriptor) {
+        String getWrapperMethodName = wrapperDescriptor.getMethodName();
+        String wrapperFieldName = wrapperDescriptor.getFieldName();
+        Class<?> wrapperClass = wrapperDescriptor.getWrapperClass();
+        String classFactoryGeneratorFieldName = wrapperDescriptor.getClassFactoryGeneratorFieldName();
+        Class<? extends MetaClassFactory<?>> classFactoryGenerator = wrapperDescriptor.getWrapperClassFactory();
+
+        return new WrapperEnhancer(
+                originInterface,
+                classFactoryGenerator,
+                classGeneratorSingletonContainer
+                        .get(wrapperFieldName)
+                        .getTypeDescription(),
+                classFactoryGeneratorFieldName,
+                wrapperClass,
+                wrapperFieldName,
+                getWrapperMethodName
+        );
     }
 
     /**
