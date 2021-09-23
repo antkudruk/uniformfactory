@@ -1,39 +1,42 @@
-# Uniform Factory
+# Library for Generating Adapters Based On Annotations in Java
 
-## Description
+Adapters are classes implementing a common interface to manipulate different 
+classes the common way. **UniformFactory** tool generates adapters automatically
+based on the annotations at their members.
 
-The project is designed to simplify processing annotated class members.
+In the **Uniform Factory** library, we're using the term **wrapper**. 
+Even though **wrapper** and **adapter** patterns are a bit different,
+in this tutorials we will be using them as synonyms.
 
-## Tutorial
+## Why do you Need to Generate Adapters in Java?
 
-### Introduction
-
-Supposing you define some annotations to mark arbitrary class members with for 
-further processing of that classes. The classes may have different structure or
-you even may be not aware of the classes structure if you publish your 
-functionality as a framework to share it with another developers. The task is 
+Supposing you define some annotations to mark arbitrary class members with.
+The classes may have different structure.
+You even may be not aware of the classes structure if you publish your 
+functionality as a framework to share it with other developers. The task is 
 just to process the annotated class members. 
 
 The common way of doing that is to look through annotated class members each 
 time you use them, find them and process. However that approach is too 
 cumbersome. It's slow as well because reflective operations are too expensive. 
 
-You'd like to process the annotated members more convenient way, aren't you? 
+You'd like to process the annotated members more convenient way. 
 
-With **Uniform Factory** you can just define a common interface to get 
-annotated class members (we'll call it **wrapper interface**) and let 
+**Uniform Factory** allows you just to define a common interface for the classes.
+We'll call the interface **wrapper interface**. Then you let 
 **Uniform Factory** automatically generate an implementation of that interface 
 for each **origin** class. Then you can access annotated members using the 
 common wrapper interface regardless of a class structure. 
 
-It works at the bytecode level so it's significantly faster than iteration over
-class members to look for the annotated members. 
+**Uniform Factory** works at the bytecode level. Thus, it's significantly faster 
+than iteration over class members to look for the annotated members. 
 
 Let's consider the following example.
+
 You defined `@Label` annotation to mark a member to identify an 
 object. And you defined `@Propery` annotation to mark an objects named 
 properties. You don't know the **origin** classes structure. One of the 
-**origin** classes may look like in the following listing. 
+**origin** classes may look like in the following listing: 
 
 ```
 @Marker
@@ -52,7 +55,7 @@ class OriginImpl {
 ```      
 
 First, you should define the following interfaces to generate wrapper 
-implementations from.
+implementations from:
 
  * **Wrapper** interface. It's a common interface to generate the wrapper 
    classes from. A wrapper class is generated for each Origin class.
@@ -70,7 +73,7 @@ interface Wrapper {
     Map<String, Property> getProperties();
 }
 
-// Yourr origin interface
+// Your origin interface
 interface Origin {
     Wrapper getWrapper();
 }
@@ -134,11 +137,11 @@ class Origin implements OriginInterface {
 The following tutorial describes how to set up **Uniform Factory** to generate 
 wrapper classes properly.
 
-### Installing Uniform Factory into your project
+## Installing Uniform Factory Into Your Project
 
 You can download **Uniform Factory** into your project from Maven Central.
 
-Here is an example for Gradle
+Here is an example for Gradle:
 
 ```
 dependencies {
@@ -146,7 +149,7 @@ dependencies {
 }
 ```
 
-and for Maven
+and for Maven:
 
 ```
 <dependency>
@@ -160,7 +163,7 @@ and for Maven
 generate uniformed **wrapper** classes. Just import and apply  
 `byte-buddy-gradle-plugin` and specify your plugin class.
 
-Here is an example for Gradle
+Here is an example for Gradle:
 
 ```
 plugins {
@@ -175,7 +178,7 @@ byteBuddy {
 }
 ```
 
-and in Maven
+and in Maven:
 
 ```
     <plugin>
@@ -201,10 +204,10 @@ and in Maven
 
 Let's take a look at some examples.
 
-### Empty wrapper
+## Empty Adapter
 
 Here is an example of **Wrapper** interface to be implemented by wrappers. It 
-doesn't have any method so far and it's shown here just for the sake of 
+doesn't have any method so far. It's shown here just for the sake of 
 demonstrating the concept. 
 
 ```
@@ -234,10 +237,9 @@ public @interface Marker { }
 ```
 
 Keep in mind that the `@Marker` annotation must have `@Retention` level at 
-least `RetentionPolicy.CLASS`. It's not a native Java feature. **Uniform Factory** 
-just implements it.
+least `RetentionPolicy.CLASS`.
 
-We'll use *Byte buddy gradle plugin* to transform origin classes. The procedure 
+We'll use *Byte Buddy gradle plugin* to transform origin classes. The procedure 
 of using that plugin is the following.
 
  * Define your plugin class
@@ -248,7 +250,7 @@ Let's extend our plugin class from the default implementation `WrapperPlugin`
 implementation.   
 
 ```
-public class PluginImpl extends WrapperPlugin {
+public class PluginImpl extends WrapperPlugin<Wrapper> {
     public PluginImpl() {
         super(
                 Origin.class,
@@ -260,14 +262,18 @@ public class PluginImpl extends WrapperPlugin {
 }
 ```
 
-Let me walk you through the constructor parameters.
+Let's consider constructor parameters:
+
  * `Origin.class` and `Wrapper.class` are **origin interface** and **wrapper 
    interface** correspondingly.
+   
  * Default plugin implementation transforms any class annotated with 
    `Marker.class` annotation, that's why the third parameter is needed.
+   
  * `"examplePlugin"` is the name of the plugin. It should match Java 
    identifier name and should be unique among the plugins used by the common 
    application.
+   
  * `ClassFactoryGeneratorImpl` is a meta class generator. It is a singleton per 
    application. It implements `MetaClassFactory` interface that will be 
    discovered later. `MetaClassFactory` instance has to have a default 
@@ -282,8 +288,8 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 }
 ```
 
-Once the plugin has been implemented, you should refer it in 
-`byteBuddy.transformation` property.
+In your `build.gradle` script, you should refer the plugin to apply it.
+The plugin class is set up in byteBuddy.transformation` property:
   
 ```
 byteBuddy {
@@ -293,25 +299,27 @@ byteBuddy {
 }
 ```
 
-After applying the plugin each class marked with `@Marker` annotation will
-be enhanced with `Wrapper` on the class loading. For instance, when you declare 
-the following class
+After applying, the plugin will transform each class marked with `@Marker`. 
+It's doing to annotation implement `Wrapper` interface on the class loading. 
+For instance, when you declare the following class:
 
 ```
 @Marker
 public class OriginImpl { }
 ```
 
-You'll be able to get the objects wrapper.
+You'll be able to get the objects wrapper:
 
 ```
 Object origin = new OriginImpl();
 Wrapper wrapper = ((Origin)origin).getWrapper();
 ```
 
-#### Using explicit interface to enhance objects with wrappers
+You can find an example that implements an empty wrapper [here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-1-1-test)
 
-You can avoid class cast made in the previous example the following way
+### Using Explicit Interface as an Adapter
+
+You can avoid class cast made in the previous example the following way:
 
 * Add `@Marker` annotation to the `Origin` interface.
 
@@ -361,9 +369,9 @@ Wrapper wrapper = origin.getWrapper();
 This way, if you implement `getWrapper()` method explicitly, your 
 implementation it's not going to be overridden by the plugin. 
 
-#### Select type criteria
+### Select Type Criteria
 
-You may want to add wrappers to classes satisfying a custom criteria, for 
+You may specify custom criteria to choose classes to add adapters to. For 
 example, matching class names to a special regular expression. 
 **UniformFactory** provides a flexible way to select particular classes for 
 that.
@@ -372,7 +380,7 @@ Let's implement a plugin to add wrappers to methods that explicitly implement
 the `Origin` interface, but using custom class selection criteria.
 
 ```
-public class PluginImpl extends WrapperPlugin {
+public class PluginImpl extends WrapperPlugin<Wrapper> {
     public PluginImpl() {
         super(
                 Origin.class,
@@ -388,7 +396,70 @@ public class PluginImpl extends WrapperPlugin {
 }
 ```
 
-### Method Singleton
+### Using Abstract Class as an Adapter
+
+Interfaces are stateless. So you can't have any variables inside interfaces.
+
+But what if you'd like to store a state in your wrapper? For instance, 
+you have to make a cache in your wrapper.
+
+You can use a **wrapper** class instead of an interface.
+
+Let's consider an example. Your wrapper hs an accumulator. And the 
+accumulator increases by a number from an underlying object. It happens
+each time you get the accumulator value.
+
+```
+public abstract class Wrapper {
+
+    private int accumulator;
+
+    public int getAccumulated() {
+        return accumulator += getDelta();
+    }
+
+    public abstract int getDelta();
+}
+
+``` 
+
+You can use that kind of wrapper exactly the same way as for the 
+interface case. 
+
+* in Class Factory Generator:
+
+```
+public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
+
+    public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
+        super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
+                .addMethodSingleton(Wrapper.class.getMethod("getDelta"), int.class)
+                .setMarkerAnnotation(Marker.class)
+                .endMethodDescription()
+                .build());
+    }
+}
+``` 
+
+* And in the plugin:
+
+```
+public class PluginImpl extends WrapperPlugin {
+    public PluginImpl( ) {
+        super(
+                Origin.class,
+                Wrapper.class,
+                Marker.class,
+                "examplePlugin",
+                ClassFactoryGeneratorImpl.class);
+    }
+}
+``` 
+
+You can find an example of an abstract class as an adapter 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-8-test)
+
+## Generate Adapter that Implements Method Singleton
 
 Let's enhance our empty `Wrapper` class.
 Suppose we need each class annotated with `@Marker` annotation to provide it's
@@ -458,7 +529,7 @@ assertEquals("10", ((Origin)o1).getWrapper().getIdentity());
 assertEquals("name", ((Origin)o1).getWrapper().getIdentity())
 ``` 
 
-#### Application: Tree
+### Application: Tree
 
 Let's consider an example.
 Supposing we have the following structure of objects.
@@ -575,7 +646,10 @@ Company company = new Company();
                 .nested().get(0).getTreeElement().getLabel());
 ```
 
-### Method List
+You can find an example of a tree 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-2-test)
+
+## Generate Wrappers that Provides List Of Methods
 
 Supposing we have callbacks in some classes. 
 We'll mark the classes with `@Marker` annotation and processing methods with 
@@ -638,7 +712,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 In this case each *result mapper* should map an arbitary *origin method* 
 return type to the method result in the *functional* interface.
 
-### Implementing custom MetaclassGenerator
+## Custom MetaclassGenerator to Generate Wrappers in Java
 
 In the previous examples we used only default implementation 
 `DefaultMetaClassFactory`, implementing interface `MetaClassFactory`.
@@ -765,7 +839,7 @@ public class Origin2 {
 }
 ```
 
-### Method Map
+## Generate Adapters with Map of Methods
 
 Suppose we have objects that may be put into a specific coordinate.   
 
@@ -870,7 +944,7 @@ public class MethodTreeWrapperClassFactory {
         }
     }
 
-    public class PluginImpl extends WrapperPlugin {
+    public class PluginImpl extends WrapperPlugin<Wrapper> {
         public PluginImpl( ) {
             super(
                     Origin.class,
@@ -901,6 +975,9 @@ enhance your objects with state? For instance, with cache.
 You can use two wrappers:
  * An adapter generated by **Uniform Factory** 
  * Your cache object that works with the adapter
+ 
+The example of code for multiple adapters at one origin class may be found 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-9-test)
 
 ### Translating parameters and result
 
