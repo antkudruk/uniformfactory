@@ -1,9 +1,10 @@
 .idea/*
 gradle.properties
 out/*
-examples/*/build
-examples/*/out
-**/.iml
-**/.gradle
-**/.idea
-**/.build
+examples/**/.iml/
+examples/**/.gradle/
+examples/**/.idea/
+examples/**/build/
+examples/**/out/
+**/*.iml
+
