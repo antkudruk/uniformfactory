@@ -168,7 +168,7 @@ Here is an example for Gradle:
 ```
 plugins {
     id 'java'
-    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.10.6"
+    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.11.18"
 }
 
 byteBuddy {
@@ -184,7 +184,7 @@ and in Maven:
     <plugin>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy-maven-plugin</artifactId>
-        <version>1.10.6</version>
+        <version>1.11.18</version>
         <executions>
             <execution>
                 <goals>
@@ -206,126 +206,28 @@ Let's take a look at some examples.
 
 ## Empty Adapter
 
-Here is an example of **Wrapper** interface to be implemented by wrappers. It 
-doesn't have any method so far. It's shown here just for the sake of 
-demonstrating the concept. 
+Here is an example of an empty wrapper. Empty wrapper is an interface that
+doen't define any methods. Even though an empty wrapper is practically useless,
+it's a good point to start.
 
-```
-public interface Wrapper { }
-```
-
-We are going to tell **Uniform Factory** to force each **origin** class 
-implement `Origin` interface behind the scenes to access the wrapper object. 
-Any `Origin` interface should contain a method returning `Wrapper` instance for
-the object.
-
-```
-// An interface to implement by any Origin class behind the scenes
-public interface Origin {
-    Wrapper getWrapper();
-}
-```
-
-And we will use the following annotation to let Gradle Plugin know which 
-classes have to be wrapped.
-
-```
-// Marks classes enhanced by Wrapper
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Marker { }
-```
-
-Keep in mind that the `@Marker` annotation must have `@Retention` level at 
-least `RetentionPolicy.CLASS`.
-
-We'll use *Byte Buddy gradle plugin* to transform origin classes. The procedure 
-of using that plugin is the following.
-
- * Define your plugin class
- * Specify your plugin class in `byteBuddy.transformation` parameter
- * Apply *Byte buddy gradle plugin*
- 
-Let's extend our plugin class from the default implementation `WrapperPlugin` 
-implementation.   
-
-```
-public class PluginImpl extends WrapperPlugin<Wrapper> {
-    public PluginImpl() {
-        super(
-                Origin.class,
-                Wrapper.class,
-                Marker.class,
-                "examplePlugin",
-                ClassFactoryGeneratorImpl.class);
-    }
-}
-```
-
-Let's consider constructor parameters:
-
- * `Origin.class` and `Wrapper.class` are **origin interface** and **wrapper 
-   interface** correspondingly.
-   
- * Default plugin implementation transforms any class annotated with 
-   `Marker.class` annotation, that's why the third parameter is needed.
-   
- * `"examplePlugin"` is the name of the plugin. It should match Java 
-   identifier name and should be unique among the plugins used by the common 
-   application.
-   
- * `ClassFactoryGeneratorImpl` is a meta class generator. It is a singleton per 
-   application. It implements `MetaClassFactory` interface that will be 
-   discovered later. `MetaClassFactory` instance has to have a default 
-   constructor to be instantiated by `WrapperPlugin` object.  
- 
-```
-public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
-    public ClassFactoryGeneratorImpl() {
-        super(new ClassFactory.Builder<>(Wrapper.class)
-                .build());
-    }
-}
-```
-
-In your `build.gradle` script, you should refer the plugin to apply it.
-The plugin class is set up in byteBuddy.transformation` property:
-  
-```
-byteBuddy {
-    transformation {
-        plugin = 'PluginImpl'
-    }
-}
-```
-
-After applying, the plugin will transform each class marked with `@Marker`. 
-It's doing to annotation implement `Wrapper` interface on the class loading. 
-For instance, when you declare the following class:
-
-```
-@Marker
-public class OriginImpl { }
-```
-
-You'll be able to get the objects wrapper:
+This plugin example adds an empty wrapper to an object satisfying a 
+special criteria. Furthermore, the plugin makes these object implement
+the `Origin` interface. Thus, you can access the wrapper the following way:
 
 ```
 Object origin = new OriginImpl();
 Wrapper wrapper = ((Origin)origin).getWrapper();
 ```
 
-You can find an example that implements an empty wrapper [here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-1-1-test)
+You can find th whole compilable example that implements an empty wrapper
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-1-1-test)
 
 ### Using Explicit Interface as an Adapter
 
-You can avoid class cast made in the previous example the following way:
-
-* Add `@Marker` annotation to the `Origin` interface.
-
-* Add a default implementation to the `Origin` interface to prevent compilation
-error. This default implementation should basically throw an exception, but you
-may implement the different logic.
+Yon can avoid class cast from the previous example. To do it, your domain class
+should implement the `Origin` interface. If you mark `Origin` interface with 
+the `@Marker` annotation, the standard **Uniform Factory** plugin is going to
+add the wrapper into this domain class:
 
 ```
 @Marker
@@ -336,38 +238,9 @@ public interface Origin {
 }
 ```
 
-* Add `@Inherited` to the Marker annotation. 
+You can find an example of an explicit interface here 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-1-2-interface-inherited)
 
-Java doesn't support interface inheritance itself. However **Uniform Factory** 
-enables this inheritance. Only for **Marker Interfaces** though. 
-
-Indeed, only existence of the annotation is required to implement wrapper or 
-not. So there is no problem of multiple inheritance here.
-
-```
-@Retention(RetentionPolicy.CLASS)
-@Target(ElementType.TYPE)
-@Inherited
-public @interface Marker { }
-```
-
-* Add `Origin` interface to the interfaces list of each origin class.
-
-```
-@Marker
-public class OriginImpl implements Origin {
-}
-```
-After that, the `OriginImpl` class is going to have an implementation for 
-`getWrapper()` method that returns the appropriate wrapper. 
-
-```
-OriginImpl origin = new OriginImpl();
-Wrapper wrapper = origin.getWrapper();
-```
-
-This way, if you implement `getWrapper()` method explicitly, your 
-implementation it's not going to be overridden by the plugin. 
 
 ### Select Type Criteria
 
