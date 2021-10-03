@@ -203,7 +203,13 @@ and in Maven:
 
 Let's take a look at some examples.
 
-## Empty Adapter
+## Examples
+
+You can find compilable examples in the examples
+[examples](https://github.com/antkudruk/uniformfactory/tree/develop/examples)
+folder of this project.
+
+### Empty Adapter
 
 Here is an example of an empty wrapper. Empty wrapper is an interface that
 doen't define any methods. Even though an empty wrapper is practically useless,
