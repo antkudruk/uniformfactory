@@ -219,7 +219,7 @@ Wrapper wrapper = ((Origin)origin).getWrapper();
 ```
 
 You can find th whole compilable example that implements an empty wrapper
-[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-1-1-test)
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-1-1-test)
 
 ### Using Explicit Interface as an Adapter
 
@@ -238,7 +238,7 @@ public interface Origin {
 ```
 
 You can find an example of an explicit interface 
-[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-1-2-interface-inherited)
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-1-2-interface-inherited)
 
 ### Select Type Criteria
 
