@@ -2,11 +2,10 @@
 
 Adapters are classes implementing a common interface to manipulate different 
 classes the common way. **UniformFactory** tool generates adapters automatically
-based on the annotations at their members.
+based on the annotations at their members. 
 
-In the **Uniform Factory** library, we're using the term **wrapper**. 
-Even though **wrapper** and **adapter** patterns are a bit different,
-in this tutorials we will be using them as synonyms.
+In the **Uniform Factory** library, we're using the term **wrapper** 
+to denote adapter class.
 
 ## Why do you Need to Generate Adapters in Java?
 
