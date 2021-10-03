@@ -1,5 +1,17 @@
 # Empty Adapter Example
 
+## Example Structure
+
+There example contains two projects:
+ 
+  * `plugin` stands for the example of framework
+  * `client` application that uses (in our cse just tests) the framework
+ 
+The project `plugen` is not aware about the project `client`. Thus, you can
+apply `plugin` to any other application.
+
+### Plugin Project 
+
 Here is an example of **Wrapper** interface to be implemented by wrapper 
 classes. It doesn't have any method so far. It's shown here just for the sake 
 of demonstrating the 
@@ -83,13 +95,17 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 }
 ```
 
+### Client Project
+
 In your `build.gradle` script, you should refer the plugin to apply it.
 The plugin class is set up in byteBuddy.transformation` property:
   
 ```
-byteBuddy {
-    transformation {
-        plugin = 'PluginImpl'
+build {
+    byteBuddy {
+        transformation {
+            plugin = com.github.antkudruk.uniformfactory.test.gradleplugin.emptywrapper.PluginImpl
+        }
     }
 }
 ```
@@ -110,24 +126,20 @@ Object origin = new OriginImpl();
 Wrapper wrapper = ((Origin)origin).getWrapper();
 ```
 
-## How to Build the Example?
+## How to Build and Test the Example
 
-There are two projects
- 
-  * `plugin` stands for the example of framework
-  * `client` application that uses (in our cse just tests) the framework
- 
- You should perform the following steps to run the project:
+You should perform the following steps to run the project:
 
-  * Install `plugin` into your local Maven repository. To do it, go to
-    `plugin` directory and run the command:
+* Install `plugin` into your local Maven repository. It's normally in `.m2` 
+directory of your home directory. To do it, go to `plugin` directory and run 
+the command:
      
-  ```
-  gradle install
-  ```
+```
+gradle install
+```
   
-  * Change directory to `client` project and build it.
-  
-  ```
-  gradle build
-  ``` 
+* Change directory to `client` project and build it.
+
+```
+gradle build
+``` 

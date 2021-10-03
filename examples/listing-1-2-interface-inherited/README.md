@@ -1,5 +1,17 @@
 # Using Explicit Interface as an Adapter
 
+## Example Structure
+
+There example contains two projects:
+ 
+  * `plugin` stands for the example of framework
+  * `client` application that uses (in our cse just tests) the framework
+ 
+The project `plugen` is not aware about the project `client`. Thus, you can
+apply `plugin` to any other application.
+
+### Plugin Project 
+
 Here is an example using an explicit interface to generate wrappers by the 
 [Uniform Factory](https://github.com/antkudruk/uniformfactory). 
 
@@ -35,13 +47,17 @@ not. So there is no problem of multiple inheritance here.
 public @interface Marker { }
 ```
 
-* Add `Origin` interface to the interfaces list of each origin class.
+### Client Example Implementation
+
+To enhance ByteBuddy with a wrapper, you should add `Origin` interface to the 
+interfaces list of each origin class.
 
 ```
 @Marker
 public class OriginImpl implements Origin {
 }
 ```
+
 After that, the `OriginImpl` class is going to have an implementation for 
 `getWrapper()` method that returns the appropriate wrapper. 
 
@@ -52,3 +68,21 @@ Wrapper wrapper = origin.getWrapper();
 
 This way, if you implement `getWrapper()` method explicitly, your 
 implementation it's not going to be overridden by the plugin. 
+
+## How to Build and Test the Example
+
+You should perform the following steps to run the project:
+
+* Install `plugin` into your local Maven repository. It's normally in `.m2` 
+directory of your home directory. To do it, go to `plugin` directory and run 
+the command:
+     
+```
+gradle install
+```
+  
+* Change directory to `client` project and build it.
+
+```
+gradle build
+``` 
