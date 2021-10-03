@@ -564,7 +564,7 @@ You can use two wrappers:
  * Your cache object that works with the adapter
  
 The example of code for multiple adapters at one origin class may be found 
-[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/gradle-listing-9-test)
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-9-multiple-wrappers)
 
 ### Translating parameters and result
 
