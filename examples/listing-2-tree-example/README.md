@@ -1,4 +1,4 @@
-# Using Explicit Interface as an Adapter
+# Application: Object Tree
 
 ## Example Structure
 
