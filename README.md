@@ -2,11 +2,10 @@
 
 Adapters are classes implementing a common interface to manipulate different 
 classes the common way. **UniformFactory** tool generates adapters automatically
-based on the annotations at their members.
+based on the annotations at their members. 
 
-In the **Uniform Factory** library, we're using the term **wrapper**. 
-Even though **wrapper** and **adapter** patterns are a bit different,
-in this tutorials we will be using them as synonyms.
+In the **Uniform Factory** library, we're using the term **wrapper** 
+to denote adapter class.
 
 ## Why do you Need to Generate Adapters in Java?
 
@@ -168,7 +167,7 @@ Here is an example for Gradle:
 ```
 plugins {
     id 'java'
-    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.10.6"
+    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.11.18"
 }
 
 byteBuddy {
@@ -184,7 +183,7 @@ and in Maven:
     <plugin>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy-maven-plugin</artifactId>
-        <version>1.10.6</version>
+        <version>1.11.18</version>
         <executions>
             <execution>
                 <goals>
@@ -204,128 +203,36 @@ and in Maven:
 
 Let's take a look at some examples.
 
-## Empty Adapter
+## Examples
 
-Here is an example of **Wrapper** interface to be implemented by wrappers. It 
-doesn't have any method so far. It's shown here just for the sake of 
-demonstrating the concept. 
+You can find compilable examples in the examples
+[examples](https://github.com/antkudruk/uniformfactory/tree/develop/examples)
+folder of this project.
 
-```
-public interface Wrapper { }
-```
+### Empty Adapter
 
-We are going to tell **Uniform Factory** to force each **origin** class 
-implement `Origin` interface behind the scenes to access the wrapper object. 
-Any `Origin` interface should contain a method returning `Wrapper` instance for
-the object.
+Here is an example of an empty wrapper. Empty wrapper is an interface that
+doen't define any methods. Even though an empty wrapper is practically useless,
+it's a good point to start.
 
-```
-// An interface to implement by any Origin class behind the scenes
-public interface Origin {
-    Wrapper getWrapper();
-}
-```
-
-And we will use the following annotation to let Gradle Plugin know which 
-classes have to be wrapped.
-
-```
-// Marks classes enhanced by Wrapper
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Marker { }
-```
-
-Keep in mind that the `@Marker` annotation must have `@Retention` level at 
-least `RetentionPolicy.CLASS`.
-
-We'll use *Byte Buddy gradle plugin* to transform origin classes. The procedure 
-of using that plugin is the following.
-
- * Define your plugin class
- * Specify your plugin class in `byteBuddy.transformation` parameter
- * Apply *Byte buddy gradle plugin*
- 
-Let's extend our plugin class from the default implementation `WrapperPlugin` 
-implementation.   
-
-```
-public class PluginImpl extends WrapperPlugin<Wrapper> {
-    public PluginImpl() {
-        super(
-                Origin.class,
-                Wrapper.class,
-                Marker.class,
-                "examplePlugin",
-                ClassFactoryGeneratorImpl.class);
-    }
-}
-```
-
-Let's consider constructor parameters:
-
- * `Origin.class` and `Wrapper.class` are **origin interface** and **wrapper 
-   interface** correspondingly.
-   
- * Default plugin implementation transforms any class annotated with 
-   `Marker.class` annotation, that's why the third parameter is needed.
-   
- * `"examplePlugin"` is the name of the plugin. It should match Java 
-   identifier name and should be unique among the plugins used by the common 
-   application.
-   
- * `ClassFactoryGeneratorImpl` is a meta class generator. It is a singleton per 
-   application. It implements `MetaClassFactory` interface that will be 
-   discovered later. `MetaClassFactory` instance has to have a default 
-   constructor to be instantiated by `WrapperPlugin` object.  
- 
-```
-public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
-    public ClassFactoryGeneratorImpl() {
-        super(new ClassFactory.Builder<>(Wrapper.class)
-                .build());
-    }
-}
-```
-
-In your `build.gradle` script, you should refer the plugin to apply it.
-The plugin class is set up in byteBuddy.transformation` property:
-  
-```
-byteBuddy {
-    transformation {
-        plugin = 'PluginImpl'
-    }
-}
-```
-
-After applying, the plugin will transform each class marked with `@Marker`. 
-It's doing to annotation implement `Wrapper` interface on the class loading. 
-For instance, when you declare the following class:
-
-```
-@Marker
-public class OriginImpl { }
-```
-
-You'll be able to get the objects wrapper:
+This plugin example adds an empty wrapper to an object satisfying a 
+special criteria. Furthermore, the plugin makes these object implement
+the `Origin` interface. Thus, you can access the wrapper the following way:
 
 ```
 Object origin = new OriginImpl();
 Wrapper wrapper = ((Origin)origin).getWrapper();
 ```
 
-You can find an example that implements an empty wrapper [here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-1-1-test)
+You can find th whole compilable example that implements an empty wrapper
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-1-1-test)
 
 ### Using Explicit Interface as an Adapter
 
-You can avoid class cast made in the previous example the following way:
-
-* Add `@Marker` annotation to the `Origin` interface.
-
-* Add a default implementation to the `Origin` interface to prevent compilation
-error. This default implementation should basically throw an exception, but you
-may implement the different logic.
+Yon can avoid class cast from the previous example. To do it, your domain class
+should implement the `Origin` interface. If you mark `Origin` interface with 
+the `@Marker` annotation, the standard **Uniform Factory** plugin is going to
+add the wrapper into this domain class:
 
 ```
 @Marker
@@ -336,38 +243,8 @@ public interface Origin {
 }
 ```
 
-* Add `@Inherited` to the Marker annotation. 
-
-Java doesn't support interface inheritance itself. However **Uniform Factory** 
-enables this inheritance. Only for **Marker Interfaces** though. 
-
-Indeed, only existence of the annotation is required to implement wrapper or 
-not. So there is no problem of multiple inheritance here.
-
-```
-@Retention(RetentionPolicy.CLASS)
-@Target(ElementType.TYPE)
-@Inherited
-public @interface Marker { }
-```
-
-* Add `Origin` interface to the interfaces list of each origin class.
-
-```
-@Marker
-public class OriginImpl implements Origin {
-}
-```
-After that, the `OriginImpl` class is going to have an implementation for 
-`getWrapper()` method that returns the appropriate wrapper. 
-
-```
-OriginImpl origin = new OriginImpl();
-Wrapper wrapper = origin.getWrapper();
-```
-
-This way, if you implement `getWrapper()` method explicitly, your 
-implementation it's not going to be overridden by the plugin. 
+You can find an example of an explicit interface 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-1-2-interface-inherited)
 
 ### Select Type Criteria
 
@@ -395,6 +272,9 @@ public class PluginImpl extends WrapperPlugin<Wrapper> {
     }
 }
 ```
+
+See compilable code
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-1-3-custom-select-type-criteria)
 
 ### Using Abstract Class as an Adapter
 
@@ -424,84 +304,15 @@ public abstract class Wrapper {
 ``` 
 
 You can use that kind of wrapper exactly the same way as for the 
-interface case. 
-
-* in Class Factory Generator:
-
-```
-public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
-
-    public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
-                .addMethodSingleton(Wrapper.class.getMethod("getDelta"), int.class)
-                .setMarkerAnnotation(Marker.class)
-                .endMethodDescription()
-                .build());
-    }
-}
-``` 
-
-* And in the plugin:
-
-```
-public class PluginImpl extends WrapperPlugin {
-    public PluginImpl( ) {
-        super(
-                Origin.class,
-                Wrapper.class,
-                Marker.class,
-                "examplePlugin",
-                ClassFactoryGeneratorImpl.class);
-    }
-}
-``` 
-
-You can find an example of an abstract class as an adapter 
-[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-8-test)
+interface case. See compilable exampless and detailed description
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-8-wrapper-class)
 
 ## Generate Adapter that Implements Method Singleton
 
 Let's enhance our empty `Wrapper` class.
-Suppose we need each class annotated with `@Marker` annotation to provide it's
-identity. However the classes are heterogeneous and we can't predict which 
-values will be used as identities.  
 
-First of all we should define a wrapper interface to get an identity as in the following listing.
-
-```
-    public interface Wrapper {
-        String getId();
-    }
-```
-
-Then we need to define an annotation to mark class members with to indicate the 
-sources for identities.
-
-```
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.FIELD})
-public @interface Identity { }
-```
-
-To make it work we have to specify the way of implementation of `getId()` 
-method.
-
-```
-public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
-    public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
-            .addMethodSingleton(Wrapper.class.getMethod("getIdentity"), String.class)
-            .setMarkerAnnotation(Identity.class)
-            .addResultTranslator(Long.class, Object::toString)
-            .endMethodDescription()
-            .build());
-    }
-}
-```
-
-After that you can treat each class marked with `@Marker` annotation as a 
-class implementing `Origin` interface and therefore get object identities 
-in the common way. For example, if the classes have the following signature
+Supposing we need to mark different class members to provide an object 
+identity, just like in the following listing:
 
 ```
 @Marker
@@ -519,71 +330,30 @@ public class Origin2 {
 }
 ``` 
 
-you can access their name class members the following way.
+We need the common interface to get these identities:
 
 ```
-Origin1 o1 = new Origin1();
-Origin2 o2 = new Origin2();
-        
-assertEquals("10", ((Origin)o1).getWrapper().getIdentity());
-assertEquals("name", ((Origin)o1).getWrapper().getIdentity())
-``` 
+    public interface Wrapper {
+        String getId();
+    }
+```
+
+How can we achieve this behaviour with **UniformFactory**?
+You can find a compilable example 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-3-method-singleton)
 
 ### Application: Tree
 
 Let's consider an example.
-Supposing we have the following structure of objects.
-We have a Company. The company has some Departments and each department
-has a list of employee.
+Supposing we have the following structure of objects:
 
-```
-@TreeElementMarker
-public class Company {
-
-    @Label
-    private static final String companyName = "My awesome company";
-
-    @Nested
-    public List<Department> getDepartments() {
-        return Arrays.asList(
-                new Department("Managers", "Beavis", "Butthead"),
-                new Department("Labours", "Stewart")
-        );
-    }
-}
-
-@TreeElementMarker
-public class Department {
-
-    @Label
-    private final String depName;
-
-    @Nested
-    private final List<Employee> employee;
-
-    public Department(String depName, String... employee) {
-        this.depName = depName;
-        this.employee = Stream.of(employee)
-                .map(Employee::new)
-                .collect(Collectors.toList());
-    }
-}
-
-@TreeElementMarker
-public class Employee {
-    @Label
-    private final String name;
-
-    public Employee(String name) {
-        this.name = name;
-    }
-}
-
-```
-
-To display this structure of object in the common way it's suitable to assign
-a wrapper to each of the objects that will allow you to get nested elements and
-labels for each element using the common interface
+ * Company
+ * Department
+ * Employee
+ 
+Each class has a method returning nested object. And each object has a label 
+string to render. We'd like to make a uniform tree structure to use by UI to 
+render.
 
 ```
 // Wrapper interface
@@ -598,70 +368,15 @@ public interface HasTreeElement {
 }
 ``` 
 
-The example to get this structure is quite straightforward.
-Note that in the following listing `nested()` method is assigned with default 
-value. If no nested methods are defined in the origin class (like in Employee 
-class in the listing above), the corresponding **wrapper** object will contain
-an empty list of children.
-
-```
-public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<TreeElement> {
-    public ClassFactoryGeneratorImpl() throws ReflectiveOperationException {
-        super(new ClassFactory.ShortcutBuilder<>(TreeElement.class)
-                .addMethodSingleton(TreeElement.class.getMethod("getLabel"), String.class)
-                .setMarkerAnnotation(Label.class)
-                .endMethodDescription()
-
-                .addMethodSingleton(TreeElement.class.getMethod("nested"), List.class)
-                .setMarkerAnnotation(Nested.class)
-                .setDefaultValue(new ArrayList<>())
-                .endMethodDescription()
-
-                .build());
-    }
-}
-```
-
-Once you used the classes above, you'll be able to iterate the elements like in
-the following listing. Keep in mind that the method `nested()` returns list of 
-**origin** objects implementing `HasTreeElement` interface, but not 
-`TreeElement`. To access `TreeElement`, you should just call `getTreeElement()`
-method explicitly.   
-
-```
-Company company = new Company();
-        HasTreeElement tree = (HasTreeElement) company;
-        assertEquals("Managers", tree.getTreeElement()
-                .nested().get(0).getTreeElement().getLabel());
-        assertEquals("Beavis", tree.getTreeElement()
-                .nested().get(0).getTreeElement()
-                .nested().get(0).getTreeElement().getLabel());
-        assertEquals("Butthead", tree.getTreeElement()
-                .nested().get(0).getTreeElement()
-                .nested().get(1).getTreeElement().getLabel());
-        assertEquals("Labours", tree.getTreeElement()
-                .nested().get(1).getTreeElement().getLabel());
-        assertEquals("Stewart", tree.getTreeElement()
-                .nested().get(1).getTreeElement()
-                .nested().get(0).getTreeElement().getLabel());
-```
-
 You can find an example of a tree 
-[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-2-test)
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-2-tree-example)
 
 ## Generate Wrappers that Provides List Of Methods
 
-Supposing we have callbacks in some classes. 
-We'll mark the classes with `@Marker` annotation and processing methods with 
-`@Callback` annotation. 
+We'd like to be able to mark multiple class members with an annotation and
+work with them. How can we do that?
 
-To call each callback method we'll use the following trick.
-We'll introduce an additional wrapper interface to call each event handler in
-the same way. Each method annotated with `@Processor.Process` annotation will
-cause creation of a type implementing `Processor` interface. The method of that
-interface will be invoking the corresponding origin method.
-
-Note that the interface may contain one and only one method 
+We can define the common interface containing the method:  
 
 ```
 public interface Processor {
@@ -676,8 +391,7 @@ public interface Processor {
 }
 ```
 
-Wrapper method will return list containing functional interface objects, in our 
-case it will be a `List` of `Processor`s.   
+Then we make our `Wrapper` interface return an element of that functional interface:
 
 ```
 public interface Wrapper {
@@ -685,32 +399,8 @@ public interface Wrapper {
 }
 ```
 
-To specify a way of implementing `getProcessors` method we'll use the same 
-builder as we used for `MethodSingleton` specifying in `addMethodList` is the 
-returning type of the **functional** interface.
-
-```
-public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
-    public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        this.classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
-                .addMethodList(
-                        Wrapper.class.getMethod("getProcessors"),
-                        boolean.class
-                )
-                .setMarkerAnnotation(Processor.Process.class)
-                .setFunctionalInterface(Processor.class)
-                .addResultTranslator(void.class, t -> true)
-                .addResultTranslator(Long.class, t -> t >= 0)
-                .addResultTranslator(String.class, "yes"::equalsIgnoreCase)
-                .endMethodDescription()
-
-                .build());
-    }
-}
-```
-
-In this case each *result mapper* should map an arbitary *origin method* 
-return type to the method result in the *functional* interface.
+You can find a compilable example here:
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-4-custom-method-list)
 
 ## Custom MetaclassGenerator to Generate Wrappers in Java
 
@@ -841,10 +531,11 @@ public class Origin2 {
 
 ## Generate Adapters with Map of Methods
 
-Suppose we have objects that may be put into a specific coordinate.   
+In the previous example, we just took all annotated class members. But what if
+we'd like to use some additional information?
 
-The wrapper should provide a method to return a map of coordinates using the 
-same approach as we used for MethodList.
+We can use a map instead of a list. UniformFactory takes keys from the 
+annotation parameters and generate values implementing functional interface:
 
 ```
 public interface Coordinate {
@@ -856,112 +547,8 @@ public interface PointWrapper {
 }
 ```
 
-Unlikely for MethodList, MethodMap requires a rule to get the key in the map
-based on the annotation. So we'll define a property (in this case default 
-value) to define the key.
-
-```
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.FIELD})
-public @interface CoordinateMarker {
-    String value();
-}
-```
-
-And we'll describe the way of implementing that map.
-
-```
-public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<PointWrapper> {
-    public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        super(new ClassFactory.ShortcutBuilder<>(PointWrapper.class)
-
-                .addMethodMap(PointWrapper.class.getMethod("getCoords"), long.class)
-                .setMarkerAnnotation(CoordinateMarker.class, CoordinateMarker::value)
-                .setFunctionalInterface(Coordinate.class)
-                .parameterSource(Long.class, 0)
-
-                .applyTo(new AnyParameterFilter())
-                .addTranslator(boolean.class, t -> t > 0)
-                .addTranslator(String.class, Object::toString)
-                .addTranslator(long.class, t -> t)
-
-                .finishParameterDescription()
-                .addResultTranslator(Boolean.class, t -> t ? 1L : -1L)
-                .addResultTranslator(String.class, Long::parseLong)
-                .addResultTranslator(int.class, Integer::longValue)
-
-                .endMethodDescription()
-
-                .build());
-    }
-}
-```
-
-As a result you'll be able to get each axis position via that map
-
-```
-        PointTypeA pointTypeA = new PointTypeA();
-        Point point = (Point) pointTypeA;
-
-        point.getWrapper().getCoords().get("x").getCoordinate(10L);
-        point.getWrapper().getCoords().get("y").getCoordinate(15L);
-        point.getWrapper().getCoords().get("z").getCoordinate(20L);
-```
-
-You can use the following code to get `wrappers` generated behind the scenes.
-To get it work just implement the following plugin.
-
-```
-public class MethodTreeWrapperClassFactory {
-
-    private static final ClassFactory<Wrapper> classFactory;
-
-    static  {
-        try {
-            classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
-
-                    .addMethodMap(Wrapper.class.getMethod("getWrappers"), String.class)
-                    .setMarkerAnnotation(FunctionalElement.class, FunctionalElement::value)
-                    .setFunctionalInterface(Fun.class)
-
-                    .parameterSource(String.class, 0)
-                    .applyToAnnotated(First.class)
-                    .finishParameterDescription()
-
-                    .parameterSource(String.class, 1)
-                    .applyToAnnotated(Second.class)
-                    .addTranslator(Boolean.class, "true"::equalsIgnoreCase)
-                    .addTranslator(Long.class, Long::parseLong)
-                    .finishParameterDescription()
-
-                    .addResultTranslator(Long.class, t -> t.toString() + " units")
-                    .addResultTranslator(Boolean.class, t -> t ? "Yes" : "No")
-                    .endMethodDescription()
-
-                    .build();
-        } catch (ReflectiveOperationException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    public class PluginImpl extends WrapperPlugin<Wrapper> {
-        public PluginImpl( ) {
-            super(
-                    Origin.class,
-                    Wrapper.class,
-                    Marker.class,
-                    "examplePlugin",
-                    ClassFactoryGeneratorImpl.class);
-        }
-    }
-
-    public static class CtorMeta extends DefaultMetaClassFactory<Wrapper> {
-        public CtorMeta() {
-            super(classFactory);
-        }
-    }
-}
-```
+You can find a compilable example 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/gradle-listing-6-test)
 
 ### Using Multiple Wrappers
 
@@ -977,7 +564,7 @@ You can use two wrappers:
  * Your cache object that works with the adapter
  
 The example of code for multiple adapters at one origin class may be found 
-[here](https://github.com/antkudruk/uniformfactory/tree/develop/gradle-listing-9-test)
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/gradle-listing-9-test)
 
 ### Translating parameters and result
 

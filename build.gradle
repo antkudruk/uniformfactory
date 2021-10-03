@@ -12,6 +12,7 @@ group 'com.github.antkudruk'
 version libraryVersion
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -21,8 +22,33 @@ configurations {
     testImplementation.extendsFrom compileOnly
 }
 
+task testExamples {
+    doLast {
+        def stdout = new ByteArrayOutputStream()
+        def files = new File('examples').listFiles()
+        stdout.println("Test of examples")
+        for (File file in files) {
+            stdout.println("   Compiling Plugin for the listing ${file.name}")
+            exec {
+                workingDir "examples/${file.name}/plugin"
+                commandLine 'cmd', '/c', 'gradle', 'install'
+                standardOutput = stdout
+            }
+            stdout.println("   Compiling Client for the listing ${file.name}")
+            exec {
+                workingDir "examples/${file.name}/client"
+                commandLine 'cmd', '/c', 'gradle', 'clean', 'build'
+                standardOutput = stdout
+            }
+        }
+        println "Output: $stdout"
+    }
+}
+
+test.finalizedBy(testExamples)
+
 dependencies {
-    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.5'
+    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.18'
 
     testCompile 'junit:junit:4.12',
             'org.powermock:powermock-core:2.0.4',
@@ -40,7 +66,7 @@ jar {
                 'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
                 'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
                 'Bundle-License' : "http://www.apache.org/licenses/LICENSE-2.0.txt",
-                'Bundle-SymbolicName': "com.github.antkudruk.uniformfactory",
+                'Bundle-SymbolicName': "com.github.antkudruk.uniform-factory",
                 'Bundle-Name'    : "Uniform Factory",
                 'Bundle-Version' : libraryVersion
         )

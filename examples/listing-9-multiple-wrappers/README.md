@@ -1,0 +1,1 @@
+@@include[EXAMPLE_HEADER.md](../../docs/EXAMPLE_HEADER.md)

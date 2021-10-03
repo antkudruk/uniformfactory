@@ -1,0 +1,1 @@
+This example tests application iof multiple methods in a single wrapper. 
