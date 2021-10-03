@@ -548,7 +548,7 @@ public interface PointWrapper {
 ```
 
 You can find a compilable example 
-[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/gradle-listing-6-method-map)
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-6-method-map)
 
 ### Using Multiple Wrappers
 
