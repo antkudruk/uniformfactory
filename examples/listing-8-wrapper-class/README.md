@@ -1,3 +1,5 @@
+# Generate Wrapper based on an Abstract Class
+
 Interfaces are stateless. So you can't have any variables inside interfaces.
 
 But what if you'd like to store a state in your wrapper? For instance, 
