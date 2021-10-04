@@ -1,8 +1,8 @@
 # Library for Generating Adapters Based On Annotations in Java
-
+**UniformFactory** is a 
+[Java library to generate adapters (wrappers) based on reflection](https://github.com/antkudruk/uniformfactory). 
 Adapters are classes implementing a common interface to manipulate different 
-classes the common way. **UniformFactory** tool generates adapters automatically
-based on the annotations at their members. 
+classes the common way. 
 
 In the **Uniform Factory** library, we're using the term **wrapper** 
 to denote adapter class.
