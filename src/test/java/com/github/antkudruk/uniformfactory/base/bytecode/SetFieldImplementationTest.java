@@ -10,16 +10,16 @@ import org.powermock.reflect.Whitebox;
 
 import static junit.framework.TestCase.assertEquals;
 
-public class FieldAccessImplementationTest {
+public class SetFieldImplementationTest {
 
     private static final String ORIGIN_FIELD = "originField";
-    private static final String METHOD_NAME = "getMethod";
+    private static final String METHOD_NAME = "set";
 
     public static class OriginImpl {
         @SuppressWarnings("unused")
-        public String publicField = "10";
+        public String publicField;
         @SuppressWarnings("unused")
-        private String privateField = "20";
+        private String privateField;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -57,8 +57,9 @@ public class FieldAccessImplementationTest {
         Class<?> wrapperClass = byteBuddy
                 .subclass(Object.class)
                 .defineField(ORIGIN_FIELD, originClass, Opcodes.ACC_PRIVATE)
-                .defineMethod(METHOD_NAME, Object.class, Opcodes.ACC_PUBLIC)
-                .intercept(new FieldAccessImplementation(ORIGIN_FIELD,
+                .defineMethod(METHOD_NAME, void.class, Opcodes.ACC_PUBLIC)
+                .withParameters(String.class)
+                .intercept(new SetFieldImplementation(ORIGIN_FIELD,
                         TypeDescriptionShortcuts.deepFindField(originTypeDescription, fieldName)
                                 .orElseThrow(RuntimeException::new),
                         t -> t
@@ -68,9 +69,11 @@ public class FieldAccessImplementationTest {
                 .load(getClass().getClassLoader())
                 .getLoaded();
 
+        Object origin = originClass.getConstructor().newInstance();
         Object wrapper = wrapperClass.getConstructor().newInstance();
-        Whitebox.setInternalState(wrapper, ORIGIN_FIELD, originClass.getConstructor().newInstance());
-        assertEquals(expectedResult, Whitebox.invokeMethod(wrapper, METHOD_NAME));
+        Whitebox.setInternalState(wrapper, ORIGIN_FIELD, origin);
+        Whitebox.invokeMethod(wrapper, METHOD_NAME, expectedResult);
+        assertEquals(expectedResult, Whitebox.getInternalState(origin, fieldName));
     }
 
     @Test
@@ -84,21 +87,24 @@ public class FieldAccessImplementationTest {
         Class<?> wrapperClass = byteBuddy
                 .subclass(Object.class)
                 .defineField(ORIGIN_FIELD, OriginImpl.class, Opcodes.ACC_PRIVATE)
-                .defineMethod(METHOD_NAME, Object.class, Opcodes.ACC_PUBLIC)
-                .intercept(new FieldAccessImplementation(ORIGIN_FIELD,
+                .defineMethod(METHOD_NAME, void.class, Opcodes.ACC_PUBLIC)
+                .withParameters(Object.class)
+                .intercept(new SetFieldImplementation(ORIGIN_FIELD,
                         originTypeDescription
                                 .getDeclaredFields()
                                 .filter(ElementMatchers.named("publicField"))
                                 .getOnly(),
                         t -> t.toString() + t.toString()
                 ))
-
                 .make()
                 .load(getClass().getClassLoader())
                 .getLoaded();
 
         Object wrapper = wrapperClass.getConstructor().newInstance();
-        Whitebox.setInternalState(wrapper, ORIGIN_FIELD, new OriginImpl());
-        assertEquals("1010", Whitebox.invokeMethod(wrapper, METHOD_NAME));
+        OriginImpl origin = new OriginImpl();
+        Whitebox.setInternalState(wrapper, ORIGIN_FIELD, origin);
+        Whitebox.invokeMethod(wrapper, METHOD_NAME, "10");
+
+        assertEquals("1010", Whitebox.getInternalState(origin, "publicField"));
     }
 }
