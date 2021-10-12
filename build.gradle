@@ -26,7 +26,7 @@ task testExamples {
     doLast {
         def stdout = new ByteArrayOutputStream()
         def files = new File('examples').listFiles()
-        def gradlewRelativePath = ['..', '..', '..', 'gradlew.bat'].join(File.separator)
+        def gradlewRelativePath = ['..', '..', '..', 'gradlew'].join(File.separator)
         stdout.println("Test of examples")
         for (File file in files) {
             stdout.println("   Compiling Plugin for the listing ${file.name}")
