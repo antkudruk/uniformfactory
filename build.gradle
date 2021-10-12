@@ -26,19 +26,27 @@ task testExamples {
     doLast {
         def stdout = new ByteArrayOutputStream()
         def files = new File('examples').listFiles()
-        def gradlewRelativePath = ['..', '..', '..', 'gradlew'].join(File.separator)
+        def gradlewRelativePath = ['..', '..', '..', 'gradlew.bat'].join(File.separator)
         stdout.println("Test of examples")
         for (File file in files) {
             stdout.println("   Compiling Plugin for the listing ${file.name}")
             exec {
                 workingDir "examples/${file.name}/plugin"
-                commandLine 'cmd', '/c', gradlewRelativePath, 'install'
+                if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+                    commandLine 'cmd', '/c', gradlewRelativePath, 'install'
+                } else {
+                    commandLine gradlewRelativePath, 'install'
+                }
                 standardOutput = stdout
             }
             stdout.println("   Compiling Client for the listing ${file.name}")
             exec {
                 workingDir "examples/${file.name}/client"
-                commandLine 'cmd', '/c', gradlewRelativePath, 'clean', 'build'
+                if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+                    commandLine 'cmd', '/c', gradlewRelativePath, 'clean', 'build'
+                } else {
+                    commandLine gradlewRelativePath, 'clean', 'build'
+                }
                 standardOutput = stdout
             }
         }
