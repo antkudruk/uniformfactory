@@ -21,6 +21,7 @@ import com.github.antkudruk.uniformfactory.base.MethodDescriptor;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodlist.descriptors.MethodListDescriptor;
 import com.github.antkudruk.uniformfactory.methodmap.descriptors.MethodMapDescriptor;
+import com.github.antkudruk.uniformfactory.setter.descriptors.SetterDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.Constants;
 import com.github.antkudruk.uniformfactory.singleton.descriptors.MethodSingletonDescriptor;
 import net.bytebuddy.ByteBuddy;
@@ -200,6 +201,11 @@ public class ClassFactory<W> {
             return new MethodListBuilder<>(wrapperMethod, resultClass);
         }
 
+        public <R> SetterBuilder<R> addSetter(
+                Method wrapperMethod, Class<R> resultClass) {
+            return new SetterBuilder<>(wrapperMethod, resultClass);
+        }
+
         public class MethodSingletonBuilder<R>
                 extends MethodSingletonDescriptor.IntermediateShortcutBuilder<R, MethodSingletonBuilder<R>> {
 
@@ -230,6 +236,18 @@ public class ClassFactory<W> {
                 extends MethodListDescriptor.IntermediateShortcutBuilder<R, MethodListBuilder<R>> {
 
             MethodListBuilder(Method wrapperMethod, Class<R> methodResultType) {
+                super(wrapperMethod, methodResultType);
+            }
+
+            public ShortcutBuilder<W> endMethodDescription() {
+                ShortcutBuilder.this.addMethodDescriptor(this.build());
+                return ShortcutBuilder.this;
+            }
+        }
+
+        public class SetterBuilder<R> extends SetterDescriptor.IntermediateShortcutBuilder<R, SetterBuilder<R>> {
+
+            SetterBuilder(Method wrapperMethod, Class<R> methodResultType) {
                 super(wrapperMethod, methodResultType);
             }
 

@@ -1,3 +1,19 @@
+/*
+    Copyright 2020 - 2021 Anton Kudruk
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
+
 package com.github.antkudruk.uniformfactory.base.bytecode;
 
 import com.github.antkudruk.uniformfactory.common.TypeDescriptionShortcuts;
@@ -30,16 +46,16 @@ public class SetFieldImplementation implements Implementation {
 
     private final String originFieldName;
     private final FieldDescription valueField;
-    private final Function resultTranslator;
+    private final Function parameterTranslator;
 
     public SetFieldImplementation (
             String originFieldName,
             FieldDescription valueField,
-            Function resultTranslator) {
+            Function parameterTranslator) {
 
         this.originFieldName = originFieldName;
         this.valueField = valueField;
-        this.resultTranslator = resultTranslator;
+        this.parameterTranslator = parameterTranslator;
     }
 
     @Override
@@ -62,7 +78,7 @@ public class SetFieldImplementation implements Implementation {
                         Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_VOLATILE | Opcodes.ACC_SYNTHETIC,
                         new TypeDescription.ForLoadedType(Function.class).asGenericType()))
 
-                .withInitializer(new ForStaticField(RESULT_TRANSLATOR_FIELD_NAME, resultTranslator));
+                .withInitializer(new ForStaticField(RESULT_TRANSLATOR_FIELD_NAME, parameterTranslator));
     }
 
     public static class Appender implements ByteCodeAppender {
