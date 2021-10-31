@@ -235,8 +235,10 @@ public class MethodSingletonDescriptorTest {
         MethodSingletonDescriptor methodSingletonDescriptor
                 = new TestBuilder(partialMapper, resultMapper, memberSelector).build();
 
+        // when
         Enhancer enhancer = methodSingletonDescriptor.getEnhancer(originClass);
 
+        // then
         assertEquals(expectedEnhancer, enhancer);
         PowerMockito
                 .verifyNew(SingletonMethodToFieldEnhancer.class)

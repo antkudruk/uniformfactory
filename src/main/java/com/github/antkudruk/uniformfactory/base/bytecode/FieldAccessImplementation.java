@@ -144,15 +144,16 @@ public class FieldAccessImplementation implements Implementation {
         }
 
         /**
+         * <pre>
          * {@code
-         * <p>
-         * Object invoke () {
-         * valueField.setAccessible(true);
-         * result = valueField.get(this.origin);
-         * valueField.setAccessible(false);
-         * return result;
+         *     Object invoke () {
+         *         valueField.setAccessible(true);
+         *         result = valueField.get(this.origin);
+         *         valueField.setAccessible(false);
+         *         return result;
+         *     }
          * }
-         * }
+         * </pre>
          *
          * @return Stack manipulation to access private field.
          */

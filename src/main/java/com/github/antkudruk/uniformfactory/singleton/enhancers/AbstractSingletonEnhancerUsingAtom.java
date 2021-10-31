@@ -37,7 +37,7 @@ public abstract class AbstractSingletonEnhancerUsingAtom implements Enhancer {
     private final DynamicType.Unloaded atomClassUnloaded;
     private final TypeDescription atomClass;
 
-    AbstractSingletonEnhancerUsingAtom(
+    public AbstractSingletonEnhancerUsingAtom(
             String fieldAccessorFieldName,
             TypeDescription originClass,
             Method wrapperMethod,
