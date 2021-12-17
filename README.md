@@ -144,7 +144,7 @@ Here is an example for Gradle:
 
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.1.4'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.1.3~~~~'
 }
 ```
 
@@ -154,7 +154,7 @@ and for Maven:
 <dependency>
     <groupId>com.github.antkudruk</groupId>
     <artifactId>uniform-factory</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.3</version>
 </dependency>
 ```
 
