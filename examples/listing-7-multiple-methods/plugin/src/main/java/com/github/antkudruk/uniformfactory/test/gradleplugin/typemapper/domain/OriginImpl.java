@@ -4,6 +4,7 @@ import com.github.antkudruk.uniformfactory.test.gradleplugin.typemapper.FirstMet
 import com.github.antkudruk.uniformfactory.test.gradleplugin.typemapper.Marker;
 import com.github.antkudruk.uniformfactory.test.gradleplugin.typemapper.SecondMethodMarker;
 
+// TODO: Move outside
 @Marker
 public class OriginImpl {
     @FirstMethodMarker

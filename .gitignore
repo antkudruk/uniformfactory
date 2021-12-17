@@ -7,4 +7,5 @@ examples/**/.idea/
 examples/**/build/
 examples/**/out/
 **/*.iml
-
+build
+.gradle
