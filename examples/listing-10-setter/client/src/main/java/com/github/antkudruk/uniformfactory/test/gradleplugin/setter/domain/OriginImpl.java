@@ -1,6 +1,6 @@
-package com.github.antkudruk.uniformfactory.test.gradleplugin.stateful.domain;
+package com.github.antkudruk.uniformfactory.test.gradleplugin.setter.domain;
 
-import com.github.antkudruk.uniformfactory.test.gradleplugin.stateful.Marker;
+import com.github.antkudruk.uniformfactory.test.gradleplugin.setter.Marker;
 
 @Marker
 public class OriginImpl {

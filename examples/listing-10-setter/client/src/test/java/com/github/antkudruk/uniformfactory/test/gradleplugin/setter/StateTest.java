@@ -1,6 +1,6 @@
-package com.github.antkudruk.uniformfactory.test.gradleplugin.stateful;
+package com.github.antkudruk.uniformfactory.test.gradleplugin.setter;
 
-import com.github.antkudruk.uniformfactory.test.gradleplugin.stateful.domain.OriginImpl;
+import com.github.antkudruk.uniformfactory.test.gradleplugin.setter.domain.OriginImpl;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
