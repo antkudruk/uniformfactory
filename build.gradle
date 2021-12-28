@@ -1,11 +1,11 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'signing'
+    // TODO: Uncomment: id 'signing'
 }
 
 // The current version
-def libraryVersion='0.1.3'
+def libraryVersion='0.1.4'
 
 group = 'com.github.antkudruk'
 version = libraryVersion
@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.18'
+    implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.12.6'
 
     testImplementation 'junit:junit:4.12',
             'org.powermock:powermock-core:2.0.4',
@@ -79,9 +79,11 @@ publishing {
     }
 }
 
+/* TODO: Uncomment
 signing {
     sign publishing.publications.mavenJava
 }
+ */
 
 javadoc {
     if(JavaVersion.current().isJava9Compatible()) {
