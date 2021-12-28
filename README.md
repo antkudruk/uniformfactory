@@ -148,7 +148,7 @@ dependencies {
 }
 ```
 
-and for Maven:~~~~
+and for Maven:
 
 ```
 <dependency>
@@ -167,7 +167,7 @@ Here is an example for Gradle:
 ```
 plugins {
     id 'java'
-    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.11.18"
+    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.12.6"
 }
 
 byteBuddy {
@@ -183,7 +183,7 @@ and in Maven:
     <plugin>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy-maven-plugin</artifactId>
-        <version>1.11.18</version>
+        <version>1.12.6</version>
         <executions>
             <execution>
                 <goals>
