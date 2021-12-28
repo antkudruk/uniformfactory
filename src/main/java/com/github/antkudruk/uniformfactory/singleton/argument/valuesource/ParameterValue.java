@@ -33,6 +33,7 @@ import java.util.function.Function;
 /**
  * Provides parameter from the <b>wrapper</b> method to the <b>origin</b>
  * method.
+ *
  * @param <N> Wrapper parameter class.
  */
 public class ParameterValue<N> implements ValueSource {
@@ -58,8 +59,9 @@ public class ParameterValue<N> implements ValueSource {
     }
 
     @Override
-    public Optional<PartialDescriptor> getSource(int originIndex,
-                                                 TypeDescription originParameterType) {
+    public Optional<PartialDescriptor> getSource(
+            int originIndex,
+            TypeDescription originParameterType) {
 
         return mapper
                 .findSuitableTranslator(originParameterType)

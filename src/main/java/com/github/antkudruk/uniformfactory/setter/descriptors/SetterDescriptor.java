@@ -47,7 +47,7 @@ public class SetterDescriptor<A> implements MethodDescriptor {
     private final ParameterMappersCollection<A> parameterMapper;
     private final Method wrapperMethod;
 
-    public SetterDescriptor(BuilderInterface builder) {
+    public SetterDescriptor(BuilderInterface<A> builder) {
         this.memberSelector = builder.getMemberSelector();
         this.wrapperMethod = builder.getWrapperMethod();
         this.parameterMapper = builder.getParameterMapper();
@@ -80,26 +80,26 @@ public class SetterDescriptor<A> implements MethodDescriptor {
         }
     }
 
-    public interface BuilderInterface<R> {
+    public interface BuilderInterface<P> {
         MemberSelector getMemberSelector();
         Method getWrapperMethod();
-        ParameterMappersCollection getParameterMapper();
-        SetterDescriptor<R> build();
+        ParameterMappersCollection<P> getParameterMapper();
+        SetterDescriptor<P> build();
     }
 
     // TODO: Try Lombok to reduce that code nightmare
-    public static class Builder<R> implements BuilderInterface<R> {
+    public static class Builder<P> implements BuilderInterface<P> {
         private Method wrapperMethod;
-        private ParameterMappersCollection parameterMapper;
+        private ParameterMappersCollection<P> parameterMapper;
         private MemberSelector memberSelector;
 
-        public Builder(Method wrapperMethod, Class<R> wrapperParameterType) {
+        public Builder(Method wrapperMethod, Class<P> fieldWrapperType) {
             this.wrapperMethod = wrapperMethod;
-            this.parameterMapper = new ParameterMappersCollection<>(wrapperParameterType);
+            this.parameterMapper = new ParameterMappersCollection<>(fieldWrapperType);
         }
 
-        public SetterDescriptor build() {
-            return new SetterDescriptor(this);
+        public SetterDescriptor<P> build() {
+            return new SetterDescriptor<>(this);
         }
 
         @Override
@@ -107,12 +107,12 @@ public class SetterDescriptor<A> implements MethodDescriptor {
             return memberSelector;
         }
 
-        public Builder<R> setAnnotation(Class<? extends Annotation> annotation) {
+        public Builder<P> setAnnotation(Class<? extends Annotation> annotation) {
              memberSelector = new MemberSelectorByAnnotation(annotation);
              return this;
         }
 
-        public Builder<R> setMemberSelector(MemberSelector memberSelector) {
+        public Builder<P> setMemberSelector(MemberSelector memberSelector) {
             this.memberSelector = memberSelector;
             return this;
         }
@@ -122,14 +122,19 @@ public class SetterDescriptor<A> implements MethodDescriptor {
             return wrapperMethod;
         }
 
-        public Builder<R> setWrapperMethod(Method wrapperMethod) {
+        public Builder<P> setWrapperMethod(Method wrapperMethod) {
             this.wrapperMethod = wrapperMethod;
             return this;
         }
 
         @Override
-        public ParameterMappersCollection getParameterMapper() {
+        public ParameterMappersCollection<P> getParameterMapper() {
             return parameterMapper;
+        }
+
+        public Builder<P> setParameterMapper(ParameterMappersCollection<P> parameterMapper) {
+            this.parameterMapper = parameterMapper;
+            return this;
         }
     }
 
