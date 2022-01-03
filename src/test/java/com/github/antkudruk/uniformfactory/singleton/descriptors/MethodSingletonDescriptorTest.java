@@ -1,7 +1,7 @@
 package com.github.antkudruk.uniformfactory.singleton.descriptors;
 
 import com.github.antkudruk.uniformfactory.base.Enhancer;
-import com.github.antkudruk.uniformfactory.seletor.MemberSelector;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToFieldEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToMethodEnhancer;

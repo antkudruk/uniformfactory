@@ -18,8 +18,8 @@ package com.github.antkudruk.uniformfactory.base;
 
 import com.github.antkudruk.uniformfactory.base.exception.NoWrapperMethodException;
 import com.github.antkudruk.uniformfactory.base.exception.NoMarkerAnnotationException;
-import com.github.antkudruk.uniformfactory.seletor.MemberSelector;
-import com.github.antkudruk.uniformfactory.seletor.MemberSelectorByAnnotation;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelectorByAnnotation;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapper;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterUnion;

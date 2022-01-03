@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package com.github.antkudruk.uniformfactory.seletor;
+package com.github.antkudruk.uniformfactory.methodcollection.seletor;
 
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
@@ -23,11 +23,29 @@ import net.bytebuddy.description.type.TypeDescription;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Provides collections of methods and fields to generate a collection of
+ * functional objects to fork with class members the common way.
+ */
 public interface MemberSelector {
+    /**
+     * Provides a list of methods to work with. Basically, it's methods
+     * annotated with a specified annotation.
+     *
+     * @param type
+     * @return
+     */
     default List<MethodDescription> getMethods(TypeDescription type) {
         return Collections.emptyList();
     }
 
+    /**
+     * Provides a list of fields to work with. Basically, it's fields
+     * annotated with a specified annotation.
+     *
+     * @param type
+     * @return
+     */
     default List<FieldDescription> getFields(TypeDescription type) {
         return Collections.emptyList();
     }

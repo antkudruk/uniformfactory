@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package com.github.antkudruk.uniformfactory.seletor;
+package com.github.antkudruk.uniformfactory.methodcollection.seletor;
 
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
