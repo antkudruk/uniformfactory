@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - 2022 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -94,7 +94,8 @@ public class MethodListDescriptor<R> extends AbstractMethodDescriptorImpl {
                     AccessFieldValue.INSTANCE.generateClass(
                             originType,
                             resultMapper.getTranslatorOrThrow(field.getType().asErasure()),
-                            field),
+                            field,
+                            wrapperMethod),
                     m -> m,
                     INTERMEDIATE_WRAPPER_FIELD_NAME
             );

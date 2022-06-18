@@ -26,6 +26,7 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.implementation.bytecode.Duplication;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
+import net.bytebuddy.implementation.bytecode.assign.TypeCasting;
 import net.bytebuddy.implementation.bytecode.constant.FieldConstant;
 import net.bytebuddy.implementation.bytecode.constant.IntegerConstant;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
@@ -136,6 +137,8 @@ public class FieldAccessImplementation implements Implementation {
                             "apply",
                             Object.class).orElseThrow(RuntimeException::new)
                     ),
+
+                    TypeCasting.to(instrumentedMethod.getReturnType().asErasure().asBoxed()),
 
                     MethodReturn.REFERENCE
             ).apply(methodVisitor, implementationContext)

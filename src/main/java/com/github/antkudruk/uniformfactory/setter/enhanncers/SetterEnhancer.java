@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - 2022 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.github.antkudruk.uniformfactory.setter.enhanncers;
 
 import com.github.antkudruk.uniformfactory.setter.atomicaccassor.SetterAtomGenerator;
 import com.github.antkudruk.uniformfactory.singleton.argument.exceptions.ParameterTranslatorNotFound;
-import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.ParameterMappersCollection;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.AbstractSingletonEnhancerUsingAtom;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -32,17 +32,15 @@ public class SetterEnhancer extends AbstractSingletonEnhancerUsingAtom {
             TypeDescription originClass,
             FieldDescription originField,
             Method wrapperMethod,
-            ParameterMappersCollection<?> parameterMapper) throws ParameterTranslatorNotFound {
+            ParameterBindersSource parameterMapper) throws ParameterTranslatorNotFound {
         super(
                 fieldAccessorFieldName,
                 originClass,
                 wrapperMethod,
                 SetterAtomGenerator.INSTANCE.generateClass(
                         originClass,
-                        parameterMapper
-                                .findSuitableTranslator(originField.getType().asErasure())
-                                .map(ParameterMappersCollection.ParameterMapperDescriptor::getTranslator)
-                                .orElseThrow(() -> new ParameterTranslatorNotFound(null)),
+                        wrapperMethod,
+                        parameterMapper,
                         originField
                 ));
     }

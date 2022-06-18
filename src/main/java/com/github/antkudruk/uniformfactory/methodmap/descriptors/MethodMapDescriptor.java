@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - 2022 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,22 +23,18 @@ import com.github.antkudruk.uniformfactory.methodmap.enhancers.MemberEntry;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.field.AccessFieldValue;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.method.AccessMethodInvocation;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
-import com.github.antkudruk.uniformfactory.exception.AmbiguousValueSourceException;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodmap.enhancers.MethodMapEnhancer;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.MethodCall;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.implementation.bytecode.constant.TextConstant;
-import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -115,7 +111,8 @@ public class MethodMapDescriptor<R> extends AbstractMethodDescriptorImpl {
                             AccessFieldValue.INSTANCE.generateClass(
                                     originType,
                                     resultMapper.getTranslatorOrThrow(field.getType().asErasure()),
-                                    field),
+                                    field,
+                                    wrapperMethod),
                             m -> m,
                             INTERMEDIATE_WRAPPER_FIELD_NAME
                     )

@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - 2022 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelect
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelectorByAnnotation;
 import com.github.antkudruk.uniformfactory.setter.enhanncers.DoNothingEnhancer;
 import com.github.antkudruk.uniformfactory.setter.enhanncers.SetterEnhancer;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapper;
-import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.ParameterMappersCollection;
-import com.github.antkudruk.uniformfactory.singleton.descriptors.ResultMapperCollection;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterUnion;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.type.TypeDescription;
 
@@ -44,8 +44,9 @@ public class SetterDescriptor<A> implements MethodDescriptor {
             = FIELD_NAME_PREFIX + fieldNameIndex.incrementAndGet();
 
     private final MemberSelector memberSelector;
-    private final ParameterMappersCollection<A> parameterMapper;
+    // private final ParameterMappersCollection<A> parameterMapper;
     private final Method wrapperMethod;
+    protected final ParameterBindersSource parameterMapper;
 
     public SetterDescriptor(BuilderInterface<A> builder) {
         this.memberSelector = builder.getMemberSelector();
@@ -64,8 +65,6 @@ public class SetterDescriptor<A> implements MethodDescriptor {
 
         List<FieldDescription> singletonOriginField = memberSelector.getFields(originType);
 
-
-        // FieldDescription field = ;
         if(singletonOriginField.size() > 0) {
             return new SetterEnhancer(
                     fieldAccessorFieldName, // singletonOriginField.get(0),
@@ -83,19 +82,18 @@ public class SetterDescriptor<A> implements MethodDescriptor {
     public interface BuilderInterface<P> {
         MemberSelector getMemberSelector();
         Method getWrapperMethod();
-        ParameterMappersCollection<P> getParameterMapper();
+        ParameterBindersSource getParameterMapper();
         SetterDescriptor<P> build();
     }
 
     // TODO: Try Lombok to reduce that code nightmare
     public static class Builder<P> implements BuilderInterface<P> {
         private Method wrapperMethod;
-        private ParameterMappersCollection<P> parameterMapper;
+        private final List<PartialMapper> parameterMappers = new ArrayList<>();
         private MemberSelector memberSelector;
 
         public Builder(Method wrapperMethod, Class<P> fieldWrapperType) {
             this.wrapperMethod = wrapperMethod;
-            this.parameterMapper = new ParameterMappersCollection<>(fieldWrapperType);
         }
 
         public SetterDescriptor<P> build() {
@@ -128,12 +126,13 @@ public class SetterDescriptor<A> implements MethodDescriptor {
         }
 
         @Override
-        public ParameterMappersCollection<P> getParameterMapper() {
-            return parameterMapper;
+        public ParameterBindersSource getParameterMapper() {
+            return new PartialParameterUnion(parameterMappers.toArray(new PartialMapper[0]));
         }
 
-        public Builder<P> setParameterMapper(ParameterMappersCollection<P> parameterMapper) {
-            this.parameterMapper = parameterMapper;
+        @SuppressWarnings("unchecked")
+        public Builder<P> addParameterTranslator(PartialMapper mapper) {
+            parameterMappers.add(mapper);
             return this;
         }
     }
@@ -144,8 +143,6 @@ public class SetterDescriptor<A> implements MethodDescriptor {
 
         private MemberSelector memberSelector;
         private final List<PartialMapper> parameterMappers = new ArrayList<>();
-        private ResultMapperCollection<R> resultMapper;
-
 
         public IntermediateShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
             super(wrapperMethod, methodResultType);
@@ -167,8 +164,8 @@ public class SetterDescriptor<A> implements MethodDescriptor {
         }
 
         @Override
-        public ParameterMappersCollection getParameterMapper() {
-            return null;
+        public ParameterBindersSource getParameterMapper() {
+            return new PartialParameterUnion(parameterMappers.toArray(new PartialMapper[0]));
         }
 
         @Override

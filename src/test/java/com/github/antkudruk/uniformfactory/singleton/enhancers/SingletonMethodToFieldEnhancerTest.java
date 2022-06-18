@@ -33,12 +33,16 @@ public class SingletonMethodToFieldEnhancerTest {
                 Wrapper.class.getDeclaredMethod("getValue"),
                 new ResultMapperCollection<>(String.class)
                         .addMapper(String.class, t -> t));
-
-        Class<? extends Wrapper> wrapperClass = EnhancerTestUtils.mimicWrapperClass(Wrapper.class, OriginImpl.class, enhancer);
+        // when
+        Class<? extends Wrapper> wrapperClass = EnhancerTestUtils.mimicWrapperClass(
+                Wrapper.class,
+                OriginImpl.class,
+                enhancer);
 
         OriginImpl origin = new OriginImpl();
         Wrapper wrapper = wrapperClass.getConstructor(OriginImpl.class).newInstance(origin);
 
+        // then
         assertEquals(FIELD_VALUE, wrapper.getValue());
     }
 }

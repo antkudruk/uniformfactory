@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - 2022 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,6 +22,14 @@ import net.bytebuddy.description.method.MethodDescription;
 import java.util.List;
 
 public interface ParameterBindersSource {
+
+    /**
+     * Forms parameter binders in the order corresponding to origin method order
+     *
+     * @param originMethod
+     * @return
+     * @throws ParameterTranslatorNotFound
+     */
     List<PartialDescriptor> getParameterBinders(MethodDescription originMethod)
             throws ParameterTranslatorNotFound;
 }

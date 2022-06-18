@@ -22,6 +22,10 @@ public class AccessFieldValueTest {
         public String field = ORIGIN_FIELD_VALUE;
     }
 
+    public interface Wrapper {
+        String methodReturningString();
+    }
+
     @Test
     @SuppressWarnings("unchecked")
     public void generateFieldAccessClassTest() throws ReflectiveOperationException {
@@ -29,11 +33,14 @@ public class AccessFieldValueTest {
         Mockito.when(resultTranslatorMock.apply(eq(ORIGIN_FIELD_VALUE)))
                 .thenReturn(WRAPPER_METHOD_RESULT);
 
+        // when
         Class atomClass = AccessFieldValue.INSTANCE.generateClass(
-                new TypeDescription.ForLoadedType(OriginImpl.class),
-                resultTranslatorMock,
-                new FieldDescription.ForLoadedField(
-                        OriginImpl.class.getField("field")))
+                    new TypeDescription.ForLoadedType(OriginImpl.class),
+                    resultTranslatorMock,
+                    new FieldDescription.ForLoadedField(
+                            OriginImpl.class.getField("field")),
+                    Wrapper.class.getDeclaredMethod("methodReturningString")
+                )
                 .load(getClass().getClassLoader())
                 .getLoaded();
 
@@ -44,6 +51,7 @@ public class AccessFieldValueTest {
 
         Object result = method.invoke(atom);
 
+        // then
         Mockito.verify(resultTranslatorMock, times(1))
                 .apply(ORIGIN_FIELD_VALUE);
 

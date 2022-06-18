@@ -37,37 +37,37 @@ public class PureSetterImplementationTest {
     }
 
     @Test
-    public void givenPublicStringField() throws Exception {
-        givenPublicIntField("publicStringField", String.class, "value");
+    public void givenPublicStringField_whenSet_applyParameter() throws Exception {
+        givenField_whenSet_applyParameter("publicStringField", String.class, "value");
     }
 
     @Test
-    public void givenPrivateStringField() throws Exception {
-        givenPublicIntField("privateStringField", String.class, "value");
+    public void givenPrivateStringField_whenSet_applyParameter() throws Exception {
+        givenField_whenSet_applyParameter("privateStringField", String.class, "value");
     }
 
     @Test
-    public void givenPublicIntegerField() throws Exception {
-        givenPublicIntField("publicIntegerValue", Integer.class, 13);
+    public void givenPublicIntegerField_whenSet_applyParameter() throws Exception {
+        givenField_whenSet_applyParameter("publicIntegerValue", Integer.class, 13);
     }
 
     @Test
-    public void givenPrivateIntegerField() throws Exception {
-        givenPublicIntField("privateIntegerValue", Integer.class, 13);
+    public void givenPrivateIntegerField_whenSet_applyParameter() throws Exception {
+        givenField_whenSet_applyParameter("privateIntegerValue", Integer.class, 13);
     }
 
     @Test
-    public void givenPublicIntField() throws Exception {
-        givenPublicIntField("publicIntValue", Integer.class, 13);
+    public void givenPublicIntField_whenSet_applyParameter() throws Exception {
+        givenField_whenSet_applyParameter("publicIntValue", Integer.class, 13);
     }
 
     @Test
-    public void givenPrivateIntField() throws Exception {
-        givenPublicIntField("privateIntValue", Integer.class, 13);
+    public void givenPrivateIntField_whenSet_applyParameter() throws Exception {
+        givenField_whenSet_applyParameter("privateIntValue", Integer.class, 13);
     }
 
 
-    private void givenPublicIntField(String fieldName, Class<?> argumentType, Object value) throws Exception {
+    private void givenField_whenSet_applyParameter(String fieldName, Class<?> argumentType, Object value) throws Exception {
         // Given
         FieldDescription.InDefinedShape valueField = new TypeDescription.ForLoadedType(OriginImpl.class)
                 .getDeclaredFields()
