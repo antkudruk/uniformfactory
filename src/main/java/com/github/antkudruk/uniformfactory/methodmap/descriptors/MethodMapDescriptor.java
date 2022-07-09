@@ -172,8 +172,9 @@ public class MethodMapDescriptor<F, R> extends AbstractMethodDescriptorImpl<R> {
             return fieldKeyGetter;
         }
 
-        public void setElementFactory(ElementFactory<F> elementFactory) {
+        public Builder<F, R> setElementFactory(ElementFactory<F> elementFactory) {
             this.elementFactory = elementFactory;
+            return this;
         }
 
         @Override

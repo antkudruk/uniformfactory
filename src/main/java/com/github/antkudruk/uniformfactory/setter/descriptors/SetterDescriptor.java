@@ -53,6 +53,9 @@ public class SetterDescriptor<A> implements MethodDescriptor {
         this.wrapperMethod = builder.getWrapperMethod();
         this.parameterMapper = builder.getParameterMapper();
 
+        assert  this.memberSelector != null;
+        assert  this.wrapperMethod != null;
+        assert  this.parameterMapper != null;
     }
 
     @Override
@@ -156,11 +159,6 @@ public class SetterDescriptor<A> implements MethodDescriptor {
         public T setMemberSelector(MemberSelector memberSelector) {
             this.memberSelector = memberSelector;
             return (T)this;
-        }
-
-        @Override
-        public Method getWrapperMethod() {
-            return null;
         }
 
         @Override

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 // Marks classes enhanced by Wrapper
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface Marker {
-
+@Target({ElementType.FIELD, ElementType.METHOD})
+public @interface Css {
+    String value();
 }

@@ -4,6 +4,7 @@ import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.SpecifiedFieldSelector;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapper;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -11,11 +12,11 @@ import net.bytebuddy.description.type.TypeDescription;
 public class SetterElementFactory<F, R> implements ElementFactory<F> {
 
     private final Class<F> elementType;
-    private final ParameterBindersSource parameterMapper;
+    private final PartialMapper parameterMapper;
 
     public SetterElementFactory(
             Class<F> elementType,
-            ParameterBindersSource parameterMapper) {
+            PartialMapper parameterMapper) {
 
         this.elementType = elementType;
         this.parameterMapper = parameterMapper;

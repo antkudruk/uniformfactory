@@ -23,6 +23,7 @@ public class SetterTest {
 
     @Test
     public void testIntegerField() throws ReflectiveOperationException {
+        // given
         ClassFactoryGeneratorImpl classFactoryGenerator = new ClassFactoryGeneratorImpl();
 
         Origin origin = new Origin();
@@ -32,14 +33,17 @@ public class SetterTest {
 
         Adapter adapter = classFactory.apply(origin);
 
+        // when
         adapter.setValue("10");
 
+        // then
         int value = Whitebox.getInternalState(origin, "value");
         assertEquals(10, value);
     }
 
     @Test
     public void testPrimitiveField() throws ReflectiveOperationException {
+        // given
         ClassFactoryGeneratorImpl classFactoryGenerator = new ClassFactoryGeneratorImpl();
 
         OriginWithPrimitive origin = new OriginWithPrimitive();
@@ -49,8 +53,10 @@ public class SetterTest {
 
         Adapter adapter = classFactory.apply(origin);
 
+        // when
         adapter.setValue("10");
 
+        // then
         int value = Whitebox.getInternalState(origin, "value");
         assertEquals(10, value);
     }

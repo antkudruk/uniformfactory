@@ -90,7 +90,7 @@ javadoc {
         options.addBooleanOption('html5', true)
     }
 }
-
+/*
 task testExamples {
     doLast {
         def stdout = new ByteArrayOutputStream()
@@ -123,5 +123,5 @@ task testExamples {
     }
     dependsOn(publishToMavenLocal)
 }
-
+*/
 
