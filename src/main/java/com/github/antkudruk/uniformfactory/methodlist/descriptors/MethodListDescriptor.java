@@ -95,7 +95,7 @@ public class MethodListDescriptor<R> extends AbstractMethodDescriptorImpl {
                             originType,
                             resultMapper.getTranslatorOrThrow(field.getType().asErasure()),
                             field,
-                            wrapperMethod),
+                            functionalClassMethod),
                     m -> m,
                     INTERMEDIATE_WRAPPER_FIELD_NAME
             );
