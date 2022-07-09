@@ -20,6 +20,7 @@ import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToConstantEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToFieldEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToMethodEnhancer;
@@ -36,6 +37,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Method Singleton maps a method of wrapper class to a method or field in
  * wrapper class.
  *
+ * @param <R> Return value type
  */
 public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
 
@@ -190,6 +192,12 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
             this.hasDefaultValue = true;
             this.defaultValue = defaultValue;
             return (T) this;
+        }
+
+        // TODO: Rempve this method, too
+        public T setMemberSelector(MemberSelector memberSelector) {
+            super.setMemberSelector(memberSelector);
+            return  (T) this;
         }
     }
 

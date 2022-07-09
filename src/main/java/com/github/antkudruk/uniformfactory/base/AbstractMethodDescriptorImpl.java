@@ -29,8 +29,7 @@ import com.github.antkudruk.uniformfactory.singleton.descriptors.ResultMapperCol
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import java.util.function.Function;
 
 public abstract class AbstractMethodDescriptorImpl<R> implements MethodDescriptor {
@@ -56,6 +55,10 @@ public abstract class AbstractMethodDescriptorImpl<R> implements MethodDescripto
     @Override
     public Method getWrapperMethod() {
         return wrapperMethod;
+    }
+
+    public ParameterBindersSource getParameterMapper() {
+        return parameterMapper;
     }
 
     private void validate() {
@@ -84,7 +87,7 @@ public abstract class AbstractMethodDescriptorImpl<R> implements MethodDescripto
 
         private MemberSelector memberSelector;
         protected final Method wrapperMethod;
-        private final List<PartialMapper> parameterMappers = new ArrayList<>();
+        private ParameterBindersSource partialParameterUnion = new PartialParameterUnion(Collections.emptyList());
         private ResultMapperCollection<R> resultMapper;
 
         public Builder(Method wrapperMethod, Class<R> methodResultType) {
@@ -121,9 +124,14 @@ public abstract class AbstractMethodDescriptorImpl<R> implements MethodDescripto
             return memberSelector;
         }
 
+        public T setParameterMapper(ParameterBindersSource partialParameterUnion) {
+            this.partialParameterUnion = partialParameterUnion;
+            return (T) this;
+        }
+
         @SuppressWarnings("unchecked")
         public T addParameterTranslator(PartialMapper mapper) {
-            parameterMappers.add(mapper);
+            partialParameterUnion = partialParameterUnion.add(mapper);
             return (T) this;
         }
 
@@ -139,7 +147,7 @@ public abstract class AbstractMethodDescriptorImpl<R> implements MethodDescripto
 
         @Override
         public ParameterBindersSource getParameterMapper() {
-            return new PartialParameterUnion(parameterMappers.toArray(new PartialMapper[0]));
+            return this.partialParameterUnion;
         }
 
         public abstract AbstractMethodDescriptorImpl build();

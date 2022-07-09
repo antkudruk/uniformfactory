@@ -32,4 +32,5 @@ public interface ParameterBindersSource {
      */
     List<PartialDescriptor> getParameterBinders(MethodDescription originMethod)
             throws ParameterTranslatorNotFound;
+    ParameterBindersSource add(PartialMapper mapper);
 }

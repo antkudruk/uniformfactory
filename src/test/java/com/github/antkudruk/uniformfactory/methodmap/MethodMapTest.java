@@ -79,9 +79,11 @@ public class MethodMapTest {
     public void test() throws ReflectiveOperationException, ClassGeneratorException {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
-                        new MethodMapDescriptor.ShortcutBuilder<>(Wrapper.class.getMethod("getFunctionsList"), String.class)
+                        new MethodMapDescriptor.ShortcutBuilder<>(
+                                Fun.class,
+                                Wrapper.class.getMethod("getFunctionsList"),
+                                String.class)
 
-                                .setFunctionalInterface(Fun.class)
                                 .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
 
                                 .parameterSource(String.class, 0)
@@ -120,9 +122,9 @@ public class MethodMapTest {
     public void test1() throws ReflectiveOperationException, ClassGeneratorException {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(new MethodMapDescriptor.ShortcutBuilder<>(
+                        Fun.class,
                         Wrapper.class.getMethod("getFunctionsList"), String.class)
 
-                        .setFunctionalInterface(Fun.class)
                         .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
 
                         .constantSource("Value")
@@ -159,11 +161,10 @@ public class MethodMapTest {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
                         new MethodMapDescriptor.Builder<>(
-
+                                Fun.class,
                                 Wrapper.class.getMethod("getFunctionsList"),
                                 String.class)
                                 .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
-                                .setFunctionalInterface(Fun.class)
                                 .addParameterTranslator(new PartialMapperImpl(
                                         new AnnotationParameterFilter<>(Name.class),
                                         new ParameterValue<>(String.class, 0)
@@ -200,9 +201,12 @@ public class MethodMapTest {
 
     @Test(expected = WrongTypeException.class)
     public void inappropriateMethodReturnType() throws ReflectiveOperationException {
-        new MethodMapDescriptor.Builder<>(WrapperOfList.class.getMethod("getFunctionsList"), String.class)
+        new MethodMapDescriptor.Builder<>(
+                Fun.class,
+                WrapperOfList.class.getMethod("getFunctionsList"),
+                String.class
+        )
                 .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
-                .setFunctionalInterface(Fun.class)
                 .build();
     }
 }

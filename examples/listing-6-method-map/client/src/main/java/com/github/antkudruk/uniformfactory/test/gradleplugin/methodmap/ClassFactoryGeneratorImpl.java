@@ -8,9 +8,8 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<PointWrap
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         super(new ClassFactory.ShortcutBuilder<>(PointWrapper.class)
 
-                .addMethodMap(PointWrapper.class.getMethod("getCoords"), long.class)
+                .addMethodMap(PointWrapper.class.getMethod("getCoords"), Coordinate.class, long.class)
                 .setMarkerAnnotation(CoordinateMarker.class, CoordinateMarker::value)
-                .setFunctionalInterface(Coordinate.class)
                 .parameterSource(Long.class, 0)
 
                 .applyTo(new AnyParameterFilter())

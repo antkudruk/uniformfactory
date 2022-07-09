@@ -28,10 +28,18 @@ import java.util.stream.IntStream;
 
 public class PartialParameterUnion implements ParameterBindersSource {
 
-    private final PartialMapper[] list;
+    private final List<PartialMapper> list;
 
-    public PartialParameterUnion(PartialMapper... list) {
+    public PartialParameterUnion(List<PartialMapper> list) {
         this.list = list;
+    }
+
+    @Override
+    public PartialParameterUnion add(PartialMapper mapper) {
+        List<PartialMapper> newList = new ArrayList<>(list.size() + 1);
+        newList.addAll(list);
+        newList.add(mapper);
+        return new PartialParameterUnion(newList);
     }
 
     /**
@@ -90,7 +98,7 @@ public class PartialParameterUnion implements ParameterBindersSource {
         }
 
         public PartialParameterUnion build() {
-            return new PartialParameterUnion(mappers.toArray(new PartialMapper[0]));
+            return new PartialParameterUnion(mappers);
         }
     }
 }

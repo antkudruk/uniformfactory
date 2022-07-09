@@ -41,7 +41,7 @@ public class PartialParameterUnionTest {
         FakePartialMapper first = new FakePartialMapper(Arrays.asList(
                 firstDescriptor, secondDescriptor, thirdDescriptor));
 
-        PartialParameterUnion partialParameterUnion = new PartialParameterUnion(first);
+        PartialParameterUnion partialParameterUnion = new PartialParameterUnion(Collections.singletonList(first));
 
         List<PartialDescriptor> binders = partialParameterUnion.getParameterBinders(method);
 
@@ -69,7 +69,7 @@ public class PartialParameterUnionTest {
         FakePartialMapper second = new FakePartialMapper(Arrays.asList(
                 secondDescriptor0, secondDescriptor1));
 
-        PartialParameterUnion partialParameterUnion = new PartialParameterUnion(first, second);
+        PartialParameterUnion partialParameterUnion = new PartialParameterUnion(Arrays.asList(first, second));
 
         List<PartialDescriptor> binders = partialParameterUnion.getParameterBinders(method);
 
@@ -91,7 +91,7 @@ public class PartialParameterUnionTest {
         FakePartialMapper second = new FakePartialMapper(Collections.singletonList(
                 new PartialParameterDescriptor<>(2, 1, t -> t)));
 
-        PartialParameterUnion partialParameterUnion = new PartialParameterUnion(first, second);
+        PartialParameterUnion partialParameterUnion = new PartialParameterUnion(Arrays.asList(first, second));
 
         partialParameterUnion.getParameterBinders(method);
     }

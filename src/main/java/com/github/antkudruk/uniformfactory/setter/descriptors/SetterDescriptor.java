@@ -127,7 +127,7 @@ public class SetterDescriptor<A> implements MethodDescriptor {
 
         @Override
         public ParameterBindersSource getParameterMapper() {
-            return new PartialParameterUnion(parameterMappers.toArray(new PartialMapper[0]));
+            return new PartialParameterUnion(parameterMappers);
         }
 
         @SuppressWarnings("unchecked")
@@ -165,7 +165,7 @@ public class SetterDescriptor<A> implements MethodDescriptor {
 
         @Override
         public ParameterBindersSource getParameterMapper() {
-            return new PartialParameterUnion(parameterMappers.toArray(new PartialMapper[0]));
+            return new PartialParameterUnion(parameterMappers);
         }
 
         @Override

@@ -20,29 +20,27 @@ import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
-import com.github.antkudruk.uniformfactory.methodcollection.ElementGenerator;
+import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.GetterElementFactory;
 import com.github.antkudruk.uniformfactory.methodlist.enhancers.MethodListEnhancer;
-import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.field.AccessFieldValue;
-import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.method.AccessMethodInvocation;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.implementation.MethodCall;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class MethodListDescriptor<R> extends AbstractMethodDescriptorImpl {
+public class MethodListDescriptor<F, R> extends AbstractMethodDescriptorImpl {
 
-    private static final String INTERMEDIATE_WRAPPER_FIELD_NAME = "intermediateWrapper";
-
-    private final Class functionalInterface;
+    private final Class<F> functionalInterface;
     private final Method wrapperMethod;
     private final Method functionalClassMethod;
+    private final ElementFactory<F> elementFactory;
 
-    private MethodListDescriptor(BuilderInterface<R> builder) {
+    private MethodListDescriptor(BuilderInterface<F, R> builder) {
         super(builder);
 
         wrapperMethod = builder.getWrapperMethod();
@@ -58,6 +56,7 @@ public class MethodListDescriptor<R> extends AbstractMethodDescriptorImpl {
         }
 
         functionalClassMethod = functionalInterface.getDeclaredMethods()[0];
+        this.elementFactory = builder.getElementFactory();
         validate();
     }
 
@@ -68,39 +67,17 @@ public class MethodListDescriptor<R> extends AbstractMethodDescriptorImpl {
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
         List<DynamicType.Unloaded> functionalMapperClasses = new ArrayList<>();
         for (MethodDescription originMethod : memberSelector.getMethods(originType)) {
-            DynamicType.Unloaded functionalWrapperClass
-                    = ElementGenerator.INSTANCE.generate(
-                    originType,
-                    new TypeDescription.ForLoadedType(functionalInterface),
-                    AccessMethodInvocation.INSTANCE.generateClass(
-                            originType,
-                            resultMapper.getTranslatorOrThrow(originMethod.getReturnType().asErasure()),
-                            originMethod,
-                            functionalClassMethod,
-                            parameterMapper.getParameterBinders(originMethod)
-                    ),
-                    MethodCall::withAllArguments,
-                    INTERMEDIATE_WRAPPER_FIELD_NAME
+            functionalMapperClasses.add(
+                    elementFactory.getMethodElement(originType, originMethod).build(originType)
             );
-
-            functionalMapperClasses.add(functionalWrapperClass);
         }
 
         for (FieldDescription field : memberSelector.getFields(originType)) {
 
-            DynamicType.Unloaded functionalWrapperClass = ElementGenerator.INSTANCE.generate(
-                    originType,
-                    new TypeDescription.ForLoadedType(functionalInterface),
-                    AccessFieldValue.INSTANCE.generateClass(
-                            originType,
-                            resultMapper.getTranslatorOrThrow(field.getType().asErasure()),
-                            field,
-                            functionalClassMethod),
-                    m -> m,
-                    INTERMEDIATE_WRAPPER_FIELD_NAME
-            );
 
-            functionalMapperClasses.add(functionalWrapperClass);
+            functionalMapperClasses.add(
+                    elementFactory.getFieldElement(originType, field).build(originType)
+            );
         }
 
         return new MethodListEnhancer(
@@ -121,46 +98,61 @@ public class MethodListDescriptor<R> extends AbstractMethodDescriptorImpl {
         }
     }
 
-    public interface BuilderInterface<R>
+    public interface BuilderInterface<F, R>
             extends AbstractMethodDescriptorImpl.BuilderInterface<R> {
 
-        Class getFunctionalInterface();
+        Class<F> getFunctionalInterface();
+
+        /**
+         * @return Factory that returns class factory for each method or field.
+         */
+        ElementFactory<F> getElementFactory();
     }
 
-    public static class Builder<R>
-            extends AbstractMethodDescriptorImpl.Builder<R, Builder<R>>
-            implements BuilderInterface<R> {
+    public static class Builder<F, R>
+            extends AbstractMethodDescriptorImpl.Builder<R, Builder<F, R>>
+            implements BuilderInterface<F, R> {
 
-        private Class functionalInterface;
+        private final Class<F> functionalInterface;
+        private ElementFactory<F> elementFactory;
 
-        public Builder(Method wrapperMethod, Class<R> methodResultType) {
+        public Builder(Class<F> functionalInterface, Method wrapperMethod, Class<R> methodResultType) {
             super(wrapperMethod, methodResultType);
-        }
-
-        public Builder<R> setFunctionalInterface(Class functionalInterface) {
             this.functionalInterface = functionalInterface;
-            return this;
         }
 
         @Override
-        public Class getFunctionalInterface() {
+        public Class<F> getFunctionalInterface() {
             return functionalInterface;
         }
 
         @Override
-        public MethodListDescriptor<R> build() {
+        public ElementFactory<F> getElementFactory() {
+            return Optional.ofNullable(elementFactory).orElse(
+                    new GetterElementFactory<>(
+                            getFunctionalInterface(),
+                            getResultMapper(),
+                            getParameterMapper()
+                    )
+            );
+        }
+
+        @Override
+        public MethodListDescriptor<F, R> build() {
             return new MethodListDescriptor<>(this);
         }
     }
 
-    public static abstract class IntermediateShortcutBuilder<R, T extends IntermediateShortcutBuilder<R, T>>
+    public static abstract class IntermediateShortcutBuilder<F, R, T extends IntermediateShortcutBuilder<F, R, T>>
             extends AbstractMethodDescriptorImpl.ShortcutBuilder<R, T>
-            implements BuilderInterface<R> {
+            implements BuilderInterface<F, R> {
 
-        private Class functionalInterface;
+        private Class<F> functionalInterface;
+        private ElementFactory<F> elementFactory;
 
-        public IntermediateShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
+        public IntermediateShortcutBuilder(Class<F> functionalInterface, Method wrapperMethod, Class<R> methodResultType) {
             super(wrapperMethod, methodResultType);
+            this.functionalInterface = functionalInterface;
         }
 
         @SuppressWarnings("unchecked")
@@ -175,16 +167,40 @@ public class MethodListDescriptor<R> extends AbstractMethodDescriptorImpl {
         }
 
         @Override
-        public MethodListDescriptor<R> build() {
+        public ElementFactory<F> getElementFactory() {
+            return Optional.ofNullable(elementFactory).orElse(
+                    new GetterElementFactory<>(
+                            getFunctionalInterface(),
+                            getResultMapper(),
+                            getParameterMapper()
+                    )
+            );
+        }
+
+        @Override
+        public MethodListDescriptor<F, R> build() {
             return new MethodListDescriptor<>(this);
         }
     }
 
-    public static final class ShortcutBuilder<R>
-            extends IntermediateShortcutBuilder<R, ShortcutBuilder<R>> {
+    public static final class ShortcutBuilder<F, R>
+            extends IntermediateShortcutBuilder<F, R, ShortcutBuilder<F, R>> {
 
-        public ShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
-            super(wrapperMethod, methodResultType);
+        public ShortcutBuilder(Class<F> functionalInterface, Method wrapperMethod, Class<R> methodResultType) {
+            super(functionalInterface, wrapperMethod, methodResultType);
         }
+
+        /*
+        @Override
+        public ElementFactory<F> getElementFactory() {
+            return Optional.ofNullable(elementFactory).orElse(
+                    new GetterElementFactory<>(
+                            getFunctionalInterface(),
+                            getResultMapper(),
+                            getParameterMapper()
+                    )
+            );
+        }
+        */
     }
 }

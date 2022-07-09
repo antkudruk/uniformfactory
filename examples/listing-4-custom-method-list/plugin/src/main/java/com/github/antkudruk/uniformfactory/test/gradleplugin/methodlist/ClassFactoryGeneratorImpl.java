@@ -18,6 +18,7 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
         this.classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
                 .addMethodList(
                         Wrapper.class.getMethod("getProcessors"),
+                        Processor.class,
                         boolean.class
                 )
                 .setMarkerAnnotation(Processor.Process.class)
