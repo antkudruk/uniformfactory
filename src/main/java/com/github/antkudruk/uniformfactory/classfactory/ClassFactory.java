@@ -19,16 +19,11 @@ package com.github.antkudruk.uniformfactory.classfactory;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.base.MethodDescriptor;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
-import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.GetterElementFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.methodlist.descriptors.MethodListDescriptor;
 import com.github.antkudruk.uniformfactory.methodmap.descriptors.MethodMapDescriptor;
 import com.github.antkudruk.uniformfactory.setter.descriptors.SetterDescriptor;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.Constants;
 import com.github.antkudruk.uniformfactory.singleton.descriptors.MethodSingletonDescriptor;
-import com.github.antkudruk.uniformfactory.singleton.descriptors.ResultMapperCollection;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
@@ -191,108 +186,44 @@ public class ClassFactory<W> {
             super(wrapperInterface);
         }
 
-        public <R> MethodSingletonBuilder<R> addMethodSingleton(
+        public <R> MethodSingletonDescriptor.ShortcutBuilder<W, R> addMethodSingleton(
                 Method wrapperMethod, Class<R> resultClass) {
-            return new MethodSingletonBuilder<>(wrapperMethod, resultClass);
+            return new MethodSingletonDescriptor.ShortcutBuilder<>(this, wrapperMethod, resultClass);
         }
 
-        public <F, R> MethodMapBuilder<F, R> addMethodMap(
+        /**
+         * Adds method descriptor to describe method map
+         *
+         * @param wrapperMethod Method to return the map
+         * @param functionalInterface Type of the map element
+         * @param <F> Type of the map element
+         * @return Builder to describe method map
+         */
+        public <F> MethodMapDescriptor.ShortcutBuilder<W, F> addMethodMap(
                 Method wrapperMethod,
-                Class<F> functionalInterface,
-                Class<R> resultClass) {
-            return new MethodMapBuilder<>(functionalInterface, wrapperMethod, resultClass);
+                Class<F> functionalInterface) {
+            return new MethodMapDescriptor.ShortcutBuilder<>(this, functionalInterface, wrapperMethod);
         }
 
-        public <F, R> MethodListBuilder<F, R> addMethodList(
-                Method wrapperMethod, Class<F> functionalInterface, Class<R> resultClass) {
-            return new MethodListBuilder<>(functionalInterface, wrapperMethod, resultClass);
+        /**
+         * Adds method descriptor to describe method list
+         *
+         * @param wrapperMethod Method to return the list
+         * @param functionalInterface Type of the list element
+         * @param <F> Type of the list element
+         * @return Builder to describe method list
+         */
+        public <F> MethodListDescriptor.ShortcutBuilder<W, F> addMethodList(
+                Method wrapperMethod, Class<F> functionalInterface) {
+            return new MethodListDescriptor.ShortcutBuilder<>(
+                    this,
+                    functionalInterface,
+                    wrapperMethod);
         }
 
-        public <R> SetterBuilder<R> addSetter(
-                Method wrapperMethod, Class<R> fieldClass) {
-            return new SetterBuilder<>(wrapperMethod, fieldClass);
-        }
-
-        public class MethodSingletonBuilder<R>
-                extends MethodSingletonDescriptor.IntermediateShortcutBuilder<R, MethodSingletonBuilder<R>> {
-
-            MethodSingletonBuilder(Method wrapperMethod, Class<R> methodResultType) {
-                super(wrapperMethod, methodResultType);
-            }
-
-            @Override
-            // TODO: Remove this method
-            public MethodSingletonBuilder<R> setMemberSelector(MemberSelector memberSelector) {
-                super.setMemberSelector(memberSelector);
-                return this;
-            }
-
-            @Override
-            // TODO: Remove this method
-            public MethodSingletonBuilder<R> setResultMapper(ResultMapperCollection<R> resultMapperCollection) {
-                super.setResultMapper(resultMapperCollection);
-                return this;
-            }
-
-            @Override
-            // TODO: Remove this method
-            public MethodSingletonBuilder<R> setParameterMapper(ParameterBindersSource partialParameterUnion) {
-                super.setParameterMapper(partialParameterUnion);
-                return this;
-            }
-
-
-            public ShortcutBuilder<W> endMethodDescription() {
-                ShortcutBuilder.this.addMethodDescriptor(this.build());
-                return ShortcutBuilder.this;
-            }
-        }
-
-        public class MethodMapBuilder<F, R>
-                extends MethodMapDescriptor.IntermediateShortcutBuilder<F, R, MethodMapBuilder<F, R>> {
-
-            MethodMapBuilder(Class<F> functionalInterface, Method wrapperMethod, Class<R> methodResultType) {
-                super(functionalInterface, wrapperMethod, methodResultType);
-            }
-
-            public ShortcutBuilder<W> endMethodDescription() {
-                ShortcutBuilder.this.addMethodDescriptor(this.build());
-                return ShortcutBuilder.this;
-            }
-        }
-
-        public class MethodListBuilder<F, R>
-                extends MethodListDescriptor.IntermediateShortcutBuilder<F, R, MethodListBuilder<F, R>> {
-
-            MethodListBuilder(Class<F> functionalInterface,  Method wrapperMethod, Class<R> methodResultType) {
-                super(functionalInterface, wrapperMethod, methodResultType);
-            }
-
-            public ShortcutBuilder<W> endMethodDescription() {
-                ShortcutBuilder.this.addMethodDescriptor(this.build());
-                return ShortcutBuilder.this;
-            }
-
-            @Override
-            public ElementFactory<F> getElementFactory() {
-                return new GetterElementFactory<>(
-                        getFunctionalInterface(),
-                        getResultMapper(),
-                        getParameterMapper()
-                );
-            }
-        }
-
-        public class SetterBuilder<R> extends SetterDescriptor.IntermediateShortcutBuilder<R, SetterBuilder<R>> {
-
-            SetterBuilder(Method wrapperMethod, Class<R> fieldType) {
-                super(wrapperMethod, fieldType);
-            }
-
-            public ShortcutBuilder<W> endMethodDescription() {
-                ShortcutBuilder.this.addMethodDescriptor(this.build());
-                return ShortcutBuilder.this;
-            }
+        public <R> SetterDescriptor.ShortcutBuilder<W, R> addSetter(
+                Method wrapperMethod) {
+            return new SetterDescriptor.ShortcutBuilder<>(this, wrapperMethod);
         }
     }
 }

@@ -19,4 +19,8 @@ public interface ElementFactory<F> {
     ClassFactory<F> getMethodElement(
             TypeDescription origin,
             MethodDescription methodDescription) throws ClassGeneratorException ;
+
+    interface BuilderInterface<F> {
+        ElementFactory<F> build();
+    }
 }

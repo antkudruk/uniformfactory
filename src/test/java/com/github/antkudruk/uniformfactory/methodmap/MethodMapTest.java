@@ -79,21 +79,21 @@ public class MethodMapTest {
     public void test() throws ReflectiveOperationException, ClassGeneratorException {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
-                        new MethodMapDescriptor.ShortcutBuilder<>(
-                                Fun.class,
-                                Wrapper.class.getMethod("getFunctionsList"),
-                                String.class)
+                        new MethodMapDescriptor.Builder<>(Fun.class,
+                                Wrapper.class.getMethod("getFunctionsList"))
 
                                 .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
 
-                                .parameterSource(String.class, 0)
-                                .applyToAnnotated(Name.class)
-                                .finishParameterDescription()
+                                .getterElementFactory(String.class)
+                                    .parameterSource(String.class, 0)
+                                    .applyToAnnotated(Name.class)
+                                    .finishParameterDescription()
 
-                                .parameterSource(Long.class, 1)
-                                .applyToAnnotated(Index.class)
-                                .addTranslator(Integer.class, Long::intValue)
-                                .finishParameterDescription()
+                                    .parameterSource(Long.class, 1)
+                                    .applyToAnnotated(Index.class)
+                                    .addTranslator(Integer.class, Long::intValue)
+                                    .finishParameterDescription()
+                                .finishElementFactory()
 
                                 .build()
                 )

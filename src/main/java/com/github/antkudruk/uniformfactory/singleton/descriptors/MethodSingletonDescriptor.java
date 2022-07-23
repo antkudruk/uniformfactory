@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - 2022 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,14 +16,17 @@
 
 package com.github.antkudruk.uniformfactory.singleton.descriptors;
 
+import com.github.antkudruk.uniformfactory.base.AbstractMethodWithMappersDescriptorImpl;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
-import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
+import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
+import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
-import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToConstantEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToFieldEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToMethodEnhancer;
+import lombok.experimental.Delegate;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -31,15 +34,15 @@ import net.bytebuddy.description.type.TypeDescription;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 /**
  * Describes method singleton.
  * Method Singleton maps a method of wrapper class to a method or field in
  * wrapper class.
  *
- * @param <R> Return value type
  */
-public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
+public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescriptorImpl {
 
     private static final String FIELD_NAME_PREFIX = "singletonMethod";
     private static final AtomicLong fieldNameIndex = new AtomicLong(0L);
@@ -47,13 +50,15 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
     private final String fieldAccessorFieldName
             = FIELD_NAME_PREFIX + fieldNameIndex.incrementAndGet();
 
-    private final boolean hasDefaultValue;
-    private final R defaultValue;
+    protected final ResultMapperCollection<R> resultMapper;
+    protected final boolean hasDefaultValue;
+    protected final R defaultValue;
 
     public MethodSingletonDescriptor(BuilderInterface<R> builder) {
         super(builder);
+        this.resultMapper = builder.resultMapper();
+        this.defaultValue = builder.defaultValue();
         this.hasDefaultValue = builder.hasDefaultValue();
-        this.defaultValue = builder.getDefaultValue();
         validate();
     }
 
@@ -109,103 +114,130 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodDescriptorImpl {
         }
     }
 
-    public interface BuilderInterface<R> extends AbstractMethodDescriptorImpl.BuilderInterface<R> {
+    public interface BuilderInterface<R> extends AbstractMethodWithMappersDescriptorImpl.BuilderInterface {
+        /**
+         *
+         * @return Mapper to map a value returning by the origin method to the wrapper one
+         */
+        ResultMapperCollection<R> resultMapper();
+
+        /**
+         *
+         * @return default value returning if the method is absent.
+         */
+        R defaultValue();
+
+        /**
+         * Indicates whether default value has been det up or not.
+         * @return
+         */
         boolean hasDefaultValue();
-
-        R getDefaultValue();
     }
 
-    public static class Builder<R>
-            extends AbstractMethodDescriptorImpl.Builder<R, MethodSingletonDescriptor.Builder<R>>
+    @SuppressWarnings("unchecked")
+    public static abstract class AbstractBuilder<R, T extends AbstractBuilder<R, T>>
+            extends AbstractMethodWithMappersDescriptorImpl.AbstractBuilder<T>
             implements BuilderInterface<R> {
 
+        private final Class<R> methodResultType;
         private boolean hasDefaultValue;
         private R defaultValue;
+        private ResultMapperCollection<R> resultMapper;
 
-        public Builder(Method wrapperMethod, Class<R> methodResultType) {
-            super(wrapperMethod, methodResultType);
+        public AbstractBuilder(Method wrapperMethod, Class<R> methodResultType) {
+            super(wrapperMethod);
+            this.methodResultType = methodResultType;
+            this.resultMapper = new ResultMapperCollection<>(methodResultType);
         }
 
+        /**
+         * {inheritDoc}
+         */
         @Override
-        public MethodSingletonDescriptor build() {
+        public MethodSingletonDescriptor<R> build() {
             return new MethodSingletonDescriptor<>(this);
         }
 
+        /**
+         * {inheritDoc}
+         */
         @Override
         public boolean hasDefaultValue() {
             return hasDefaultValue;
         }
 
+        /**
+         * {inheritDoc}
+         */
         @Override
-        public R getDefaultValue() {
+        public ResultMapperCollection<R> resultMapper() {
+            return resultMapper;
+        }
+
+        /**
+         * {inheritDoc}
+         */
+        @Override
+        public R defaultValue() {
             return defaultValue;
         }
 
-        public Builder<R> setDefaultValue(R defaultValue) {
-            this.hasDefaultValue = true;
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder<R> dropDefaultValue() {
-            this.hasDefaultValue = false;
-            this.defaultValue = null;
-            return this;
-        }
-    }
-
-    public static abstract class IntermediateShortcutBuilder<R, T extends IntermediateShortcutBuilder<R, T>>
-            extends AbstractMethodDescriptorImpl.ShortcutBuilder<R, T>
-            implements BuilderInterface<R> {
-
-        private boolean hasDefaultValue;
-        private R defaultValue;
-
-        public IntermediateShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
-            super(wrapperMethod, methodResultType);
-        }
-
-        @Override
-        public MethodSingletonDescriptor build() {
-            return new MethodSingletonDescriptor<>(this);
-        }
-
-        @Override
-        public boolean hasDefaultValue() {
-            return hasDefaultValue;
-        }
-
-        @SuppressWarnings("unchecked")
-        public T dropDefaultValue() {
-            this.hasDefaultValue = false;
-            this.defaultValue = null;
-            return (T) this;
-        }
-
-        @Override
-        public R getDefaultValue() {
-            return defaultValue;
-        }
-
-        @SuppressWarnings("unchecked")
         public T setDefaultValue(R defaultValue) {
             this.hasDefaultValue = true;
             this.defaultValue = defaultValue;
             return (T) this;
         }
 
-        // TODO: Rempve this method, too
-        public T setMemberSelector(MemberSelector memberSelector) {
-            super.setMemberSelector(memberSelector);
-            return  (T) this;
+        public T dropDefaultValue() {
+            this.hasDefaultValue = false;
+            this.defaultValue = null;
+            return (T) this;
+        }
+
+        public <O> T addResultTranslator(Class<O> originClass, Function<O, R> translator) {
+            resultMapper.addMapper(originClass, translator);
+            return (T) this;
+        }
+
+        public T setResultMapper(ResultMapperCollection<R> resultMapper) {
+            this.resultMapper = resultMapper.createChild();
+            return (T) this;
         }
     }
 
-    public static final class ShortcutBuilder<R>
-            extends IntermediateShortcutBuilder<R, ShortcutBuilder<R>> {
-
-        public ShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
+    /**
+     * Created an instance of Method Singleton Description
+     * @param <R> Result type of the method
+     */
+    public static class Builder<R> extends AbstractBuilder<R, Builder<R>> {
+        public Builder(Method wrapperMethod, Class<R> methodResultType) {
             super(wrapperMethod, methodResultType);
+        }
+
+        @Override
+        public MethodSingletonDescriptor<R> build() {
+            return new MethodSingletonDescriptor<>(this);
+        }
+    }
+
+    /**
+     * Method Singleton
+     *
+     * @param <W> Class of wrapper
+     * @param <R> Class of the method return value
+     */
+    public static class ShortcutBuilder<W, R>
+            extends AbstractBuilder<R, ShortcutBuilder<W, R>> {
+
+        @Delegate
+        private final ChildMethodDescriptionBuilderWrapper<W> classFactoryReference;
+
+        public ShortcutBuilder(
+                ClassFactory.ShortcutBuilder<W> wrapperClass,
+                Method wrapperMethod,
+                Class<R> methodResultType) {
+            super(wrapperMethod, methodResultType);
+            classFactoryReference = new ChildMethodDescriptionBuilderWrapper<>(wrapperClass, this);
         }
     }
 }

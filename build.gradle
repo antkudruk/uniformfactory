@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    // TODO: Uncomment: id 'signing'
+    id 'signing'
 }
 
 // The current version
@@ -29,6 +29,10 @@ dependencies {
             'org.powermock:powermock-core:2.0.4',
             'org.powermock:powermock-module-junit4:2.0.4',
             'org.powermock:powermock-api-mockito2:2.0.4'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
 publishing {
@@ -79,11 +83,9 @@ publishing {
     }
 }
 
-/* TODO: Uncomment
 signing {
     sign publishing.publications.mavenJava
 }
- */
 
 javadoc {
     if(JavaVersion.current().isJava9Compatible()) {

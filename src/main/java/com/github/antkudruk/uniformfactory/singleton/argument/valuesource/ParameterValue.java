@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package com.github.antkudruk.uniformfactory.singleton.argument.valuesource;
 
-import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
+import com.github.antkudruk.uniformfactory.base.AbstractMethodWithMappersDescriptorImpl;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.ParameterFilter;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnnotationParameterFilter;
@@ -78,7 +77,7 @@ public class ParameterValue<N> implements ValueSource {
      * @param <W> Wrapper parameter class (parameter source class)
      * @param <T> Parent wrapper type
      */
-    public static class ShortcutBuilder<W, T extends AbstractMethodDescriptorImpl.ShortcutBuilder> {
+    public static class ShortcutBuilder<W, T extends AbstractMethodWithMappersDescriptorImpl.AbstractBuilder<T>> {
 
         private final T parentBuilder;
         private final Class<W> wrapperParameterClass;
@@ -123,11 +122,13 @@ public class ParameterValue<N> implements ValueSource {
                 return this;
             }
 
+            /* TODO:
             public T finishParameterDescription() {
                 parentBuilder.addParameterTranslator(new PartialMapperImpl(filter,
                         new ParameterValue<>(parameterNumber, parameterMapper)));
                 return parentBuilder;
             }
+            */
         }
     }
 }

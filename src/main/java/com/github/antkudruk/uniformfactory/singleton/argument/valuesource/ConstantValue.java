@@ -17,6 +17,7 @@
 package com.github.antkudruk.uniformfactory.singleton.argument.valuesource;
 
 import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
+import com.github.antkudruk.uniformfactory.base.AbstractMethodWithMappersDescriptorImpl;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialConstantDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
@@ -50,7 +51,7 @@ public class ConstantValue<O> implements ValueSource {
      * @param <W> Wrapper parameter class (parameter source class)
      * @param <T> Parent wrapper type
      */
-    public static class ShortcutBuilder<W, T extends AbstractMethodDescriptorImpl.ShortcutBuilder> {
+    public static class ShortcutBuilder<W, T extends AbstractMethodWithMappersDescriptorImpl.AbstractBuilder<T>> {
         private final T parentBuilder;
         private final W wrapperParameterValue;
 
@@ -65,10 +66,12 @@ public class ConstantValue<O> implements ValueSource {
          * @return parent builder
          */
         public T applyToTyped(Class<?> parameterClass) {
+            /* TODO:
             parentBuilder.addParameterTranslator(new PartialMapperImpl(
                     new ParameterTypeFilter<>(parameterClass),
                     new ConstantValue<>(wrapperParameterValue)
             ));
+             */
             return parentBuilder;
         }
 
@@ -78,10 +81,12 @@ public class ConstantValue<O> implements ValueSource {
          * @return parent builder
          */
         public T applyToAnnotated(Class<? extends Annotation> annotation) {
+            /* TODO
             parentBuilder.addParameterTranslator(new PartialMapperImpl(
                     new AnnotationParameterFilter<>(annotation),
                     new ConstantValue<>(wrapperParameterValue)
             ));
+             */
             return parentBuilder;
         }
     }
