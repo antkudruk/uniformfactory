@@ -18,7 +18,8 @@ package com.github.antkudruk.uniformfactory.singleton.argument.valuesource;
 
 import com.github.antkudruk.uniformfactory.base.AbstractMethodWithMappersDescriptorImpl;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterDescriptor;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialParameterDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.ParameterFilter;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnnotationParameterFilter;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.ParameterTypeFilter;
@@ -77,7 +78,7 @@ public class ParameterValue<N> implements ValueSource {
      * @param <W> Wrapper parameter class (parameter source class)
      * @param <T> Parent wrapper type
      */
-    public static class ShortcutBuilder<W, T extends AbstractMethodWithMappersDescriptorImpl.AbstractBuilder<T>> {
+    public static class ShortcutBuilder<W, T extends HasParameterTranslator> {
 
         private final T parentBuilder;
         private final Class<W> wrapperParameterClass;
@@ -122,13 +123,11 @@ public class ParameterValue<N> implements ValueSource {
                 return this;
             }
 
-            /* TODO:
             public T finishParameterDescription() {
                 parentBuilder.addParameterTranslator(new PartialMapperImpl(filter,
                         new ParameterValue<>(parameterNumber, parameterMapper)));
                 return parentBuilder;
             }
-            */
         }
     }
 }

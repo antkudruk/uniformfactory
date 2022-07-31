@@ -79,7 +79,7 @@ public class MethodSingletonDescriptorTest {
 
     }
 
-    public static class TestBuilder implements MethodSingletonDescriptor.BuilderInterface<String> {
+    private static class TestBuilder implements MethodSingletonDescriptor.BuilderInterface<String> {
 
         private final ParameterBindersSource partialMapper;
         private final ResultMapperCollection<String> resultMapper;

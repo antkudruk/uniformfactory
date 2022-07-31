@@ -39,9 +39,8 @@ public class SetterDescriptorTest {
     @Test
     public void whenFieldExists_thenReturnSetFieldEnhancer() throws ReflectiveOperationException, ClassGeneratorException {
         // given
-        SetterDescriptor setterDescriptor = new SetterDescriptor.Builder(
-                Wrapper.class.getMethod("set", String.class),
-                String.class
+        SetterDescriptor setterDescriptor = new SetterDescriptor.Builder<>(
+                Wrapper.class.getMethod("set", String.class)
         )
         .setAnnotation(Marker.class)
         .addParameterTranslator(
@@ -68,7 +67,7 @@ public class SetterDescriptorTest {
     public void whenFieldAbsent_thenReturnDoNothingEnhancer() throws ReflectiveOperationException, ClassGeneratorException {
         // given
         SetterDescriptor setterDescriptor = new SetterDescriptor.Builder(
-                Wrapper.class.getMethod("set", String.class), String.class)
+                Wrapper.class.getMethod("set", String.class))
                 .setAnnotation(Marker.class)
                 .build();
 

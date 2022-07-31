@@ -1,6 +1,7 @@
 package com.github.antkudruk.uniformfactory.singleton.argument.partialbinding;
 
 import com.github.antkudruk.uniformfactory.singleton.argument.exceptions.ParameterTranslatorNotFound;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialParameterDescriptor;
 import net.bytebuddy.description.method.MethodDescription;
 import org.junit.Test;
 

@@ -1,6 +1,6 @@
 package com.github.antkudruk.uniformfactory.singleton.argument.valuesource;
 
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterDescriptor;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialParameterDescriptor;
 import net.bytebuddy.description.type.TypeDescription;
 import org.junit.Assert;
 import org.junit.Ignore;

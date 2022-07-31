@@ -77,7 +77,7 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
     @SuppressWarnings("unchecked")
     @Getter
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
-            extends AbstractMethodCollectionDescriptor.AbstractBuilder<T>
+            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T>
             implements BuilderInterface<F> {
 
         private final Class<F> functionalInterface;

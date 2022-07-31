@@ -16,11 +16,10 @@
 
 package com.github.antkudruk.uniformfactory.methodmap.descriptors;
 
-import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
+import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescriptor;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
 import com.github.antkudruk.uniformfactory.methodmap.enhancers.MemberEntry;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
@@ -48,29 +47,15 @@ import java.util.function.Function;
  * @param <F> Type of the map values
  *
  */
-public class MethodMapDescriptor<F> extends AbstractMethodDescriptorImpl {
+public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F> {
 
     private final Function<MethodDescription, StackManipulation> methodKeyGetter;
     private final Function<FieldDescription, StackManipulation> fieldKeyGetter;
-    private final Class<F> functionalInterface;
-    private final Method wrapperMethod;
-    private final ElementFactory<F> elementFactory;
 
     public MethodMapDescriptor(BuilderInterface<F> builder) {
         super(builder);
-
-        wrapperMethod = builder.getWrapperMethod();
-
-        this.functionalInterface = builder.getFunctionalInterface();
-
         this.methodKeyGetter = builder.getMethodKeyGetter();
         this.fieldKeyGetter = builder.getFieldKeyGetter();
-
-        if (functionalInterface.getDeclaredMethods().length != 1) {
-            throw new RuntimeException("Functional interface must contain exactly one method.");
-        }
-
-        elementFactory = builder.getElementFactory();
         validate();
     }
 
@@ -85,14 +70,14 @@ public class MethodMapDescriptor<F> extends AbstractMethodDescriptorImpl {
         for (MethodDescription originMethod : memberSelector.getMethods(originType)) {
             functionalMapperClasses.add(new MemberEntry(
                     methodKeyGetter.apply(originMethod),
-                    elementFactory.getMethodElement(originType, originMethod).build(originType)
+                    getElementFactory().getMethodElement(originType, originMethod).build(originType)
             ));
         }
 
         for (FieldDescription field : memberSelector.getFields(originType)) {
             functionalMapperClasses.add(new MemberEntry(
                     fieldKeyGetter.apply(field),
-                    elementFactory.getFieldElement(originType, field).build(originType)
+                    getElementFactory().getFieldElement(originType, field).build(originType)
             ));
         }
 
@@ -110,7 +95,7 @@ public class MethodMapDescriptor<F> extends AbstractMethodDescriptorImpl {
     }
 
     public interface BuilderInterface<F>
-            extends AbstractMethodDescriptorImpl.BuilderInterface {
+            extends AbstractMethodCollectionDescriptor.BuilderInterface<F> {
 
         /**
          *
@@ -129,22 +114,16 @@ public class MethodMapDescriptor<F> extends AbstractMethodDescriptorImpl {
          * @return Operations to get key for a field
          */
         Function<FieldDescription, StackManipulation>  getFieldKeyGetter();
-
-        /**
-         * @return Factory that returns class factory for each method or field.
-         */
-        ElementFactory<F> getElementFactory();
     }
 
     @SuppressWarnings("unchecked")
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
-            extends AbstractMethodDescriptorImpl.AbstractBuilder<T>
+            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T>
             implements BuilderInterface<F> {
 
         private final Class<F> functionalInterface;
         private Function<MethodDescription, StackManipulation> methodKeyGetter;
         private Function<FieldDescription, StackManipulation> fieldKeyGetter;
-        private ElementFactory<F> elementFactory;
 
         public AbstractBuilder(Class<F> functionalInterface, Method wrapperMethod) {
             super(wrapperMethod);
@@ -158,13 +137,6 @@ public class MethodMapDescriptor<F> extends AbstractMethodDescriptorImpl {
 
         public T setFieldKeyGetter(Function<FieldDescription, StackManipulation> fieldKeyGetter) {
             this.fieldKeyGetter = fieldKeyGetter;
-            return (T) this;
-        }
-
-        public <A extends Annotation> T setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {
-            setMarkerAnnotation(marker);
-            setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(md.getDeclaredAnnotations().ofType(marker).load())));
-            setFieldKeyGetter(fd -> new TextConstant(keyGetter.apply(fd.getDeclaredAnnotations().ofType(marker).load())));
             return (T) this;
         }
 
@@ -183,14 +155,11 @@ public class MethodMapDescriptor<F> extends AbstractMethodDescriptorImpl {
             return fieldKeyGetter;
         }
 
-        public T setElementFactory(ElementFactory<F> elementFactory) {
-            this.elementFactory = elementFactory;
+        public <A extends Annotation> T setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {
+            setMarkerAnnotation(marker);
+            setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(md.getDeclaredAnnotations().ofType(marker).load())));
+            setFieldKeyGetter(fd -> new TextConstant(keyGetter.apply(fd.getDeclaredAnnotations().ofType(marker).load())));
             return (T) this;
-        }
-
-        @Override
-        public ElementFactory<F> getElementFactory() {
-            return elementFactory;
         }
 
         @Override

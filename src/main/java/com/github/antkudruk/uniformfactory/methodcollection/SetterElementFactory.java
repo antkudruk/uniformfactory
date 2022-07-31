@@ -16,9 +16,13 @@
 
 package com.github.antkudruk.uniformfactory.methodcollection;
 
+import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescriptor;
+import com.github.antkudruk.uniformfactory.base.ParameterMapperBuilder;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.SpecifiedFieldSelector;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapper;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
+import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.HasParameterTranslator;
+import lombok.experimental.Delegate;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -27,14 +31,18 @@ import net.bytebuddy.description.type.TypeDescription;
  * Element factory for setter field
  * @param <F>
  */
-public class SetterElementFactory<F> implements ElementFactory<F> {
+public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterTranslator {
 
     private final Class<F> elementType;
-    private final PartialMapper parameterMapper;
+    private final ParameterBindersSource parameterMapper;
+
+    @Delegate
+    private final ParameterMapperBuilder<SetterElementFactory<F>> parameterMapperBuilder
+            = new ParameterMapperBuilder<>(this);
 
     public SetterElementFactory(
             Class<F> elementType,
-            PartialMapper parameterMapper) {
+            ParameterBindersSource parameterMapper) {
         this.elementType = elementType;
         this.parameterMapper = parameterMapper;
     }
@@ -55,5 +63,46 @@ public class SetterElementFactory<F> implements ElementFactory<F> {
             TypeDescription origin,
             MethodDescription methodDescription) {
             throw new RuntimeException("Not Implemented");
+    }
+
+    @SuppressWarnings("unchecked")
+    public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
+            implements ElementFactory.BuilderInterface<F>, HasParameterTranslator {
+
+        private final Class<F> elementType;
+        @SuppressWarnings("unchecked")
+        @Delegate
+        private final ParameterMapperBuilder<T> parameterMapperBuilder = new ParameterMapperBuilder<>((T) this);
+
+        public AbstractBuilder(Class<F> elementType) {
+            this.elementType = elementType;
+        }
+
+        @Override
+        public ElementFactory<F> build() {
+            return new SetterElementFactory<F>(elementType, parameterMapperBuilder.getParameterMapper());
+        }
+    }
+
+    public static class Builder<F> extends AbstractBuilder<F, Builder<F>> {
+        public Builder(Class<F> elementType) {
+            super(elementType);
+        }
+    }
+
+    public static class ShortcutBuilder<M extends AbstractMethodCollectionDescriptor.BuilderInterface<F>, F>
+            extends AbstractBuilder<F, ShortcutBuilder<M, F>> {
+
+        @Delegate
+        private final ElementFactoryBuilderParentReference<F, M> parentReference;
+
+        public ShortcutBuilder(
+                M builder,
+                Class<F> elementType) {
+            super(elementType);
+            parentReference = new ElementFactoryBuilderParentReference<F, M>(
+                    builder,
+                    this);
+        }
     }
 }

@@ -14,8 +14,9 @@
    limitations under the License.
  */
 
-package com.github.antkudruk.uniformfactory.singleton.argument.partialbinding;
+package com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor;
 
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.CrossLoadersFunctionAdapter;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.ForStaticField;
 import net.bytebuddy.dynamic.DynamicType;

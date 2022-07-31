@@ -17,6 +17,8 @@
 package com.github.antkudruk.uniformfactory.base;
 
 import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.GetterElementFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.SetterElementFactory;
 import lombok.Getter;
 
 import java.lang.reflect.Method;
@@ -55,7 +57,7 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
          */
         ElementFactory<F> getElementFactory();
 
-        <R> R setElementFactory(ElementFactory<F> elementFactory);
+        Object setElementFactory(ElementFactory<F> elementFactory);
 
         AbstractMethodCollectionDescriptor<F> build();
     }
@@ -64,9 +66,9 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
     @Getter
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
             extends AbstractMethodDescriptorImpl.AbstractBuilder<T>
-            implements AbstractMethodDescriptorImpl.BuilderInterface {
+            implements BuilderInterface<F> {
 
-       private ElementFactory<F> elementFactory;
+        private ElementFactory<F> elementFactory;
 
         public AbstractBuilder(Method wrapperMethod) {
             super(wrapperMethod);
@@ -74,7 +76,15 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
 
         public T setElementFactory(ElementFactory<F> elementFactory) {
             this.elementFactory = elementFactory;
-            return (T) elementFactory;
+            return (T) this;
+        }
+
+        public <R> GetterElementFactory.ShortcutBuilder<T, F, R> getterElementFactory(Class<F> elementType, Class<R> resultType) {
+            return new GetterElementFactory.ShortcutBuilder<>((T) this, elementType, resultType);
+        }
+
+        public SetterElementFactory.ShortcutBuilder<T, F> setterElementFactory(Class<F> elementType) {
+            return new SetterElementFactory.ShortcutBuilder<>((T) this, elementType);
         }
     }
 }

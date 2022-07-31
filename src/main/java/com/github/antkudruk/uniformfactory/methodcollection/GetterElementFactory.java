@@ -1,12 +1,29 @@
+/*
+    Copyright 2020 - Present Anton Kudruk
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
+
 package com.github.antkudruk.uniformfactory.methodcollection;
 
 import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescriptor;
+import com.github.antkudruk.uniformfactory.base.ParameterMapperBuilder;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.SpecifiedFieldSelector;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.SpecifiedMethodSelector;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapper;
+import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.HasParameterTranslator;
 import com.github.antkudruk.uniformfactory.singleton.descriptors.ResultMapperCollection;
 import lombok.experimental.Delegate;
 import net.bytebuddy.description.field.FieldDescription;
@@ -63,53 +80,53 @@ public class GetterElementFactory<F, R> implements ElementFactory<F> {
                 .setMemberSelector(new SpecifiedMethodSelector(originMethod))
                 .setResultMapper(resultMapper)
                 .setParameterMapper(parameterMapper)
+
+
                 .endMethodDescription()
                 .build();
     }
-,
+
+    /**
+     *
+     * @param <F> Functional interface
+     * @param <R> Method return type
+     * @param <T> This builder class
+     */
     public static class AbstractBuilder<F, R, T extends AbstractBuilder<F, R, T>>
-            implements ElementFactory.BuilderInterface<F> {
+            implements ElementFactory.BuilderInterface<F>, HasParameterTranslator {
 
         private final Class<F> elementType;
-        private final ResultMapperCollection<R> resultMapper;
-        private ParameterBindersSource parameterMapper ;
+        private ResultMapperCollection<R> resultMapper;
+        @SuppressWarnings("unchecked")
+        @Delegate
+        private final ParameterMapperBuilder<T> parameterMapperBuilder = new ParameterMapperBuilder<>((T) this);
 
         public AbstractBuilder(Class<F> elementType, Class<R> resultType) {
             this.elementType = elementType;
             this.resultMapper = new ResultMapperCollection<>(resultType);
         }
 
-        @Override
-        public ElementFactory<F> build() {
-            return new GetterElementFactory<>(elementType, resultMapper, parameterMapper);
-        }
-
-        public T setElementFactory(ResultMapperCollection<R> resultMapper) {
+        public T setResultMapper(ResultMapperCollection<R> resultMapper) {
             this.resultMapper = resultMapper;
             return (T) this;
         }
 
-        public T setParameterMapper(ParameterBindersSource partialParameterUnion) {
-            this.partialParameterUnion = partialParameterUnion;
-            return (T) this;
-        }
-
-        public T addParameterTranslator(PartialMapper mapper) {
-            parameterMapper.add(mapper);
-            partialParameterUnion = partialParameterUnion.add(mapper);
-            return (T) this;
+        @Override
+        public ElementFactory<F> build() {
+            return new GetterElementFactory<>(elementType, resultMapper, parameterMapperBuilder.getParameterMapper());
         }
     }
 
-    public static final class ShortcutBuilder<M extends AbstractMethodCollectionDescriptor.BuilderInterface<F>, F>
-            extends AbstractBuilder<F, ShortcutBuilder<M, F>> {
+    public static final class ShortcutBuilder<M extends AbstractMethodCollectionDescriptor.BuilderInterface<F>, F, R>
+            extends AbstractBuilder<F, R, ShortcutBuilder<M, F, R>> {
         @Delegate
-        private ElementFactoryBuilderParentReference<F, M> parentReference;
+        private final ElementFactoryBuilderParentReference<F, M> parentReference;
 
         public ShortcutBuilder(
                 M builder,
-                Class<F> elementType) {
-            super(elementType);
+                Class<F> elementType,
+                Class<R> resultType) {
+            super(elementType, resultType);
             parentReference = new ElementFactoryBuilderParentReference<>(
                     builder,
                     this);
