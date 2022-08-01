@@ -63,7 +63,7 @@ public class GetterElementFactory<F, R> implements ElementFactory<F> {
                         resultMapper.getWrapperReturnType()
                 )
                 .setMemberSelector(new SpecifiedFieldSelector(fieldDescription))
-
+                .setParameterMapper(parameterMapper)
                 .setResultMapper(resultMapper)
                 .endMethodDescription()
                 .build();
@@ -80,8 +80,6 @@ public class GetterElementFactory<F, R> implements ElementFactory<F> {
                 .setMemberSelector(new SpecifiedMethodSelector(originMethod))
                 .setResultMapper(resultMapper)
                 .setParameterMapper(parameterMapper)
-
-
                 .endMethodDescription()
                 .build();
     }
@@ -113,7 +111,17 @@ public class GetterElementFactory<F, R> implements ElementFactory<F> {
 
         @Override
         public ElementFactory<F> build() {
-            return new GetterElementFactory<>(elementType, resultMapper, parameterMapperBuilder.getParameterMapper());
+            return new GetterElementFactory<>(
+                    elementType,
+                    resultMapper,
+                    parameterMapperBuilder.getParameterMapper()
+            );
+        }
+    }
+
+    public static final class Builder<F, R> extends AbstractBuilder<F, R, Builder<F, R>> {
+        public Builder(Class<F> elementType, Class<R> resultType) {
+            super(elementType, resultType);
         }
     }
 

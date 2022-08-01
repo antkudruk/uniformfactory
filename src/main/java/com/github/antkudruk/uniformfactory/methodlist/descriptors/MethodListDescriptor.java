@@ -50,7 +50,7 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
      */
     @Override
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
-        List<DynamicType.Unloaded> functionalMapperClasses = new ArrayList<>();
+        List<DynamicType.Unloaded<?>> functionalMapperClasses = new ArrayList<>();
         for (MethodDescription originMethod : memberSelector.getMethods(originType)) {
             functionalMapperClasses.add(
                     getElementFactory().getMethodElement(originType, originMethod).build(originType)
@@ -74,7 +74,6 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
             extends AbstractMethodCollectionDescriptor.BuilderInterface<F> {
     }
 
-    @SuppressWarnings("unchecked")
     @Getter
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
             extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T>

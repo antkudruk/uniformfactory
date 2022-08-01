@@ -17,16 +17,10 @@
 package com.github.antkudruk.uniformfactory.base;
 
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapper;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterUnion;
 import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.HasParameterTranslator;
-import lombok.Getter;
 import lombok.experimental.Delegate;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public abstract class AbstractMethodWithMappersDescriptorImpl extends AbstractMethodDescriptorImpl {
 
@@ -44,10 +38,6 @@ public abstract class AbstractMethodWithMappersDescriptorImpl extends AbstractMe
     public static abstract class AbstractBuilder<T extends AbstractBuilder<T>>
             extends AbstractMethodDescriptorImpl.AbstractBuilder<T>
             implements BuilderInterface, HasParameterTranslator {
-
-        private final List<PartialMapper> parameterMapper = new ArrayList<>();
-        @Getter
-        private ParameterBindersSource partialParameterUnion = new PartialParameterUnion(Collections.emptyList());
 
         @SuppressWarnings("unchecked")
         @Delegate

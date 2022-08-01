@@ -22,7 +22,6 @@ import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToConstantEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToFieldEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToMethodEnhancer;
@@ -129,7 +128,7 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
 
         /**
          * Indicates whether default value has been det up or not.
-         * @return
+         * @return True if there's a default value, otherwise false
          */
         boolean hasDefaultValue();
     }
@@ -139,14 +138,12 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
             extends AbstractMethodWithMappersDescriptorImpl.AbstractBuilder<T>
             implements BuilderInterface<R> {
 
-        private final Class<R> methodResultType;
         private boolean hasDefaultValue;
         private R defaultValue;
         private ResultMapperCollection<R> resultMapper;
 
         public AbstractBuilder(Method wrapperMethod, Class<R> methodResultType) {
             super(wrapperMethod);
-            this.methodResultType = methodResultType;
             this.resultMapper = new ResultMapperCollection<>(methodResultType);
         }
 

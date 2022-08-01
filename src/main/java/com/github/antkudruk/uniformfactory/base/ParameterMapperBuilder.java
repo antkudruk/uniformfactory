@@ -22,7 +22,6 @@ import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.Par
 import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.ConstantValue;
 import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.HasParameterTranslator;
 import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.ParameterValue;
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,13 +40,12 @@ public class ParameterMapperBuilder<T extends HasParameterTranslator> implements
         this.parentObject = parentObject;
     }
 
-    @Getter
     private ParameterBindersSource partialParameterUnion = new PartialParameterUnion(Collections.emptyList());
 
     @SuppressWarnings("unchecked")
     public T setParameterMapper(ParameterBindersSource partialParameterUnion) {
         this.partialParameterUnion = partialParameterUnion;
-        return (T) this;
+        return parentObject;
     }
 
     public T addParameterTranslator(PartialMapper mapper) {
@@ -65,6 +63,6 @@ public class ParameterMapperBuilder<T extends HasParameterTranslator> implements
     }
 
     public ParameterBindersSource getParameterMapper() {
-        return this.partialParameterUnion;
+        return partialParameterUnion;
     }
 }
