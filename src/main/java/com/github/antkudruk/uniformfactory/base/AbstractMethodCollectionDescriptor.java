@@ -68,10 +68,12 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
             extends AbstractMethodDescriptorImpl.AbstractBuilder<T>
             implements BuilderInterface<F> {
 
+        private final Class<F> elementType;
         private ElementFactory<F> elementFactory;
 
-        public AbstractBuilder(Method wrapperMethod) {
+        public AbstractBuilder(Method wrapperMethod, Class<F> elementType) {
             super(wrapperMethod);
+            this.elementType = elementType;
         }
 
         public T setElementFactory(ElementFactory<F> elementFactory) {
@@ -83,7 +85,7 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
             return new GetterElementFactory.ShortcutBuilder<>((T) this, elementType, resultType);
         }
 
-        public SetterElementFactory.ShortcutBuilder<T, F> setterElementFactory(Class<F> elementType) {
+        public SetterElementFactory.ShortcutBuilder<T, F> setterElementFactory() {
             return new SetterElementFactory.ShortcutBuilder<>((T) this, elementType);
         }
     }

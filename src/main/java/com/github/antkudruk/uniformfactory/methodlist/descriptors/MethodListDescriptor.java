@@ -18,6 +18,7 @@ package com.github.antkudruk.uniformfactory.methodlist.descriptors;
 
 import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescriptor;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
+import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
@@ -43,6 +44,13 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
 
     private MethodListDescriptor(BuilderInterface<F> builder) {
         super(builder);
+        validate();
+    }
+
+    private void validate () {
+        if(getWrapperMethod().getReturnType() != List.class) {
+            throw new WrongTypeException(List.class, getWrapperMethod().getReturnType());
+        }
     }
 
     /**
@@ -82,7 +90,7 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
         private final Class<F> functionalInterface;
 
         public AbstractBuilder(Class<F> functionalInterface, Method wrapperMethod) {
-            super(wrapperMethod);
+            super(wrapperMethod, functionalInterface);
             this.functionalInterface = functionalInterface;
         }
 

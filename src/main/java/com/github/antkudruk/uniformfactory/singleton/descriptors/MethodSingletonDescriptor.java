@@ -31,7 +31,9 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
@@ -108,9 +110,22 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
     }
 
     private void validate() {
-        if (wrapperMethod.getReturnType() != resultMapper.getWrapperReturnType()) {
+        if (getBoxedType(wrapperMethod.getReturnType()) != resultMapper.getWrapperReturnType()) {
             throw new WrongTypeException(wrapperMethod.getReturnType(), resultMapper.getWrapperReturnType());
         }
+    }
+
+    // TODO: optimize
+    private Class<?> getBoxedType(Class<?> in) {
+        Map<Class<?>, Class<?>> unboxedTypes = new HashMap<>();
+        unboxedTypes.put(int.class, Integer.class);
+        unboxedTypes.put(byte.class, Byte.class);
+        unboxedTypes.put(long.class, Long.class);
+        unboxedTypes.put(boolean.class, Boolean.class);
+        unboxedTypes.put(double.class, Double.class);
+        unboxedTypes.put(float.class, Float.class);
+        unboxedTypes.put(void.class, Void.class);
+        return unboxedTypes.getOrDefault(in, in);
     }
 
     public interface BuilderInterface<R> extends AbstractMethodWithMappersDescriptorImpl.BuilderInterface {

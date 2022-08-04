@@ -126,7 +126,7 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
         private Function<FieldDescription, StackManipulation> fieldKeyGetter;
 
         public AbstractBuilder(Class<F> functionalInterface, Method wrapperMethod) {
-            super(wrapperMethod);
+            super(wrapperMethod, functionalInterface);
             this.functionalInterface = functionalInterface;
         }
 

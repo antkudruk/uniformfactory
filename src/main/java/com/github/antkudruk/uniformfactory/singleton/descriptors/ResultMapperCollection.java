@@ -67,10 +67,10 @@ public class ResultMapperCollection<A> {
 
     public ResultMapperCollection(Class<A> wrapperResultType) {
         this(wrapperResultType, null);
+        addMapper(wrapperResultType, t -> t);
     }
 
     private ResultMapperCollection(Class<A> wrapperResultType, ResultMapperCollection<A> parent) {
-        addMapper(wrapperResultType, t -> t);
         this.wrapperResultType = wrapperResultType;
         this.parent = parent;
     }

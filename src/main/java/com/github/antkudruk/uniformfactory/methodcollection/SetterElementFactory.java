@@ -34,17 +34,14 @@ import net.bytebuddy.description.type.TypeDescription;
 public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterTranslator {
 
     private final Class<F> elementType;
-    private final ParameterBindersSource parameterMapper;
 
     @Delegate
     private final ParameterMapperBuilder<SetterElementFactory<F>> parameterMapperBuilder
             = new ParameterMapperBuilder<>(this);
 
-    public SetterElementFactory(
-            Class<F> elementType,
-            ParameterBindersSource parameterMapper) {
+    public SetterElementFactory(Class<F> elementType, ParameterBindersSource parameterBindersSource) {
         this.elementType = elementType;
-        this.parameterMapper = parameterMapper;
+        parameterMapperBuilder.setParameterMapper(parameterBindersSource);
     }
 
     @Override
@@ -53,6 +50,7 @@ public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterT
             FieldDescription fieldDescription) {
         return new ClassFactory.ShortcutBuilder<>(elementType)
                 .addSetter(elementType.getDeclaredMethods()[0])
+                .setParameterMapper(parameterMapperBuilder.getParameterMapper())
                 .setMemberSelector(new SpecifiedFieldSelector(fieldDescription))
                 .endMethodDescription()
                 .build();
@@ -62,7 +60,7 @@ public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterT
     public ClassFactory<F> getMethodElement(
             TypeDescription origin,
             MethodDescription methodDescription) {
-            throw new RuntimeException("Not Implemented");
+            throw new RuntimeException("Not Implemented");  // TODO: Replace with a useful implementation
     }
 
     @SuppressWarnings("unchecked")
@@ -80,7 +78,7 @@ public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterT
 
         @Override
         public ElementFactory<F> build() {
-            return new SetterElementFactory<F>(elementType, parameterMapperBuilder.getParameterMapper());
+            return new SetterElementFactory<>(elementType, parameterMapperBuilder.getParameterMapper());
         }
     }
 
@@ -100,7 +98,7 @@ public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterT
                 M builder,
                 Class<F> elementType) {
             super(elementType);
-            parentReference = new ElementFactoryBuilderParentReference<F, M>(
+            parentReference = new ElementFactoryBuilderParentReference<>(
                     builder,
                     this);
         }

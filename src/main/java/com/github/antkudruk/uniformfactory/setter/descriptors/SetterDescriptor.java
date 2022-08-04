@@ -18,6 +18,7 @@ package com.github.antkudruk.uniformfactory.setter.descriptors;
 
 import com.github.antkudruk.uniformfactory.base.AbstractMethodWithMappersDescriptorImpl;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
+import com.github.antkudruk.uniformfactory.base.ParameterMapperBuilder;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
@@ -26,8 +27,7 @@ import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelect
 import com.github.antkudruk.uniformfactory.setter.enhanncers.DoNothingEnhancer;
 import com.github.antkudruk.uniformfactory.setter.enhanncers.SetterEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapper;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterUnion;
+import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.HasParameterTranslator;
 import lombok.Getter;
 import lombok.experimental.Delegate;
 import net.bytebuddy.description.field.FieldDescription;
@@ -35,7 +35,6 @@ import net.bytebuddy.description.type.TypeDescription;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -47,7 +46,7 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
     private final String fieldAccessorFieldName
             = FIELD_NAME_PREFIX + fieldNameIndex.incrementAndGet();
 
-    public SetterDescriptor(BuilderInterface<A> builder) {
+    public SetterDescriptor(BuilderInterface builder) {
         super(builder);
     }
 
@@ -63,7 +62,7 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
 
         if(singletonOriginField.size() > 0) {
             return new SetterEnhancer(
-                    fieldAccessorFieldName, // singletonOriginField.get(0),
+                    fieldAccessorFieldName,
                     originType,
                     singletonOriginField.get(0),
                     wrapperMethod,
@@ -75,28 +74,30 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
         }
     }
 
-    public interface BuilderInterface<P> extends AbstractMethodWithMappersDescriptorImpl.BuilderInterface {
+    public interface BuilderInterface extends AbstractMethodWithMappersDescriptorImpl.BuilderInterface {
         MemberSelector getMemberSelector();
         Method getWrapperMethod();
         ParameterBindersSource getParameterMapper();
-        SetterDescriptor<P> build();
+        //SetterDescriptor<P> build();
     }
 
     @SuppressWarnings("unchecked")
-    public static abstract class AbstractBuilder<P, T extends AbstractBuilder<P, T>>
-            implements BuilderInterface<P> {
+    public static abstract class AbstractBuilder<W, T extends AbstractBuilder<W, T>>
+            implements BuilderInterface, HasParameterTranslator {
 
         @Getter
         private Method wrapperMethod;
-        private final List<PartialMapper> parameterMappers = new ArrayList<>();
         @Getter
         private MemberSelector memberSelector;
+
+        @Delegate
+        private final ParameterMapperBuilder<T> parameterMapperBuilder = new ParameterMapperBuilder<>((T) this);
 
         public AbstractBuilder(Method wrapperMethod) {
             this.wrapperMethod = wrapperMethod;
         }
 
-        public SetterDescriptor<P> build() {
+        public SetterDescriptor<W> build() {
             return new SetterDescriptor<>(this);
         }
 
@@ -113,17 +114,6 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
         public T setWrapperMethod(Method wrapperMethod) {
             this.wrapperMethod = wrapperMethod;
             return (T) this;
-        }
-
-        @SuppressWarnings("unchecked")
-        public T addParameterTranslator(PartialMapper mapper) {
-            parameterMappers.add(mapper);
-            return (T) this;
-        }
-
-        @Override
-        public ParameterBindersSource getParameterMapper() {
-            return new PartialParameterUnion(parameterMappers);
         }
     }
 

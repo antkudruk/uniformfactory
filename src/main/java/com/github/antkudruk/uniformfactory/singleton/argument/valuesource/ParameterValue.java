@@ -16,7 +16,6 @@
 
 package com.github.antkudruk.uniformfactory.singleton.argument.valuesource;
 
-import com.github.antkudruk.uniformfactory.base.AbstractMethodWithMappersDescriptorImpl;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialParameterDescriptor;
