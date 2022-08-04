@@ -48,7 +48,7 @@ public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterT
     public ClassFactory<F> getFieldElement(
             TypeDescription origin,
             FieldDescription fieldDescription) {
-        return new ClassFactory.ShortcutBuilder<>(elementType)
+        return new ClassFactory.Builder<>(elementType)
                 .addSetter(elementType.getDeclaredMethods()[0])
                 .setParameterMapper(parameterMapperBuilder.getParameterMapper())
                 .setMemberSelector(new SpecifiedFieldSelector(fieldDescription))

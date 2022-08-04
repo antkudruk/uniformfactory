@@ -15,7 +15,7 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
     private final ClassFactory<Wrapper> classFactory;
 
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        this.classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
+        this.classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodList(
                         Wrapper.class.getMethod("getProcessors"),
                         Processor.class,

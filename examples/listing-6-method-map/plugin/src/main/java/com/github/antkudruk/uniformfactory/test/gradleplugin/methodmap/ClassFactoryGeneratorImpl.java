@@ -6,7 +6,7 @@ import com.github.antkudruk.uniformfactory.pluginbuilder.DefaultMetaClassFactory
 
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<PointWrapper> {
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        super(new ClassFactory.ShortcutBuilder<>(PointWrapper.class)
+        super(new ClassFactory.Builder<>(PointWrapper.class)
 
                 .addMethodMap(PointWrapper.class.getMethod("getCoords"), Coordinate.class, long.class)
                 .setMarkerAnnotation(CoordinateMarker.class, CoordinateMarker::value)

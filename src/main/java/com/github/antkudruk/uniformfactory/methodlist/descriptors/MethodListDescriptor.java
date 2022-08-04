@@ -118,7 +118,7 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
         private final ChildMethodDescriptionBuilderWrapper<W> classFactoryReference;
 
         public ShortcutBuilder(
-                ClassFactory.ShortcutBuilder<W> wrapperClass,
+                ClassFactory.Builder<W> wrapperClass,
                 Class<F> functionalInterface,
                 Method wrapperMethod) {
             super(functionalInterface, wrapperMethod);

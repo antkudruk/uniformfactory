@@ -10,7 +10,7 @@ import net.bytebuddy.description.type.TypeDescription;
 
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Adapter> {
     public ClassFactoryGeneratorImpl() throws ReflectiveOperationException {
-        super(new ClassFactory.ShortcutBuilder<>(Adapter.class)
+        super(new ClassFactory.Builder<>(Adapter.class)
                 .addMethodMap(Adapter.class.getDeclaredMethod("setters"), Fun.class)
                 .setMarkerAnnotation(Css.class, Css::value)
 

@@ -135,7 +135,7 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
         private final ChildMethodDescriptionBuilderWrapper<W> classFactoryReference;
 
         public ShortcutBuilder(
-                ClassFactory.ShortcutBuilder<W> wrapperClass,
+                ClassFactory.Builder<W> wrapperClass,
                 Method wrapperMethod) {
             super(wrapperMethod);
             classFactoryReference = new ChildMethodDescriptionBuilderWrapper<>(wrapperClass, this);

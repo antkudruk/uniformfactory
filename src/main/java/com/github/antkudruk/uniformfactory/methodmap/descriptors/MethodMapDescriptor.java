@@ -36,6 +36,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -157,8 +158,8 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
 
         public <A extends Annotation> T setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {
             setMarkerAnnotation(marker);
-            setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(md.getDeclaredAnnotations().ofType(marker).load())));
-            setFieldKeyGetter(fd -> new TextConstant(keyGetter.apply(fd.getDeclaredAnnotations().ofType(marker).load())));
+            setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(Objects.requireNonNull(md.getDeclaredAnnotations().ofType(marker)).load())));
+            setFieldKeyGetter(fd -> new TextConstant(keyGetter.apply(Objects.requireNonNull(fd.getDeclaredAnnotations().ofType(marker)).load())));
             return (T) this;
         }
 
@@ -186,7 +187,7 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
         private final ChildMethodDescriptionBuilderWrapper<W> classFactoryReference;
 
         public ShortcutBuilder(
-                ClassFactory.ShortcutBuilder<W> wrapperClass,
+                ClassFactory.Builder<W> wrapperClass,
                 Class<F> functionalInterface,
                 Method wrapperMethod) {
             super(functionalInterface, wrapperMethod);

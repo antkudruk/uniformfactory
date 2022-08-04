@@ -24,14 +24,14 @@ import lombok.AllArgsConstructor;
  */
 @AllArgsConstructor
 public class ChildMethodDescriptionBuilderWrapper<W> {
-    private final ClassFactory.ShortcutBuilder<W> parentBuilder;
+    private final ClassFactory.Builder<W> parentBuilder;
     private final AbstractMethodDescriptorImpl.BuilderInterface builder;
 
     /**
      * Ends description of the method.
      * @return Class Factory builder
      */
-    public ClassFactory.ShortcutBuilder<W> endMethodDescription() {
+    public ClassFactory.Builder<W> endMethodDescription() {
         parentBuilder.addMethodDescriptor(builder.build());
         return parentBuilder;
     }

@@ -245,7 +245,7 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
         private final ChildMethodDescriptionBuilderWrapper<W> classFactoryReference;
 
         public ShortcutBuilder(
-                ClassFactory.ShortcutBuilder<W> wrapperClass,
+                ClassFactory.Builder<W> wrapperClass,
                 Method wrapperMethod,
                 Class<R> methodResultType) {
             super(wrapperMethod, methodResultType);

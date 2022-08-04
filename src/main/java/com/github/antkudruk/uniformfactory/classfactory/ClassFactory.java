@@ -176,16 +176,6 @@ public class ClassFactory<W> {
             return this;
         }
 
-        public ClassFactory<W> build() throws ClassFactoryException {
-            return new ClassFactory<>(this);
-        }
-    }
-
-    public static class ShortcutBuilder<W> extends Builder<W> {
-        public ShortcutBuilder(Class<W> wrapperInterface) {
-            super(wrapperInterface);
-        }
-
         public <R> MethodSingletonDescriptor.ShortcutBuilder<W, R> addMethodSingleton(
                 Method wrapperMethod, Class<R> resultClass) {
             return new MethodSingletonDescriptor.ShortcutBuilder<>(this, wrapperMethod, resultClass);
@@ -224,6 +214,10 @@ public class ClassFactory<W> {
         public <R> SetterDescriptor.ShortcutBuilder<W, R> addSetter(
                 Method wrapperMethod) {
             return new SetterDescriptor.ShortcutBuilder<>(this, wrapperMethod);
+        }
+
+        public ClassFactory<W> build() throws ClassFactoryException {
+            return new ClassFactory<>(this);
         }
     }
 }

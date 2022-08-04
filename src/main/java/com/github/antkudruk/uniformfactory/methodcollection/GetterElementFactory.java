@@ -19,7 +19,6 @@ package com.github.antkudruk.uniformfactory.methodcollection;
 import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescriptor;
 import com.github.antkudruk.uniformfactory.base.ParameterMapperBuilder;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
-import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.SpecifiedFieldSelector;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.SpecifiedMethodSelector;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
@@ -56,8 +55,8 @@ public class GetterElementFactory<F, R> implements ElementFactory<F> {
 
     @Override
     public ClassFactory<F> getFieldElement(
-            TypeDescription origin, FieldDescription fieldDescription) throws ClassGeneratorException {
-        return new ClassFactory.ShortcutBuilder<>(elementType)
+            TypeDescription origin, FieldDescription fieldDescription) {
+        return new ClassFactory.Builder<>(elementType)
                 .addMethodSingleton(
                         elementType.getDeclaredMethods()[0],
                         resultMapper.getWrapperReturnType()
@@ -71,8 +70,8 @@ public class GetterElementFactory<F, R> implements ElementFactory<F> {
 
     @Override
     public ClassFactory<F> getMethodElement(
-            TypeDescription origin, MethodDescription originMethod) throws ClassGeneratorException {
-        return new ClassFactory.ShortcutBuilder<>(elementType)
+            TypeDescription origin, MethodDescription originMethod) {
+        return new ClassFactory.Builder<>(elementType)
                 .addMethodSingleton(
                         elementType.getDeclaredMethods()[0],
                         resultMapper.getWrapperReturnType()
@@ -104,6 +103,7 @@ public class GetterElementFactory<F, R> implements ElementFactory<F> {
             this.resultMapper = new ResultMapperCollection<>(resultType);
         }
 
+        @SuppressWarnings("unchecked")
         public T setResultMapper(ResultMapperCollection<R> resultMapper) {
             this.resultMapper = resultMapper;
             return (T) this;
