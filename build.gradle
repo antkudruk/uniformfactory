@@ -86,10 +86,10 @@ if(hasProperty('ossrhUsername') && hasProperty('ossrhPassword')) {
             }
         }
     }
-}
 
-signing {
-    sign publishing.publications.maven
+    signing {
+        sign publishing.publications.maven
+    }
 }
 
 javadoc {
