@@ -37,7 +37,7 @@ dependencies {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        maven(MavenPublication) {
             artifactId = 'uniform-factory'
             from components.java
             versionMapping {
@@ -49,9 +49,9 @@ publishing {
                 }
             }
             pom {
-                name = 'My Library'
-                description = 'A concise description of my library'
-                url = 'http://www.example.com/library'
+                name = 'Uniform Factory'
+                description = 'Builds Adapter based on annotations to handle different classes the common way'
+                url = 'https://github.com/antkudruk'
                 licenses {
                     license {
                         name = 'The Apache License, Version 2.0'
@@ -84,7 +84,7 @@ publishing {
 }
 
 signing {
-    sign publishing.publications.mavenJava
+    sign publishing.publications.maven
 }
 
 javadoc {
