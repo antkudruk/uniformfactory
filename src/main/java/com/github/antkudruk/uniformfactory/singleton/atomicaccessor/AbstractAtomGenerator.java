@@ -17,6 +17,7 @@
 package com.github.antkudruk.uniformfactory.singleton.atomicaccessor;
 
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
+import com.github.antkudruk.uniformfactory.singleton.descriptors.MethodSingletonDescriptor;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
@@ -61,8 +62,8 @@ public abstract class AbstractAtomGenerator {
         return (MethodCall) methodCall.withAssigner(Assigner.DEFAULT, Assigner.Typing.DYNAMIC);
     }
 
-    protected static DynamicType.Builder createResultTranslatorField(
-            DynamicType.Builder bbBuilder,
+    protected static <B> DynamicType.Builder<B> createResultTranslatorField(
+            DynamicType.Builder<B> bbBuilder,
             Function translator) {
 
         return bbBuilder.defineField(RESULT_TRANSLATOR, CrossLoadersFunctionAdapter.class,
@@ -71,8 +72,8 @@ public abstract class AbstractAtomGenerator {
                         new CrossLoadersFunctionAdapter(translator)));
     }
 
-    protected static DynamicType.Builder createCunstructorSettingUpOrigin(
-            DynamicType.Builder bbBuilder, TypeDescription originClass) {
+    protected static <B> DynamicType.Builder<B> createCunstructorSettingUpOrigin(
+            DynamicType.Builder<B> bbBuilder, TypeDescription originClass) {
         try {
             return bbBuilder.defineField(ORIGIN_FIELD_NAME, originClass,
                             Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)
@@ -86,10 +87,11 @@ public abstract class AbstractAtomGenerator {
         }
     }
 
-    protected static Class[] getParameterClasses(Parameter[] parameters) {
+    protected static Class<?>[] getParameterClasses(Parameter[] parameters) {
         return Arrays.stream(parameters)
                 .map(Parameter::getType)
-                .toArray(n -> new Class[n]);
+                .map(MethodSingletonDescriptor::getBoxedType)
+                .toArray(Class[]::new);
     }
 
     protected static MethodCall addResultTranslator(MethodCall methodCall) {

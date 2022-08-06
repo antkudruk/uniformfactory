@@ -418,7 +418,7 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
     private final ClassFactory<Wrapper> classFactory;
 
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        this.classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
+        this.classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodList(
                         Wrapper.class.getMethod("getProcessors"),
                         boolean.class
@@ -566,6 +566,19 @@ You can use two wrappers:
 The example of code for multiple adapters at one origin class may be found
 [here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-9-multiple-wrappers)
 
+### Setting up a Field in the Origin Class
+
+You can do setting up the field marked with an annotation exactly the same way
+as MethodSingleton does. 
+See the example 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-10-setter)
+
+### Setting up Multiple Fields
+
+UniformFactory may implement adapters for multiple fields in the origin class
+for you. See the example 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-11-setter-map)
+
 ### Translating parameters and result
 
 #### Translating result
@@ -597,7 +610,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
             .addMapper(int.class, Object::toString);
 
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
+        super(new ClassFactory.Builder<>(Wrapper.class)
 
                 .addMethodSingleton(FirstMethodMarker.class, Wrapper.class.getMethod("process", Integer.class), String.class)
                 .setResultMapper(resultMapperCollection)

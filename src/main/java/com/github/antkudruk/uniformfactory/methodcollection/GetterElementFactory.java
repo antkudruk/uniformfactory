@@ -29,6 +29,8 @@ import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 
+import java.util.function.Function;
+
 /**
  *
  * Returns class factories to getter wrappers for method/field, no matter how
@@ -106,6 +108,11 @@ public class GetterElementFactory<F, R> implements ElementFactory<F> {
         @SuppressWarnings("unchecked")
         public T setResultMapper(ResultMapperCollection<R> resultMapper) {
             this.resultMapper = resultMapper;
+            return (T) this;
+        }
+
+        public <E> T addResultTranslator(Class<E> type, Function<E, R> mapper) {
+            resultMapper.addMapper(type, mapper);
             return (T) this;
         }
 

@@ -81,7 +81,7 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
             return (T) this;
         }
 
-        public <R> GetterElementFactory.ShortcutBuilder<T, F, R> getterElementFactory(Class<F> elementType, Class<R> resultType) {
+        public <R> GetterElementFactory.ShortcutBuilder<T, F, R> getterElementFactory(Class<R> resultType) {
             return new GetterElementFactory.ShortcutBuilder<>((T) this, elementType, resultType);
         }
 

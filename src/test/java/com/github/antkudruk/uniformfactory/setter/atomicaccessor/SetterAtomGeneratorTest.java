@@ -25,30 +25,45 @@ public class SetterAtomGeneratorTest {
         public String field = "Initial";
     }
 
+    public static class OriginWithPrimitiveImpl {
+        public int field = 13;
+    }
+
+    public static class OriginWithPrivateStringField {
+        private String field = "Initial";
+    }
+
+    public static class OriginWithPrivatePrimitiveImpl {
+        private int field = 13;
+    }
+
     public interface Wrapper {
         void setField(String value);
     }
 
-    @Test
-    @SuppressWarnings("unchecked")
-    public void setFieldUsingTranslator() throws ReflectiveOperationException, ParameterTranslatorNotFound {
-        Class atomClass = SetterAtomGenerator.INSTANCE.generateClass(
-                    new TypeDescription.ForLoadedType(OriginImpl.class),
-                    Wrapper.class.getDeclaredMethod("setField", String.class),
+    private Class generateWrapperClass(Class originClass) throws ReflectiveOperationException, ParameterTranslatorNotFound {
+        return SetterAtomGenerator.INSTANCE.generateClass(
+                        new TypeDescription.ForLoadedType(originClass),
+                        Wrapper.class.getDeclaredMethod("setField", String.class),
                         new PartialParameterUnion.Builder()
                                 .add(
                                         new PartialMapperImpl(
                                                 new AnyParameterFilter(),
                                                 new ParameterValue<>(String.class, 0)
                                                         .addTranslator(new TypeDescription.ForLoadedType(String.class), s -> TRANSLATED_NEW_VALUE)
+                                                        .addTranslator(new TypeDescription.ForLoadedType(int.class), Integer::parseInt)
                                         )
                                 )
                                 .build(),
-                    new FieldDescription.ForLoadedField(
-                            OriginImpl.class.getField("field")))
+                        new FieldDescription.ForLoadedField(originClass.getDeclaredField("field")))
                 .load(getClass().getClassLoader())
                 .getLoaded();
+    }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    public void setFieldUsingTranslator() throws ReflectiveOperationException, ParameterTranslatorNotFound {
+        Class atomClass = generateWrapperClass(OriginImpl.class);
         OriginImpl origin = new OriginImpl();
 
         Method method = atomClass.getDeclaredMethod(Constants.METHOD_NAME, String.class);
@@ -60,5 +75,60 @@ public class SetterAtomGeneratorTest {
 
         // Then
         assertEquals(TRANSLATED_NEW_VALUE, result);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void setPrimitiveFieldUsingTranslator() throws ReflectiveOperationException, ParameterTranslatorNotFound {
+        Class atomClass = generateWrapperClass(OriginWithPrimitiveImpl.class);
+        OriginWithPrimitiveImpl origin = new OriginWithPrimitiveImpl();
+
+        Object atom = atomClass
+                .getConstructor(OriginWithPrimitiveImpl.class)
+                .newInstance(origin);
+        Method method = atomClass.getDeclaredMethod(Constants.METHOD_NAME, String.class);
+
+        method.invoke(atom, "13");
+
+        Object result = Whitebox.getInternalState(origin, "field");
+
+        // Then
+        assertEquals(13, result);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void setPrivateFieldUsingTranslator() throws ReflectiveOperationException, ParameterTranslatorNotFound {
+        Class atomClass = generateWrapperClass(OriginWithPrivateStringField.class);
+        OriginWithPrivateStringField origin = new OriginWithPrivateStringField();
+
+        Method method = atomClass.getDeclaredMethod(Constants.METHOD_NAME, String.class);
+        Object atom = atomClass.getConstructor(OriginWithPrivateStringField.class).newInstance(origin);
+
+        method.invoke(atom, NEW_VALUE_SETTER);
+
+        Object result = Whitebox.getInternalState(origin, "field");
+
+        // Then
+        assertEquals(TRANSLATED_NEW_VALUE, result);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void setPrivatePrimitiveFieldUsingTranslator() throws ReflectiveOperationException, ParameterTranslatorNotFound {
+        Class atomClass = generateWrapperClass(OriginWithPrivatePrimitiveImpl.class);
+        OriginWithPrivatePrimitiveImpl origin = new OriginWithPrivatePrimitiveImpl();
+
+        Object atom = atomClass
+                .getConstructor(OriginWithPrivatePrimitiveImpl.class)
+                .newInstance(origin);
+        Method method = atomClass.getDeclaredMethod(Constants.METHOD_NAME, String.class);
+
+        method.invoke(atom, "13");
+
+        Object result = Whitebox.getInternalState(origin, "field");
+
+        // Then
+        assertEquals(13, result);
     }
 }

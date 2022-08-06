@@ -16,26 +16,26 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
 
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         this.classFactory = new ClassFactory.Builder<>(Wrapper.class)
-                .addMethodList(
-                        Wrapper.class.getMethod("getProcessors"),
-                        Processor.class,
-                        boolean.class
-                )
+                .addMethodList(Wrapper.class.getMethod("getProcessors"), Processor.class)
                 .setMarkerAnnotation(Processor.Process.class)
-                .setFunctionalInterface(Processor.class)
 
+                // Setting up element factory for the list - getters
+                .getterElementFactory(Boolean.class)
+
+                // Descrives how to map results from origin methods to the adapter methd result
                 .addResultTranslator(void.class, t -> true)
                 .addResultTranslator(Long.class, t -> t >= 0)
                 .addResultTranslator(String.class, "yes"::equalsIgnoreCase)
                 .addResultTranslator(Boolean.class, t -> t)
 
+                // Describes how to map parameters from the adapter method to origin methods
                 .parameterSource(String.class, 0)
                 .applyTo(new AnyParameterFilter())
                 .addTranslator(Integer.class, Integer::parseInt)
                 .finishParameterDescription()
 
+                .finishElementFactory()
                 .endMethodDescription()
-
                 .build();
     }
 

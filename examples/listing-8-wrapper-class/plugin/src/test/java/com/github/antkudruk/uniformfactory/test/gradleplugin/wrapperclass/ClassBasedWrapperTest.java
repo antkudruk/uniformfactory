@@ -3,16 +3,22 @@ package com.github.antkudruk.uniformfactory.test.gradleplugin.wrapperclass;
 import com.github.antkudruk.uniformfactory.test.gradleplugin.wrapperclass.domain.OriginImpl;
 import org.junit.Test;
 
+import java.util.function.Function;
+
 import static org.junit.Assert.assertEquals;
 
 public class ClassBasedWrapperTest {
     @Test
-    public void test() {
+    public void test() throws NoSuchMethodException {
         OriginImpl originImpl = new OriginImpl();
-        Origin origin = (Origin)originImpl;
+        ClassFactoryGeneratorImpl classFactoryGenerator
+                = new ClassFactoryGeneratorImpl();
+        Function<OriginImpl, ? extends Wrapper> metaClass
+                = classFactoryGenerator.generateMetaClass(OriginImpl.class);
 
-        assertEquals(2, origin.getWrapper().getAccumulated());
-        assertEquals(4, origin.getWrapper().getAccumulated());
-        assertEquals(6, origin.getWrapper().getAccumulated());
+        Wrapper wrapper = metaClass.apply(originImpl);
+        assertEquals(2, wrapper.getAccumulated());
+        assertEquals(4, wrapper.getAccumulated());
+        assertEquals(6, wrapper.getAccumulated());
     }
 }

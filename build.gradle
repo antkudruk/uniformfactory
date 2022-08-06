@@ -92,7 +92,7 @@ javadoc {
         options.addBooleanOption('html5', true)
     }
 }
-/*
+
 task testExamples {
     doLast {
         def stdout = new ByteArrayOutputStream()
@@ -104,9 +104,9 @@ task testExamples {
             exec {
                 workingDir "examples/${file.name}/plugin"
                 if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-                    commandLine 'cmd', '/c', gradlewRelativePath, 'publishToMavenLocal'
+                    commandLine 'cmd', '/c', gradlewRelativePath, 'clean', 'test', 'publishToMavenLocal'
                 } else {
-                    commandLine gradlewRelativePath, 'publishToMavenLocal'
+                    commandLine gradlewRelativePath, 'clean', 'test', 'publishToMavenLocal'
                 }
                 standardOutput = stdout
             }
@@ -125,5 +125,5 @@ task testExamples {
     }
     dependsOn(publishToMavenLocal)
 }
-*/
+
 

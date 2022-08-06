@@ -91,7 +91,7 @@ an empty list of children.
 ```
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<TreeElement> {
     public ClassFactoryGeneratorImpl() throws ReflectiveOperationException {
-        super(new ClassFactory.ShortcutBuilder<>(TreeElement.class)
+        super(new ClassFactory.Builder<>(TreeElement.class)
                 .addMethodSingleton(TreeElement.class.getMethod("getLabel"), String.class)
                 .setMarkerAnnotation(Label.class)
                 .endMethodDescription()

@@ -9,8 +9,9 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.implementation.bytecode.Duplication;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
+import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.implementation.bytecode.assign.TypeCasting;
-import net.bytebuddy.implementation.bytecode.assign.primitive.PrimitiveUnboxingDelegate;
+import net.bytebuddy.implementation.bytecode.assign.primitive.PrimitiveBoxingDelegate;
 import net.bytebuddy.implementation.bytecode.constant.FieldConstant;
 import net.bytebuddy.implementation.bytecode.constant.IntegerConstant;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
@@ -96,10 +97,21 @@ public class PureSetterImplementation implements Implementation {
                     // Stack: targetField, this
                     FieldAccess.forField(originField).read(),
                     // Stack: targetField, origin
-                    MethodVariableAccess.REFERENCE.loadFrom(
-                            instrumentedMethod.getParameters().get(0).getOffset()),
+                    MethodVariableAccess
+                            .of(instrumentedMethod.getParameters().get(0).getType())
+                            .loadFrom(instrumentedMethod.getParameters().get(0).getOffset()),
                     // Stack: targetField, origin, value
-                    TypeCasting.to(targetField.getType().asErasure().asBoxed()), // TODO: Can get rid?
+                    instrumentedMethod.getParameters().get(0).getType().isPrimitive()
+                            ? PrimitiveBoxingDelegate
+                                    .forPrimitive(instrumentedMethod.getParameters().get(0).getType())
+                                    .assignBoxedTo(
+                                            instrumentedMethod.getParameters().get(0).getType().asErasure().asBoxed().asGenericType(),
+                                            Assigner.DEFAULT,
+                                            Assigner.Typing.DYNAMIC
+                                    )
+                            : StackManipulation.Trivial.INSTANCE,
+
+                    TypeCasting.to(targetField.getType().asErasure().asBoxed()),
                     // Stack: targetField, origin, value
                     MethodInvocation.invoke(TypeDescriptionShortcuts.findMethod(
                             Field.class,
@@ -119,15 +131,10 @@ public class PureSetterImplementation implements Implementation {
                     MethodVariableAccess.loadThis(),
                     // Stack: this
                     FieldAccess.forField(originField).read(),
-                    // Stack: origin, translator
-                    MethodVariableAccess.REFERENCE.loadFrom(
-                            instrumentedMethod.getParameters().get(0).getOffset()),
-                    // Stack: origin, translator, argument
-                    TypeCasting.to(targetField.getType().asErasure().asBoxed()), // TODO: Can get rid?
-                    // Stack: origin, translator, argument
-                    targetField.getType().isPrimitive()
-                            ? PrimitiveUnboxingDelegate.forPrimitive(targetField.getType())
-                            : StackManipulation.Trivial.INSTANCE,   // TODO: Test for the different types, including a custom one
+                    // Stack: origin
+                    MethodVariableAccess
+                            .of(instrumentedMethod.getParameters().get(0).getType())
+                            .loadFrom(instrumentedMethod.getParameters().get(0).getOffset()),
                     // Stack: origin, value
                     FieldAccess.forField(targetField).write(),
                     // Stack:

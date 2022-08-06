@@ -86,7 +86,7 @@ public class MethodListTest {
                                     Wrapper.class.getMethod("getFunctionsList"))
 
                                 .setMarkerAnnotation(MethodMarker.class)
-                                .getterElementFactory(Fun.class, String.class)
+                                .getterElementFactory(String.class)
                                 .parameterSource(String.class, 0)
                                 .applyToAnnotated(Name.class)
                                 .finishParameterDescription()
@@ -133,7 +133,7 @@ public class MethodListTest {
                         Fun.class, Wrapper.class.getMethod("getFunctionsList"))
 
                         .setMarkerAnnotation(MethodMarker.class)
-                        .getterElementFactory(Fun.class, String.class)
+                        .getterElementFactory(String.class)
                         .constantSource("Value")
                         .applyToTyped(String.class)
 
@@ -183,7 +183,7 @@ public class MethodListTest {
 
                                 .setMarkerAnnotation(MethodMarker.class)
 
-                                .getterElementFactory(Fun.class, String.class)
+                                .getterElementFactory(String.class)
 
                                 .addParameterTranslator(new PartialMapperImpl(
                                         new AnnotationParameterFilter<>(Name.class),

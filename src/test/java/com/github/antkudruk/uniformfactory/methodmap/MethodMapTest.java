@@ -84,7 +84,7 @@ public class MethodMapTest {
 
                                 .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
 
-                                .getterElementFactory(Fun.class, String.class)
+                                .getterElementFactory(String.class)
                                     .parameterSource(String.class, 0)
                                     .applyToAnnotated(Name.class)
                                     .finishParameterDescription()
@@ -127,7 +127,7 @@ public class MethodMapTest {
 
                         .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
 
-                        .getterElementFactory(Fun.class, String.class)
+                        .getterElementFactory(String.class)
 
                         .constantSource("Value")
                         .applyToTyped(String.class)
@@ -169,7 +169,7 @@ public class MethodMapTest {
                                 Wrapper.class.getMethod("getFunctionsList"))
                                 .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
 
-                                .getterElementFactory(Fun.class, String.class)
+                                .getterElementFactory(String.class)
 
                                 .addParameterTranslator(new PartialMapperImpl(
                                         new AnnotationParameterFilter<>(Name.class),

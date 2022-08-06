@@ -16,6 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.singleton.argument.valuesource;
 
+import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnyParameterFilter;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialParameterDescriptor;
@@ -91,6 +92,10 @@ public class ParameterValue<N> implements ValueSource {
 
         public WithDefinedTargets applyTo(ParameterFilter filter) {
             return new WithDefinedTargets(filter);
+        }
+
+        public WithDefinedTargets applyToAny() {
+            return new WithDefinedTargets(new AnyParameterFilter());
         }
 
         public WithDefinedTargets applyToAnnotated(Class<? extends Annotation> parameterAnnotation) {

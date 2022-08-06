@@ -115,11 +115,12 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
         }
     }
 
-    // TODO: optimize
-    private Class<?> getBoxedType(Class<?> in) {
+    // TODO: optimize, move outside the cass
+    public static Class<?> getBoxedType(Class<?> in) {
         Map<Class<?>, Class<?>> unboxedTypes = new HashMap<>();
         unboxedTypes.put(int.class, Integer.class);
         unboxedTypes.put(byte.class, Byte.class);
+        unboxedTypes.put(char.class, Character.class);
         unboxedTypes.put(long.class, Long.class);
         unboxedTypes.put(boolean.class, Boolean.class);
         unboxedTypes.put(double.class, Double.class);

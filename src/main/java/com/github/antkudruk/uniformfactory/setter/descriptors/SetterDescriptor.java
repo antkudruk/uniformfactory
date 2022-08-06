@@ -78,7 +78,6 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
         MemberSelector getMemberSelector();
         Method getWrapperMethod();
         ParameterBindersSource getParameterMapper();
-        //SetterDescriptor<P> build();
     }
 
     @SuppressWarnings("unchecked")

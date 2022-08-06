@@ -71,7 +71,7 @@ public class ResultMapperCollection<A> {
     }
 
     private ResultMapperCollection(Class<A> wrapperResultType, ResultMapperCollection<A> parent) {
-        this.wrapperResultType = wrapperResultType;
+        this.wrapperResultType = (Class<A>)MethodSingletonDescriptor.getBoxedType(wrapperResultType);
         this.parent = parent;
     }
 

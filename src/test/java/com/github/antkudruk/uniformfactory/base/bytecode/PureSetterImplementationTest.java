@@ -58,7 +58,7 @@ public class PureSetterImplementationTest {
 
     @Test
     public void givenPublicIntField_whenSet_applyParameter() throws Exception {
-        givenField_whenSet_applyParameter("publicIntValue", Integer.class, 13);
+        givenField_whenSet_applyParameter("publicIntValue", int.class, 13);
     }
 
     @Test
