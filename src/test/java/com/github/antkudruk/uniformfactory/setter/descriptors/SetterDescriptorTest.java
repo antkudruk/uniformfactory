@@ -2,6 +2,9 @@ package com.github.antkudruk.uniformfactory.setter.descriptors;
 
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
+import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnyParameterFilter;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
+import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.ParameterValue;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.EnhancerTestUtils;
 import net.bytebuddy.description.type.TypeDescription;
 import org.junit.Test;
@@ -35,10 +38,18 @@ public class SetterDescriptorTest {
 
     @Test
     public void whenFieldExists_thenReturnSetFieldEnhancer() throws ReflectiveOperationException, ClassGeneratorException {
-        SetterDescriptor setterDescriptor = new SetterDescriptor.Builder(
-                Wrapper.class.getMethod("set", String.class), String.class)
-                .setAnnotation(Marker.class)
-                .build();
+        // given
+        SetterDescriptor setterDescriptor = new SetterDescriptor.Builder<>(
+                Wrapper.class.getMethod("set", String.class)
+        )
+        .setAnnotation(Marker.class)
+        .addParameterTranslator(
+                new PartialMapperImpl(
+                        new AnyParameterFilter(),
+                        new ParameterValue<>(String.class, 0)
+                )
+        )
+        .build();
 
         // when
         Enhancer enhancer = setterDescriptor.getEnhancer(new TypeDescription.ForLoadedType(HasField.class));
@@ -54,8 +65,9 @@ public class SetterDescriptorTest {
 
     @Test
     public void whenFieldAbsent_thenReturnDoNothingEnhancer() throws ReflectiveOperationException, ClassGeneratorException {
+        // given
         SetterDescriptor setterDescriptor = new SetterDescriptor.Builder(
-                Wrapper.class.getMethod("set", String.class), String.class)
+                Wrapper.class.getMethod("set", String.class))
                 .setAnnotation(Marker.class)
                 .build();
 

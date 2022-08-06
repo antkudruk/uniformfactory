@@ -15,11 +15,12 @@ public class FieldAccessImplementationTest {
     private static final String ORIGIN_FIELD = "originField";
     private static final String METHOD_NAME = "getMethod";
 
+    @SuppressWarnings("unused")
     public static class OriginImpl {
-        @SuppressWarnings("unused")
         public String publicField = "10";
-        @SuppressWarnings("unused")
         private String privateField = "20";
+        private long privatePrimitive = 30L;
+        private long publicPrimitive = 40L;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -28,26 +29,26 @@ public class FieldAccessImplementationTest {
 
     @Test
     public void testPublic() throws Exception {
-        test(OriginImpl.class, "publicField", "10");
+        testReturningReference(OriginImpl.class, "publicField", "10");
     }
 
     @Test
     public void testPrivate() throws Exception {
-        test(OriginImpl.class, "privateField", "20");
+        testReturningReference(OriginImpl.class, "privateField", "20");
     }
 
     @Test
     public void testSuperPublic() throws Exception {
-        test(OriginDerived.class, "publicField", "10");
+        testReturningReference(OriginDerived.class, "publicField", "10");
     }
 
     @Test
     public void testSuperPrivate() throws Exception {
-        test(OriginDerived.class, "privateField", "20");
+        testReturningReference(OriginDerived.class, "privateField", "20");
     }
 
     @SuppressWarnings("unchecked")
-    private void test(Class originClass, String fieldName, Object expectedResult) throws Exception {
+    private void testReturningReference(Class originClass, String fieldName, Object expectedResult) throws Exception {
 
         TypeDescription originTypeDescription
                 = new TypeDescription.ForLoadedType(originClass);
@@ -100,5 +101,41 @@ public class FieldAccessImplementationTest {
         Object wrapper = wrapperClass.getConstructor().newInstance();
         Whitebox.setInternalState(wrapper, ORIGIN_FIELD, new OriginImpl());
         assertEquals("1010", Whitebox.invokeMethod(wrapper, METHOD_NAME));
+    }
+
+    @Test
+    public void testPrivatePrimitiveField() throws Exception {
+        testReturningPrimitive(OriginDerived.class, "privatePrimitive", 30L);
+    }
+
+    @Test
+    public void testPublicPrimitiveField() throws Exception {
+        testReturningPrimitive(OriginDerived.class, "publicPrimitive", 40L);
+    }
+
+    private void testReturningPrimitive(Class<?> originClass, String fieldName, long expectedResult) throws Exception {
+
+        TypeDescription originTypeDescription
+                = new TypeDescription.ForLoadedType(originClass);
+
+        ByteBuddy byteBuddy = new ByteBuddy();
+
+        Class<?> wrapperClass = byteBuddy
+                .subclass(Object.class)
+                .defineField(ORIGIN_FIELD, originClass, Opcodes.ACC_PRIVATE)
+                .defineMethod(METHOD_NAME, long.class, Opcodes.ACC_PUBLIC)
+                .intercept(new FieldAccessImplementation(ORIGIN_FIELD,
+                        TypeDescriptionShortcuts.deepFindField(originTypeDescription, fieldName)
+                                .orElseThrow(RuntimeException::new),
+                        t -> t
+                ))
+
+                .make()
+                .load(getClass().getClassLoader())
+                .getLoaded();
+
+        Object wrapper = wrapperClass.getConstructor().newInstance();
+        Whitebox.setInternalState(wrapper, ORIGIN_FIELD, originClass.getConstructor().newInstance());
+        assertEquals(expectedResult, (long)Whitebox.invokeMethod(wrapper, METHOD_NAME));
     }
 }

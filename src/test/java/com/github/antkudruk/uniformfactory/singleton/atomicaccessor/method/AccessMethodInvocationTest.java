@@ -1,7 +1,7 @@
 package com.github.antkudruk.uniformfactory.singleton.atomicaccessor.method;
 
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterDescriptor;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialParameterDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.Constants;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatchers;

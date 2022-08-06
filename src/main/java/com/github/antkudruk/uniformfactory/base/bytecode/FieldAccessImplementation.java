@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.implementation.bytecode.Duplication;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
+import net.bytebuddy.implementation.bytecode.assign.TypeCasting;
+import net.bytebuddy.implementation.bytecode.assign.primitive.PrimitiveUnboxingDelegate;
 import net.bytebuddy.implementation.bytecode.constant.FieldConstant;
 import net.bytebuddy.implementation.bytecode.constant.IntegerConstant;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
@@ -130,14 +132,22 @@ public class FieldAccessImplementation implements Implementation {
                             ? publicFieldStackManipulation()
                             : privateFieldStackManipulation(),
 
-                    // Apply method on the field
-                    MethodInvocation.invoke(TypeDescriptionShortcuts.findMethod(
-                            Function.class,
-                            "apply",
-                            Object.class).orElseThrow(RuntimeException::new)
-                    ),
+                    instrumentedMethod.getReturnType().equals(new TypeDescription.ForLoadedType(void.class))
+                    ? MethodReturn.VOID
+                    : new StackManipulation.Compound(
+                            // Apply method on the field
+                            MethodInvocation.invoke(TypeDescriptionShortcuts.findMethod(
+                                    Function.class,
+                                    "apply",
+                                    Object.class).orElseThrow(RuntimeException::new)
+                            ),
+                            TypeCasting.to(instrumentedMethod.getReturnType().asErasure().asBoxed()),
+                            instrumentedMethod.getReturnType().isPrimitive()
+                                ? PrimitiveUnboxingDelegate.forPrimitive(instrumentedMethod.getReturnType())
+                                : TypeCasting.to(instrumentedMethod.getReturnType().asErasure().asBoxed()),
+                            MethodReturn.of(instrumentedMethod.getReturnType())
+                    )
 
-                    MethodReturn.REFERENCE
             ).apply(methodVisitor, implementationContext)
                     .getMaximalSize(),
                     instrumentedMethod.getStackSize());

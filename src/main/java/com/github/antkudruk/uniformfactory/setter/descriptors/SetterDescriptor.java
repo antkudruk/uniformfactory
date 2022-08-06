@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - 2022 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,26 +16,29 @@
 
 package com.github.antkudruk.uniformfactory.setter.descriptors;
 
+import com.github.antkudruk.uniformfactory.base.AbstractMethodWithMappersDescriptorImpl;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
-import com.github.antkudruk.uniformfactory.base.MethodDescriptor;
+import com.github.antkudruk.uniformfactory.base.ParameterMapperBuilder;
+import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
+import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
-import com.github.antkudruk.uniformfactory.seletor.MemberSelector;
-import com.github.antkudruk.uniformfactory.seletor.MemberSelectorByAnnotation;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelectorByAnnotation;
 import com.github.antkudruk.uniformfactory.setter.enhanncers.DoNothingEnhancer;
 import com.github.antkudruk.uniformfactory.setter.enhanncers.SetterEnhancer;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapper;
-import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.ParameterMappersCollection;
-import com.github.antkudruk.uniformfactory.singleton.descriptors.ResultMapperCollection;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
+import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.HasParameterTranslator;
+import lombok.Getter;
+import lombok.experimental.Delegate;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SetterDescriptor<A> implements MethodDescriptor {
+public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl {
 
     private static final String FIELD_NAME_PREFIX = "setterMethod";
     private static final AtomicLong fieldNameIndex = new AtomicLong(0L);
@@ -43,15 +46,8 @@ public class SetterDescriptor<A> implements MethodDescriptor {
     private final String fieldAccessorFieldName
             = FIELD_NAME_PREFIX + fieldNameIndex.incrementAndGet();
 
-    private final MemberSelector memberSelector;
-    private final ParameterMappersCollection<A> parameterMapper;
-    private final Method wrapperMethod;
-
     public SetterDescriptor(BuilderInterface builder) {
-        this.memberSelector = builder.getMemberSelector();
-        this.wrapperMethod = builder.getWrapperMethod();
-        this.parameterMapper = builder.getParameterMapper();
-
+        super(builder);
     }
 
     @Override
@@ -64,11 +60,9 @@ public class SetterDescriptor<A> implements MethodDescriptor {
 
         List<FieldDescription> singletonOriginField = memberSelector.getFields(originType);
 
-
-        // FieldDescription field = ;
         if(singletonOriginField.size() > 0) {
             return new SetterEnhancer(
-                    fieldAccessorFieldName, // singletonOriginField.get(0),
+                    fieldAccessorFieldName,
                     originType,
                     singletonOriginField.get(0),
                     wrapperMethod,
@@ -80,103 +74,70 @@ public class SetterDescriptor<A> implements MethodDescriptor {
         }
     }
 
-    public interface BuilderInterface<R> {
+    public interface BuilderInterface extends AbstractMethodWithMappersDescriptorImpl.BuilderInterface {
         MemberSelector getMemberSelector();
         Method getWrapperMethod();
-        ParameterMappersCollection getParameterMapper();
-        SetterDescriptor<R> build();
+        ParameterBindersSource getParameterMapper();
     }
 
-    // TODO: Try Lombok to reduce that code nightmare
-    public static class Builder<R> implements BuilderInterface<R> {
+    @SuppressWarnings("unchecked")
+    public static abstract class AbstractBuilder<W, T extends AbstractBuilder<W, T>>
+            implements BuilderInterface, HasParameterTranslator {
+
+        @Getter
         private Method wrapperMethod;
-        private ParameterMappersCollection parameterMapper;
+        @Getter
         private MemberSelector memberSelector;
 
-        public Builder(Method wrapperMethod, Class<R> wrapperParameterType) {
+        @Delegate
+        private final ParameterMapperBuilder<T> parameterMapperBuilder = new ParameterMapperBuilder<>((T) this);
+
+        public AbstractBuilder(Method wrapperMethod) {
             this.wrapperMethod = wrapperMethod;
-            this.parameterMapper = new ParameterMappersCollection<>(wrapperParameterType);
         }
 
-        public SetterDescriptor build() {
-            return new SetterDescriptor(this);
+        public SetterDescriptor<W> build() {
+            return new SetterDescriptor<>(this);
         }
 
-        @Override
-        public MemberSelector getMemberSelector() {
-            return memberSelector;
-        }
-
-        public Builder<R> setAnnotation(Class<? extends Annotation> annotation) {
+        public T setAnnotation(Class<? extends Annotation> annotation) {
              memberSelector = new MemberSelectorByAnnotation(annotation);
-             return this;
-        }
-
-        public Builder<R> setMemberSelector(MemberSelector memberSelector) {
-            this.memberSelector = memberSelector;
-            return this;
-        }
-
-        @Override
-        public Method getWrapperMethod() {
-            return wrapperMethod;
-        }
-
-        public Builder<R> setWrapperMethod(Method wrapperMethod) {
-            this.wrapperMethod = wrapperMethod;
-            return this;
-        }
-
-        @Override
-        public ParameterMappersCollection getParameterMapper() {
-            return parameterMapper;
-        }
-    }
-
-    public static abstract class IntermediateShortcutBuilder<R, T extends IntermediateShortcutBuilder<R, T>>
-            extends Builder<R>
-            implements BuilderInterface<R> {
-
-        private MemberSelector memberSelector;
-        private final List<PartialMapper> parameterMappers = new ArrayList<>();
-        private ResultMapperCollection<R> resultMapper;
-
-
-        public IntermediateShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
-            super(wrapperMethod, methodResultType);
-        }
-
-        @Override
-        public MemberSelector getMemberSelector() {
-            return memberSelector;
+             return (T) this;
         }
 
         public T setMemberSelector(MemberSelector memberSelector) {
             this.memberSelector = memberSelector;
-            return (T)this;
+            return (T) this;
         }
 
-        @Override
-        public Method getWrapperMethod() {
-            return null;
-        }
-
-        @Override
-        public ParameterMappersCollection getParameterMapper() {
-            return null;
-        }
-
-        @Override
-        public SetterDescriptor<R> build() {
-            return new SetterDescriptor<>(this);
+        public T setWrapperMethod(Method wrapperMethod) {
+            this.wrapperMethod = wrapperMethod;
+            return (T) this;
         }
     }
 
-    public static final class ShortcutBuilder<R>
-            extends IntermediateShortcutBuilder<R, ShortcutBuilder<R>> {
+    public static class Builder<R> extends AbstractBuilder<R, Builder<R>> {
 
-        public ShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
-            super(wrapperMethod, methodResultType);
+        /**
+         *
+         * @param wrapperMethod Method to be implemented by the setter
+         */
+        public Builder(Method wrapperMethod) {
+            super(wrapperMethod);
+        }
+    }
+
+    public static final class ShortcutBuilder<W, R>
+            extends AbstractBuilder<R, ShortcutBuilder<W, R>> {
+
+        @Delegate
+        private final ChildMethodDescriptionBuilderWrapper<W> classFactoryReference;
+
+        public ShortcutBuilder(
+                ClassFactory.Builder<W> wrapperClass,
+                Method wrapperMethod) {
+            super(wrapperMethod);
+            classFactoryReference = new ChildMethodDescriptionBuilderWrapper<>(wrapperClass, this);
         }
     }
 }

@@ -6,7 +6,7 @@ import com.github.antkudruk.uniformfactory.pluginbuilder.DefaultMetaClassFactory
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
 
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
+        super(new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodSingleton(Wrapper.class.getMethod("getDelta"), int.class)
                 .setMarkerAnnotation(Marker.class)
                 .endMethodDescription()

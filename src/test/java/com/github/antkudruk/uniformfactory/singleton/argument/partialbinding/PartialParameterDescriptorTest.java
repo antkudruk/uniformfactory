@@ -1,5 +1,6 @@
 package com.github.antkudruk.uniformfactory.singleton.argument.partialbinding;
 
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialParameterDescriptor;
 import net.bytebuddy.implementation.MethodCall;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import org.junit.Ignore;

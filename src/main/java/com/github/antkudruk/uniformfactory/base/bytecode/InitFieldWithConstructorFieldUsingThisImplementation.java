@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.implementation.bytecode.assign.TypeCasting;
+import net.bytebuddy.implementation.bytecode.assign.primitive.PrimitiveUnboxingDelegate;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
 import net.bytebuddy.implementation.bytecode.member.MethodInvocation;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
@@ -98,6 +99,12 @@ public class InitFieldWithConstructorFieldUsingThisImplementation extends Abstra
                                     .filter(ElementMatchers.named("apply"))
                                     .getOnly()),
                     TypeCasting.to(wrapperField.getType()), // TODO: Can get rid?
+
+                    // TODO: Test
+                    wrapperField.getType().isPrimitive()
+                            ? PrimitiveUnboxingDelegate.forPrimitive(wrapperField.getType())
+                            : StackManipulation.Trivial.INSTANCE,
+
                     FieldAccess.forField(wrapperField).write(),
                     isTerminating() ? MethodReturn.VOID : StackManipulation.Trivial.INSTANCE
             ).apply(methodVisitor, implementationContext)

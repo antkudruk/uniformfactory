@@ -18,7 +18,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
             .addMapper(int.class, Object::toString);
 
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
+        super(new ClassFactory.Builder<>(Wrapper.class)
 
                 .addMethodSingleton(Wrapper.class.getMethod("processFirst", Integer.class), String.class)
                 .setMarkerAnnotation(FirstMethodMarker.class)

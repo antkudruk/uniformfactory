@@ -144,17 +144,17 @@ Here is an example for Gradle:
 
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.1.3'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.2.0'
 }
 ```
 
-and for Maven:~~~~
+and for Maven:
 
 ```
 <dependency>
     <groupId>com.github.antkudruk</groupId>
     <artifactId>uniform-factory</artifactId>
-    <version>0.1.3</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
@@ -167,7 +167,7 @@ Here is an example for Gradle:
 ```
 plugins {
     id 'java'
-    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.11.18"
+    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.12.6"
 }
 
 byteBuddy {
@@ -183,7 +183,7 @@ and in Maven:
     <plugin>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy-maven-plugin</artifactId>
-        <version>1.11.18</version>
+        <version>1.12.6</version>
         <executions>
             <execution>
                 <goals>
@@ -418,7 +418,7 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
     private final ClassFactory<Wrapper> classFactory;
 
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        this.classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
+        this.classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodList(
                         Wrapper.class.getMethod("getProcessors"),
                         boolean.class
@@ -566,6 +566,19 @@ You can use two wrappers:
 The example of code for multiple adapters at one origin class may be found
 [here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-9-multiple-wrappers)
 
+### Setting up a Field in the Origin Class
+
+You can do setting up the field marked with an annotation exactly the same way
+as MethodSingleton does. 
+See the example 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-10-setter)
+
+### Setting up Multiple Fields
+
+UniformFactory may implement adapters for multiple fields in the origin class
+for you. See the example 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-11-setter-map)
+
 ### Translating parameters and result
 
 #### Translating result
@@ -597,7 +610,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
             .addMapper(int.class, Object::toString);
 
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
-        super(new ClassFactory.ShortcutBuilder<>(Wrapper.class)
+        super(new ClassFactory.Builder<>(Wrapper.class)
 
                 .addMethodSingleton(FirstMethodMarker.class, Wrapper.class.getMethod("process", Integer.class), String.class)
                 .setResultMapper(resultMapperCollection)
@@ -624,7 +637,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 ## License
 
 ```
-Copyright 2020 - 2021 Anton Kudruk
+Copyright 2020 - Present Anton Kudruk
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

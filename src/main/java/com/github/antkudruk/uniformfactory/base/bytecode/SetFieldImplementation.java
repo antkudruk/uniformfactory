@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.implementation.bytecode.Duplication;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.implementation.bytecode.assign.TypeCasting;
+import net.bytebuddy.implementation.bytecode.assign.primitive.PrimitiveUnboxingDelegate;
 import net.bytebuddy.implementation.bytecode.constant.FieldConstant;
 import net.bytebuddy.implementation.bytecode.constant.IntegerConstant;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
@@ -141,7 +142,8 @@ public class SetFieldImplementation implements Implementation {
                             Object.class).orElseThrow(RuntimeException::new)
                     ),
                     // Stack: targetField, origin, value
-                    TypeCasting.to(targetField.getType().asErasure()), // TODO: Can get rid?
+                    TypeCasting.to(targetField.getType().asErasure().asBoxed()), // TODO: Can get rid?
+
                     // Stack: targetField, origin, value
                     MethodInvocation.invoke(TypeDescriptionShortcuts.findMethod(
                             Field.class,
@@ -174,7 +176,12 @@ public class SetFieldImplementation implements Implementation {
                             Object.class).orElseThrow(RuntimeException::new)
                     ),
                     // Stack: origin, value
-                    TypeCasting.to(targetField.getType().asErasure()), // TODO: Can get rid?
+                    TypeCasting.to(targetField.getType().asErasure().asBoxed()), // TODO: Can get rid?
+
+                    targetField.getType().isPrimitive()
+                            ? PrimitiveUnboxingDelegate.forPrimitive(targetField.getType())
+                            : StackManipulation.Trivial.INSTANCE,   // TODO: Test for the different types, including a custom one
+
                     // Stack: origin, value
                     FieldAccess.forField(targetField).write(),
                     // Stack:

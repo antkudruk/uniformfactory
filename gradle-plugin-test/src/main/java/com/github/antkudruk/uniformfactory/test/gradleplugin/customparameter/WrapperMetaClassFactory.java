@@ -12,7 +12,7 @@ public class WrapperMetaClassFactory extends DefaultMetaClassFactory<Wrapper> {
 
     static {
         try {
-            classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
+            classFactory = new ClassFactory.Builder<>(Wrapper.class)
                     .addMethodSingleton(
                             Wrapper.class.getMethod("common", String.class, String.class),
                             String.class)

@@ -2,7 +2,10 @@ package com.github.antkudruk.uniformfactory.setter.enhancer;
 
 import com.github.antkudruk.uniformfactory.setter.enhanncers.SetterEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.argument.exceptions.ParameterTranslatorNotFound;
-import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.ParameterMappersCollection;
+import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnyParameterFilter;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterUnion;
+import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.ParameterValue;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.EnhancerTestUtils;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatchers;
@@ -35,8 +38,14 @@ public class SetterEnhancerTest {
                 new TypeDescription.ForLoadedType(OriginImpl.class)
                         .getDeclaredFields().filter(ElementMatchers.named("field")).getOnly(),
                 Wrapper.class.getDeclaredMethod("setValue", Object.class),
-                new ParameterMappersCollection<>(String.class)
-                        .add(TypeDescription.STRING, t -> t)
+                new PartialParameterUnion.Builder()
+                        .add(
+                                new PartialMapperImpl(
+                                        new AnyParameterFilter(),
+                                        new ParameterValue<>(String.class, 0)
+                                )
+                        )
+                        .build()
         );
 
         Class<? extends Wrapper> wrapperClass = EnhancerTestUtils.mimicWrapperClass(Wrapper.class, OriginImpl.class, enhancer);
@@ -46,7 +55,6 @@ public class SetterEnhancerTest {
 
         wrapper.setValue("test");
 
-        //
         Object state = Whitebox.getInternalState(origin, "field");
 
         assertEquals("test", state);
