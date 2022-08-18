@@ -272,7 +272,7 @@ public class WrapperPlugin implements Plugin {
 
     // TODO: Builder does not process default parameters unless it's build method called. Make the constructor work .
     @SuppressWarnings("unused")
-    private <W> WrapperPlugin(Builder<W> builder) {
+    public  <W> WrapperPlugin(Builder<W> builder) {
         this(
                 builder.originInterface,
                 builder.getWrapperMethodName,
