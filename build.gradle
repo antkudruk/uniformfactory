@@ -114,6 +114,7 @@ task testExamples {
                     commandLine gradlewRelativePath, 'clean', 'test', 'publishToMavenLocal'
                 }
                 standardOutput = stdout
+                errorOutput = stdout
             }
             stdout.println("   Compiling Client for the listing ${file.name}")
             exec {
@@ -124,6 +125,7 @@ task testExamples {
                     commandLine gradlewRelativePath, 'clean', 'build'
                 }
                 standardOutput = stdout
+                errorOutput = stdout
             }
         }
         println "Output: $stdout"
