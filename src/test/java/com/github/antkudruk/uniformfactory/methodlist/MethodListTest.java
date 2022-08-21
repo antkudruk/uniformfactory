@@ -81,10 +81,12 @@ public class MethodListTest {
     public void test() throws ReflectiveOperationException, ClassGeneratorException {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
-                        new MethodListDescriptor.ShortcutBuilder<>(Wrapper.class.getMethod("getFunctionsList"), String.class)
-                                .setMarkerAnnotation(MethodMarker.class)
-                                .setFunctionalInterface(Fun.class)
+                        new MethodListDescriptor.Builder<>(
+                                    Fun.class,
+                                    Wrapper.class.getMethod("getFunctionsList"))
 
+                                .setMarkerAnnotation(MethodMarker.class)
+                                .getterElementFactory(String.class)
                                 .parameterSource(String.class, 0)
                                 .applyToAnnotated(Name.class)
                                 .finishParameterDescription()
@@ -93,6 +95,7 @@ public class MethodListTest {
                                 .applyToAnnotated(Index.class)
                                 .addTranslator(Integer.class, Long::intValue)
                                 .finishParameterDescription()
+                                .finishElementFactory()
 
                                 .build()
                 )
@@ -126,13 +129,11 @@ public class MethodListTest {
     @Test
     public void test1() throws ReflectiveOperationException, ClassGeneratorException {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
-                .addMethodDescriptor(new MethodListDescriptor.ShortcutBuilder<>(
-                        Wrapper.class.getMethod("getFunctionsList"), String.class)
+                .addMethodDescriptor(new MethodListDescriptor.Builder<>(
+                        Fun.class, Wrapper.class.getMethod("getFunctionsList"))
 
                         .setMarkerAnnotation(MethodMarker.class)
-
-                        .setFunctionalInterface(Fun.class)
-
+                        .getterElementFactory(String.class)
                         .constantSource("Value")
                         .applyToTyped(String.class)
 
@@ -141,6 +142,8 @@ public class MethodListTest {
 
                         .constantSource(10)
                         .applyToAnnotated(Index.class)
+
+                        .finishElementFactory()
 
                         .build()
                 )
@@ -175,11 +178,12 @@ public class MethodListTest {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
                         new MethodListDescriptor.Builder<>(
-                                Wrapper.class.getMethod("getFunctionsList"),
-                                String.class)
+                                Fun.class,
+                                Wrapper.class.getMethod("getFunctionsList"))
 
                                 .setMarkerAnnotation(MethodMarker.class)
-                                .setFunctionalInterface(Fun.class)
+
+                                .getterElementFactory(String.class)
 
                                 .addParameterTranslator(new PartialMapperImpl(
                                         new AnnotationParameterFilter<>(Name.class),
@@ -191,6 +195,8 @@ public class MethodListTest {
                                         new ParameterValue<>(Long.class, 1)
                                                 .addTranslator(new TypeDescription.ForLoadedType(Integer.class), Long::intValue)
                                 ))
+
+                                .finishElementFactory()
 
                                 .build()
                 )
@@ -223,9 +229,8 @@ public class MethodListTest {
 
     @Test(expected = WrongTypeException.class)
     public void inappropriateMethodReturnType() throws ReflectiveOperationException {
-        new MethodListDescriptor.Builder<>(WrapperOfMaps.class.getMethod("getFunctionsList"), String.class)
+        new MethodListDescriptor.Builder<>(Fun.class, WrapperOfMaps.class.getMethod("getFunctionsList"))
                 .setMarkerAnnotation(MethodMarker.class)
-                .setFunctionalInterface(Fun.class)
                 .build();
     }
 }

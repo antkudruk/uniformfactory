@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public abstract class AbstractSingletonEnhancerUsingAtom implements Enhancer {
     private final DynamicType.Unloaded atomClassUnloaded;
     private final TypeDescription atomClass;
 
-    AbstractSingletonEnhancerUsingAtom(
+    public AbstractSingletonEnhancerUsingAtom(
             String fieldAccessorFieldName,
             TypeDescription originClass,
             Method wrapperMethod,

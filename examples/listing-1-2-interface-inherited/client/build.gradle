@@ -1,0 +1,41 @@
+buildscript {
+    repositories {
+        mavenLocal()
+    }
+    dependencies {
+        classpath group: 'com.github.antkudruk', 
+                name: 'gradle-listing-1-2-interface-inherited', 
+                version: '1.0-SNAPSHOT'
+    }
+}
+
+plugins {
+    id 'java'
+    id "net.bytebuddy.byte-buddy-gradle-plugin" version '1.12.6'
+}
+
+group 'com.github.antkudruk'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation 'net.bytebuddy:byte-buddy:1.12.6'
+    implementation group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.2.1'
+    implementation group: 'com.github.antkudruk', name: 'gradle-listing-1-2-interface-inherited', version: '1.0-SNAPSHOT'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+}
+
+build {
+    byteBuddy {
+        transformation {
+            plugin = com.github.antkudruk.uniformfactory.test.gradleplugin.emptywrapper.interfaceinherited.PluginImpl
+        }
+    }
+}

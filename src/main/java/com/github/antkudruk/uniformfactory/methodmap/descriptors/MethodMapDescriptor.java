@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - 2022 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,31 +16,27 @@
 
 package com.github.antkudruk.uniformfactory.methodmap.descriptors;
 
-import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
+import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescriptor;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
-import com.github.antkudruk.uniformfactory.methodcollection.ElementGenerator;
+import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
+import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.methodmap.enhancers.MemberEntry;
-import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.field.AccessFieldValue;
-import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.method.AccessMethodInvocation;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
-import com.github.antkudruk.uniformfactory.exception.AmbiguousValueSourceException;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodmap.enhancers.MethodMapEnhancer;
+import lombok.experimental.Delegate;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.implementation.MethodCall;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.implementation.bytecode.constant.TextConstant;
-import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -49,39 +45,24 @@ import java.util.function.Function;
  * Method defined with {@code MethodMapDescriptor} returns a map of objects that
  * have methods calling corresponding rigin method.
  *
+ * @param <F> Type of the map values
+ *
  */
-public class MethodMapDescriptor<R> extends AbstractMethodDescriptorImpl {
-
-    public static final String INTERMEDIATE_WRAPPER_FIELD_NAME = "intermediateWrapper";
+public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F> {
 
     private final Function<MethodDescription, StackManipulation> methodKeyGetter;
     private final Function<FieldDescription, StackManipulation> fieldKeyGetter;
-    private final Class functionalInterface;
-    private final Method wrapperMethod;
-    private final Method functionalClassMethod;
 
-    public MethodMapDescriptor(BuilderInterface<R> builder) {
+    public MethodMapDescriptor(BuilderInterface<F> builder) {
         super(builder);
-
-        wrapperMethod = builder.getWrapperMethod();
-
-        this.functionalInterface = builder.getFunctionalInterface();
-
         this.methodKeyGetter = builder.getMethodKeyGetter();
         this.fieldKeyGetter = builder.getFieldKeyGetter();
-
-        if (functionalInterface.getDeclaredMethods().length != 1) {
-            throw new RuntimeException("Functional interface must contain exactly one method.");
-        }
-
-        functionalClassMethod = functionalInterface.getDeclaredMethods()[0];
         validate();
     }
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     @Override
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
 
@@ -90,35 +71,14 @@ public class MethodMapDescriptor<R> extends AbstractMethodDescriptorImpl {
         for (MethodDescription originMethod : memberSelector.getMethods(originType)) {
             functionalMapperClasses.add(new MemberEntry(
                     methodKeyGetter.apply(originMethod),
-                    ElementGenerator.INSTANCE.generate(
-                            originType,
-                            new TypeDescription.ForLoadedType(functionalInterface),
-                            AccessMethodInvocation.INSTANCE.generateClass(
-                                    originType,
-                                    resultMapper.getTranslatorOrThrow(originMethod.getReturnType().asErasure()),
-                                    originMethod,
-                                    functionalClassMethod,
-                                    parameterMapper.getParameterBinders(originMethod)
-                            ),
-                            MethodCall::withAllArguments,
-                            INTERMEDIATE_WRAPPER_FIELD_NAME
-                    )
+                    getElementFactory().getMethodElement(originType, originMethod).build(originType)
             ));
         }
 
         for (FieldDescription field : memberSelector.getFields(originType)) {
             functionalMapperClasses.add(new MemberEntry(
                     fieldKeyGetter.apply(field),
-                    ElementGenerator.INSTANCE.generate(
-                            originType,
-                            new TypeDescription.ForLoadedType(functionalInterface),
-                            AccessFieldValue.INSTANCE.generateClass(
-                                    originType,
-                                    resultMapper.getTranslatorOrThrow(field.getType().asErasure()),
-                                    field),
-                            m -> m,
-                            INTERMEDIATE_WRAPPER_FIELD_NAME
-                    )
+                    getElementFactory().getFieldElement(originType, field).build(originType)
             ));
         }
 
@@ -133,91 +93,42 @@ public class MethodMapDescriptor<R> extends AbstractMethodDescriptorImpl {
         if (!Map.class.isAssignableFrom(wrapperMethod.getReturnType())) {
             throw new WrongTypeException(Map.class, wrapperMethod.getReturnType());
         }
-
-        if (functionalClassMethod.getReturnType() != resultMapper.getWrapperReturnType()) {
-            throw new WrongTypeException(functionalClassMethod.getReturnType(), resultMapper.getWrapperReturnType());
-        }
     }
 
-    public interface BuilderInterface<R>
-            extends AbstractMethodDescriptorImpl.BuilderInterface<R> {
+    public interface BuilderInterface<F>
+            extends AbstractMethodCollectionDescriptor.BuilderInterface<F> {
 
-        Class getFunctionalInterface();
+        /**
+         *
+         * @return Type of the map values
+         */
+        Class<F> getFunctionalInterface();
+
+        /**
+         *
+         * @return Operations to get key for a method
+         */
         Function<MethodDescription, StackManipulation>  getMethodKeyGetter();
+
+        /**
+         *
+         * @return Operations to get key for a field
+         */
         Function<FieldDescription, StackManipulation>  getFieldKeyGetter();
     }
 
-    public static class Builder<R>
-            extends AbstractMethodDescriptorImpl.Builder<R, MethodMapDescriptor.Builder<R>>
-            implements BuilderInterface<R> {
+    @SuppressWarnings("unchecked")
+    public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
+            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T>
+            implements BuilderInterface<F> {
 
-        private Class functionalInterface;
+        private final Class<F> functionalInterface;
         private Function<MethodDescription, StackManipulation> methodKeyGetter;
         private Function<FieldDescription, StackManipulation> fieldKeyGetter;
 
-        public Builder(Method wrapperMethod, Class<R> methodResultType) {
-            super(wrapperMethod, methodResultType);
-        }
-
-        public Builder<R> setFunctionalInterface(Class functionalInterface) {
+        public AbstractBuilder(Class<F> functionalInterface, Method wrapperMethod) {
+            super(wrapperMethod, functionalInterface);
             this.functionalInterface = functionalInterface;
-            return this;
-        }
-
-        public Builder<R> setMethodKeyGetter(Function<MethodDescription, StackManipulation> methodKeyGetter) {
-            this.methodKeyGetter = methodKeyGetter;
-            return this;
-        }
-
-        public Builder<R> setFieldKeyGetter(Function<FieldDescription, StackManipulation> fieldKeyGetter) {
-            this.fieldKeyGetter = fieldKeyGetter;
-            return this;
-        }
-
-        public <A extends Annotation> Builder<R> setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {
-            setMarkerAnnotation(marker);
-            setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(md.getDeclaredAnnotations().ofType(marker).load())));
-            setFieldKeyGetter(fd -> new TextConstant(keyGetter.apply(fd.getDeclaredAnnotations().ofType(marker).load())));
-            return this;
-        }
-
-        @Override
-        public Class getFunctionalInterface() {
-            return functionalInterface;
-        }
-
-        @Override
-        public Function<MethodDescription, StackManipulation> getMethodKeyGetter() {
-            return methodKeyGetter;
-        }
-
-        @Override
-        public Function<FieldDescription, StackManipulation> getFieldKeyGetter() {
-            return fieldKeyGetter;
-        }
-
-        @Override
-        public MethodMapDescriptor<R> build() {
-            return new MethodMapDescriptor<>(this);
-        }
-    }
-
-    public static abstract class IntermediateShortcutBuilder<R, T extends IntermediateShortcutBuilder<R, T>>
-            extends AbstractMethodDescriptorImpl.ShortcutBuilder<R, T>
-            implements BuilderInterface<R> {
-
-        private Class functionalInterface;
-        private Function<MethodDescription, StackManipulation> methodKeyGetter;
-        private Function<FieldDescription, StackManipulation> fieldKeyGetter;
-
-        public IntermediateShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
-            super(wrapperMethod, methodResultType);
-        }
-
-        @SuppressWarnings("unchecked")
-        public T setFunctionalInterface(Class functionalInterface) {
-            this.functionalInterface = functionalInterface;
-            return (T) this;
         }
 
         public T setMethodKeyGetter(Function<MethodDescription, StackManipulation> methodKeyGetter) {
@@ -230,15 +141,8 @@ public class MethodMapDescriptor<R> extends AbstractMethodDescriptorImpl {
             return (T) this;
         }
 
-        public <A extends Annotation> T setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {
-            setMarkerAnnotation(marker);
-            setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(md.getDeclaredAnnotations().ofType(marker).load())));
-            setFieldKeyGetter(fd -> new TextConstant(keyGetter.apply(fd.getDeclaredAnnotations().ofType(marker).load())));
-            return (T) this;
-        }
-
         @Override
-        public Class getFunctionalInterface() {
+        public Class<F> getFunctionalInterface() {
             return functionalInterface;
         }
 
@@ -252,17 +156,42 @@ public class MethodMapDescriptor<R> extends AbstractMethodDescriptorImpl {
             return fieldKeyGetter;
         }
 
+        public <A extends Annotation> T setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {
+            setMarkerAnnotation(marker);
+            setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(Objects.requireNonNull(md.getDeclaredAnnotations().ofType(marker)).load())));
+            setFieldKeyGetter(fd -> new TextConstant(keyGetter.apply(Objects.requireNonNull(fd.getDeclaredAnnotations().ofType(marker)).load())));
+            return (T) this;
+        }
+
         @Override
-        public MethodMapDescriptor<R> build() {
+        public MethodMapDescriptor<F> build() {
             return new MethodMapDescriptor<>(this);
         }
     }
 
-    public static final class ShortcutBuilder<R>
-            extends IntermediateShortcutBuilder<R, ShortcutBuilder<R>> {
+    public static final class Builder<F> extends AbstractBuilder<F, Builder<F>> {
+        public Builder(Class<F> functionalInterface, Method wrapperMethod) {
+            super(functionalInterface, wrapperMethod);
+        }
+    }
 
-        public ShortcutBuilder(Method wrapperMethod, Class<R> methodResultType) {
-            super(wrapperMethod, methodResultType);
+    /**
+     * Map of methods
+     *
+     * @param <F> Type of a list element
+     */
+    public static class ShortcutBuilder<W, F>
+            extends AbstractBuilder<F, ShortcutBuilder<W, F>> {
+
+        @Delegate
+        private final ChildMethodDescriptionBuilderWrapper<W> classFactoryReference;
+
+        public ShortcutBuilder(
+                ClassFactory.Builder<W> wrapperClass,
+                Class<F> functionalInterface,
+                Method wrapperMethod) {
+            super(functionalInterface, wrapperMethod);
+            classFactoryReference = new ChildMethodDescriptionBuilderWrapper<>(wrapperClass, this);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - 2022 Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,45 +17,45 @@
 package com.github.antkudruk.uniformfactory.singleton.atomicaccessor.field;
 
 import com.github.antkudruk.uniformfactory.base.bytecode.FieldAccessImplementation;
+import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.AbstractAtomGenerator;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.implementation.FieldAccessor;
-import net.bytebuddy.implementation.MethodCall;
-import net.bytebuddy.jar.asm.Opcodes;
+import net.bytebuddy.dynamic.scaffold.subclass.ConstructorStrategy;
 
+import java.lang.reflect.Method;
 import java.util.function.Function;
 
-import static com.github.antkudruk.uniformfactory.common.TypeDescriptionShortcuts.findConstructor;
 import static com.github.antkudruk.uniformfactory.singleton.atomicaccessor.Constants.METHOD_NAME;
 import static com.github.antkudruk.uniformfactory.singleton.atomicaccessor.Constants.ORIGIN_FIELD_NAME;
 
-public class AccessFieldValue {
+public class AccessFieldValue extends AbstractAtomGenerator {
 
     public static final AccessFieldValue INSTANCE = new AccessFieldValue();
 
     public DynamicType.Unloaded generateClass(
             TypeDescription originClass,
             Function resultTranslator,
-            FieldDescription fieldDescription) {
-        return new ByteBuddy()
-                .subclass(Object.class)
+            FieldDescription fieldDescription,
+            Method wrapperMethod) {
 
-                .defineField(ORIGIN_FIELD_NAME, originClass,
-                        Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)
 
-                .defineConstructor(Visibility.PUBLIC)
-                .withParameters(originClass)
-                .intercept(MethodCall.invoke(findConstructor(Object.class).orElse(null))
-                        .andThen(FieldAccessor.ofField(ORIGIN_FIELD_NAME).setsArgumentAt(0)))
-                .defineMethod(METHOD_NAME, Object.class, Visibility.PUBLIC)
+        DynamicType.Builder bbBuilder = new ByteBuddy()
+                .subclass(Object.class, ConstructorStrategy.Default.NO_CONSTRUCTORS);
+
+        bbBuilder = createCunstructorSettingUpOrigin(bbBuilder, originClass);
+        //bbBuilder = createResultTranslatorField(bbBuilder, resultTranslator);
+
+        bbBuilder = bbBuilder
+                .defineMethod(METHOD_NAME, wrapperMethod.getReturnType(), Visibility.PUBLIC)
                 .intercept(new FieldAccessImplementation(
                         ORIGIN_FIELD_NAME,
                         fieldDescription,
                         resultTranslator
-                ))
-                .make();
+                ));
+
+        return bbBuilder.make();
     }
 }

@@ -1,124 +1,134 @@
 plugins {
     id 'java-library'
-    id 'maven'
     id 'maven-publish'
     id 'signing'
 }
 
 // The current version
-def libraryVersion='0.1.0'
+def libraryVersion='0.2.1'
 
-group 'com.github.antkudruk'
-version libraryVersion
+group = 'com.github.antkudruk'
+version = libraryVersion
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
 }
 
-configurations {
-    testImplementation.extendsFrom compileOnly
-}
-
 dependencies {
-    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.6'
+    implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.12.6'
 
-    testCompile 'junit:junit:4.12',
+    testImplementation 'junit:junit:4.12',
             'org.powermock:powermock-core:2.0.4',
             'org.powermock:powermock-module-junit4:2.0.4',
             'org.powermock:powermock-api-mockito2:2.0.4'
-}
-
-jar {
-    manifest {
-        attributes(
-                'Built-By'       : System.properties['user.name'],
-                'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-
-                'Created-By'     : "Gradle ${gradle.gradleVersion}",
-                'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-                'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
-                'Bundle-License' : "http://www.apache.org/licenses/LICENSE-2.0.txt",
-                'Bundle-SymbolicName': "com.github.antkudruk.uniformfactory",
-                'Bundle-Name'    : "Uniform Factory",
-                'Bundle-Version' : libraryVersion
-        )
-    }
-}
-
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allJava
-    classifier = 'sources'
-}
-
-task javadocJar(type: Jar) {
-    from javadoc
-    classifier = 'javadoc'
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
 if(hasProperty('ossrhUsername') && hasProperty('ossrhPassword')) {
-    signing {
-        sign configurations.archives
-    }
-    
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                artifactId = 'uniform-factory'
+                from components.java
+                versionMapping {
+                    usage('java-api') {
+                        fromResolutionOf('runtimeClasspath')
+                    }
+                    usage('java-runtime') {
+                        fromResolutionResult()
+                    }
                 }
-
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
-
-                pom.project {
-                    name 'Uniform Factory'
-                    packaging 'jar'
-                    artifactId = 'uniform-factory'
-
-                    description 'Simplifies working with annotated class members'
-                    url 'https://github.com/antkudruk/uniformFactory'
-
-                    organization {
-                        name 'com.github.antkudruk'
-                        url 'https://github.com/antkudruk'
-                    }
-
-                    issueManagement {
-                        system 'GitHub'
-                        url 'https://github.com/antkudruk/uniformFactory/issues'
-                    }
-
-                    scm {
-                        connection 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
-                        developerConnection 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
-                        url 'https://oss.sonatype.org/content/repositories/snapshots'
-                    }
-
+                pom {
+                    name = 'Uniform Factory'
+                    description = 'Builds Adapter based on annotations to handle different classes the common way'
+                    url = 'https://github.com/antkudruk'
                     licenses {
                         license {
-                            name 'The Apache License, Version 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                         }
                     }
-
                     developers {
                         developer {
-                            id 'antkudruk'
-                            name 'Anton Kudruk'
-                            email 'antkudruk@gmail.com'
+                            id = 'antkudruk'
+                            name = 'Anton Kudruk'
+                            email = 'antkudruk@gmail.com'
                         }
+                    }
+                    scm {
+                        connection = 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
+                        developerConnection = 'scm:svn:https://oss.sonatype.org/content/repositories/snapshots'
+                        url = 'https://oss.sonatype.org/content/repositories/snapshots'
                     }
                 }
             }
         }
+        repositories {
+            maven {
+                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username = ossrhUsername
+                    password = ossrhPassword
+                }
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.maven
     }
 }
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
+task testExamples {
+    doLast {
+        def stdout = new ByteArrayOutputStream()
+        def files = new File('examples').listFiles()
+        def gradlewRelativePath = ['..', '..', '..', 'gradlew'].join(File.separator)
+        stdout.println("Test of examples")
+        for (File file in files) {
+            stdout.println("   Compiling Plugin for the listing ${file.name}")
+            exec {
+                workingDir "examples/${file.name}/plugin"
+                if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+                    commandLine 'cmd', '/c', gradlewRelativePath, 'clean', 'test', 'publishToMavenLocal'
+                } else {
+                    commandLine gradlewRelativePath, 'clean', 'test', 'publishToMavenLocal'
+                }
+                standardOutput = stdout
+            }
+            stdout.println("   Compiling Client for the listing ${file.name}")
+            exec {
+                workingDir "examples/${file.name}/client"
+                if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+                    commandLine 'cmd', '/c', gradlewRelativePath, 'clean', 'build'
+                } else {
+                    commandLine gradlewRelativePath, 'clean', 'build'
+                }
+                standardOutput = stdout
+            }
+        }
+        println "Output: $stdout"
+    }
+    dependsOn(publishToMavenLocal)
+}
+
+

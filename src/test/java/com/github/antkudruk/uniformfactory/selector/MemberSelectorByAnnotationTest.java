@@ -1,6 +1,6 @@
 package com.github.antkudruk.uniformfactory.selector;
 
-import com.github.antkudruk.uniformfactory.seletor.MemberSelectorByAnnotation;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelectorByAnnotation;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;

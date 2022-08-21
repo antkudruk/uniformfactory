@@ -17,13 +17,6 @@ public class PluginBuilderTest {
 
     private static final String ORIGIN_INTERFACE = "originInterface";
     private static final String GET_WRAPPER = "getWrapper";
-    private static final String GET_WRAPPER_METHOD_NAME = "getWrapperMethodName";
-    private static final String WRAPPER_CLASS = "wrapperClass";
-    private static final String WRAPPER = "wrapper";
-    private static final String WRAPPER_FIELD_NAME = "wrapperFieldName";
-    private static final String WRAPPER_CLASS_FACTORY = "wrapperClassFactory";
-    private static final String CLASS_FACTORY_GENERATOR_FIELD_NAME = "classFactoryGeneratorFieldName";
-    private static final String CLASS_FACTORY_GENERATOR = "classFactoryGenerator";
 
     @Test
     public void defaultValidBuilderTest() {
@@ -31,16 +24,6 @@ public class PluginBuilderTest {
 
         assertEquals(Origin.class,
                 Whitebox.getInternalState(wrapperPlugin, ORIGIN_INTERFACE));
-        assertEquals(GET_WRAPPER, Whitebox.getInternalState(wrapperPlugin,
-                GET_WRAPPER_METHOD_NAME));
-        assertEquals(Wrapper.class, Whitebox.getInternalState(wrapperPlugin,
-                WRAPPER_CLASS));
-        assertEquals(WRAPPER, Whitebox.getInternalState(wrapperPlugin,
-                WRAPPER_FIELD_NAME));
-        assertEquals(WRAPPER_CLASS_FACTORY, Whitebox.getInternalState(wrapperPlugin,
-                CLASS_FACTORY_GENERATOR_FIELD_NAME));
-        assertEquals(TestWrapperMeta.class, Whitebox
-                .getInternalState(wrapperPlugin, CLASS_FACTORY_GENERATOR));
     }
 
     @Test
@@ -52,16 +35,6 @@ public class PluginBuilderTest {
 
         assertEquals(Origin.class,
                 Whitebox.getInternalState(wrapperPlugin, ORIGIN_INTERFACE));
-        assertEquals(GET_WRAPPER, Whitebox.getInternalState(wrapperPlugin,
-                GET_WRAPPER_METHOD_NAME));
-        assertEquals(Wrapper.class, Whitebox.getInternalState(wrapperPlugin,
-                WRAPPER_CLASS));
-        assertEquals("customWrapperField", Whitebox.getInternalState(wrapperPlugin,
-                WRAPPER_FIELD_NAME));
-        assertEquals("customWrapperConstructorField", Whitebox.getInternalState(wrapperPlugin,
-                CLASS_FACTORY_GENERATOR_FIELD_NAME));
-        assertEquals(TestWrapperMeta.class, Whitebox
-                .getInternalState(wrapperPlugin, CLASS_FACTORY_GENERATOR));
     }
 
     @Test
@@ -74,16 +47,6 @@ public class PluginBuilderTest {
 
         assertEquals(OriginWithTwoMethods.class,
                 Whitebox.getInternalState(wrapperPlugin, ORIGIN_INTERFACE));
-        assertEquals(GET_WRAPPER, Whitebox.getInternalState(wrapperPlugin,
-                GET_WRAPPER_METHOD_NAME));
-        assertEquals(Wrapper.class, Whitebox.getInternalState(wrapperPlugin,
-                WRAPPER_CLASS));
-        assertEquals(WRAPPER, Whitebox.getInternalState(wrapperPlugin,
-                WRAPPER_FIELD_NAME));
-        assertEquals(WRAPPER_CLASS_FACTORY, Whitebox.getInternalState(wrapperPlugin,
-                CLASS_FACTORY_GENERATOR_FIELD_NAME));
-        assertEquals(TestWrapperMeta.class, Whitebox
-                .getInternalState(wrapperPlugin, CLASS_FACTORY_GENERATOR));
     }
 
     @Test(expected = AmbiguousGetWrapperMethodException.class)

@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.github.antkudruk.uniformfactory.base.MethodDescriptor;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodlist.descriptors.MethodListDescriptor;
 import com.github.antkudruk.uniformfactory.methodmap.descriptors.MethodMapDescriptor;
+import com.github.antkudruk.uniformfactory.setter.descriptors.SetterDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.Constants;
 import com.github.antkudruk.uniformfactory.singleton.descriptors.MethodSingletonDescriptor;
 import net.bytebuddy.ByteBuddy;
@@ -33,7 +34,7 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.MethodCall;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,18 +78,18 @@ public class ClassFactory<W> {
                     entry.getValue().getEnhancer(originClass));
         }
 
-        @SuppressWarnings("unchecked")
-        DynamicType.Builder<W> bbBuilder = (DynamicType.Builder<W>) new ByteBuddy()
-                .subclass(Object.class, ConstructorStrategy.Default.NO_CONSTRUCTORS)
-                .implement(wrapperInterface)
+        EnhancerBasedEnhancer enhancerBasedEnhancer = new EnhancerBasedEnhancer(enhancers.values());
+
+        DynamicType.Builder<W> bbBuilder = new ByteBuddy()
+                .subclass(wrapperInterface, ConstructorStrategy.Default.NO_CONSTRUCTORS)
                 .defineConstructor(Visibility.PUBLIC)
                 .withParameters(originClass)
-                .intercept(composeConstructor(enhancers.values()))
+                .intercept(enhancerBasedEnhancer.addInitiation(
+                        initialConstructorImplementation()
+                ))
                 .defineProperty(Constants.ORIGIN_FIELD_NAME, originClass, true);
 
-        for (Enhancer enhancer : enhancers.values()) {
-            bbBuilder = enhancer.addMethod(bbBuilder);
-        }
+        bbBuilder = enhancerBasedEnhancer.addMethod(bbBuilder);
 
         return bbBuilder.make();
     }
@@ -133,6 +134,7 @@ public class ClassFactory<W> {
 
         List<String> missingMethodNames = describedMethods
                 .stream()
+                .filter(d -> Modifier.isAbstract(d.getModifiers()))
                 .filter(d -> !interfaceMethods.contains(d))
                 .map(Method::getName)
                 .collect(Collectors.toList());
@@ -143,19 +145,12 @@ public class ClassFactory<W> {
         }
     }
 
-    private Implementation.Composable composeConstructor(
-            Collection<Enhancer> enhancers) {
-
+    private Implementation.Composable initialConstructorImplementation() {
         try {
-            Implementation.Composable composable = MethodCall
-                    .invoke(Object.class.getConstructor())
+            return MethodCall.invoke(wrapperInterface.isInterface()
+                    ? Object.class.getConstructor()
+                    : wrapperInterface.getConstructor())
                     .andThen(FieldAccessor.ofField(Constants.ORIGIN_FIELD_NAME).setsArgumentAt(0));
-
-            for (Enhancer enhancer : enhancers) {
-                composable = enhancer.addInitiation(composable);
-            }
-
-            return composable;
         } catch (NoSuchMethodException ex) {
             // Object class is guaranteed to have default constructor
             throw new RuntimeException(ex);
@@ -181,68 +176,48 @@ public class ClassFactory<W> {
             return this;
         }
 
+        public <R> MethodSingletonDescriptor.ShortcutBuilder<W, R> addMethodSingleton(
+                Method wrapperMethod, Class<R> resultClass) {
+            return new MethodSingletonDescriptor.ShortcutBuilder<>(this, wrapperMethod, resultClass);
+        }
+
+        /**
+         * Adds method descriptor to describe method map
+         *
+         * @param wrapperMethod Method to return the map
+         * @param functionalInterface Type of the map element
+         * @param <F> Type of the map element
+         * @return Builder to describe method map
+         */
+        public <F> MethodMapDescriptor.ShortcutBuilder<W, F> addMethodMap(
+                Method wrapperMethod,
+                Class<F> functionalInterface) {
+            return new MethodMapDescriptor.ShortcutBuilder<>(this, functionalInterface, wrapperMethod);
+        }
+
+        /**
+         * Adds method descriptor to describe method list
+         *
+         * @param wrapperMethod Method to return the list
+         * @param functionalInterface Type of the list element
+         * @param <F> Type of the list element
+         * @return Builder to describe method list
+         */
+        public <F> MethodListDescriptor.ShortcutBuilder<W, F> addMethodList(
+                Method wrapperMethod, Class<F> functionalInterface) {
+            return new MethodListDescriptor.ShortcutBuilder<>(
+                    this,
+                    functionalInterface,
+                    wrapperMethod);
+        }
+
+        public <R> SetterDescriptor.ShortcutBuilder<W, R> addSetter(
+                Method wrapperMethod) {
+            return new SetterDescriptor.ShortcutBuilder<>(this, wrapperMethod);
+        }
+
         public ClassFactory<W> build() throws ClassFactoryException {
             return new ClassFactory<>(this);
-        }
-    }
-
-    public static class ShortcutBuilder<W> extends Builder<W> {
-        public ShortcutBuilder(Class<W> wrapperInterface) {
-            super(wrapperInterface);
-        }
-
-        public <R> MethodSingletonBuilder<R> addMethodSingleton(
-                Method wrapperMethod, Class<R> resultClass) {
-            return new MethodSingletonBuilder<>(wrapperMethod, resultClass);
-        }
-
-        public <R> MethodMapBuilder<R> addMethodMap(
-                Method wrapperMethod, Class<R> resultClass) {
-            return new MethodMapBuilder<>(wrapperMethod, resultClass);
-        }
-
-        public <R> MethodListBuilder<R> addMethodList(
-                Method wrapperMethod, Class<R> resultClass) {
-            return new MethodListBuilder<>(wrapperMethod, resultClass);
-        }
-
-        public class MethodSingletonBuilder<R>
-                extends MethodSingletonDescriptor.IntermediateShortcutBuilder<R, MethodSingletonBuilder<R>> {
-
-            MethodSingletonBuilder(Method wrapperMethod, Class<R> methodResultType) {
-                super(wrapperMethod, methodResultType);
-            }
-
-            public ShortcutBuilder<W> endMethodDescription() {
-                ShortcutBuilder.this.addMethodDescriptor(this.build());
-                return ShortcutBuilder.this;
-            }
-        }
-
-        public class MethodMapBuilder<R>
-                extends MethodMapDescriptor.IntermediateShortcutBuilder<R, MethodMapBuilder<R>> {
-
-            MethodMapBuilder(Method wrapperMethod, Class<R> methodResultType) {
-                super(wrapperMethod, methodResultType);
-            }
-
-            public ShortcutBuilder<W> endMethodDescription() {
-                ShortcutBuilder.this.addMethodDescriptor(this.build());
-                return ShortcutBuilder.this;
-            }
-        }
-
-        public class MethodListBuilder<R>
-                extends MethodListDescriptor.IntermediateShortcutBuilder<R, MethodListBuilder<R>> {
-
-            MethodListBuilder(Method wrapperMethod, Class<R> methodResultType) {
-                super(wrapperMethod, methodResultType);
-            }
-
-            public ShortcutBuilder<W> endMethodDescription() {
-                ShortcutBuilder.this.addMethodDescriptor(this.build());
-                return ShortcutBuilder.this;
-            }
         }
     }
 }

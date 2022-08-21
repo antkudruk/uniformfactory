@@ -32,8 +32,9 @@ public class ParameterMappersCollectionTest {
 
     @SuppressWarnings({"unchecked", "OptionalGetWithoutIsPresent"})
     @Test
-    public void chooseAppropriateTranslatorForInheritedParameter() {
+    public void givenInheritedParameter_whenFindSuitableTranslator_thenChooseAppropriateTranslatorFor() {
 
+        // given
         ParameterMappersCollection<ParameterClass> mapper
                 = new ParameterMappersCollection<>(ParameterClass.class);
 
@@ -44,16 +45,19 @@ public class ParameterMappersCollectionTest {
 
         mapper = mapper.add(parentParameterTypeDescription, translator);
 
+        // when
         ParameterMappersCollection.ParameterMapperDescriptor<ParameterClass>
                 suitableTranslator = mapper.findSuitableTranslator(parentParameterTypeDescription).get();
 
+        // then
         assertEquals(translator, suitableTranslator.getTranslator());
     }
 
     @SuppressWarnings({"unchecked", "OptionalGetWithoutIsPresent"})
     @Test
-    public void applyLastSuitableTranslator() {
+    public void givenFewTranslator_whenFindSuitableTranslator_thenLastSuitableTranslator() {
 
+        // given
         ParameterMappersCollection<ParameterClass> mapper
                 = new ParameterMappersCollection<>(ParameterClass.class);
 
@@ -65,9 +69,11 @@ public class ParameterMappersCollectionTest {
         mapper.add(targetTypeDescription, firstTranslator);
         mapper.add(targetTypeDescription, lastTranslator);
 
+        // when
         ParameterMappersCollection.ParameterMapperDescriptor<ParameterClass>
                 suitableTranslator = mapper.findSuitableTranslator(targetTypeDescription).get();
 
+        // then
         assertNotEquals(lastTranslator, firstTranslator);
         assertEquals(lastTranslator, suitableTranslator.getTranslator());
         assertNotEquals(firstTranslator, suitableTranslator.getTranslator());

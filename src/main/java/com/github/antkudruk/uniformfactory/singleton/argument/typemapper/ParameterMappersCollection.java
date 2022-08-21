@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -84,6 +84,11 @@ public class ParameterMappersCollection<A> {
         return this;
     }
 
+    /**
+     * Returns a suitable translator from wrapper parameter type to origin parameter type
+     * @param originParameterClass Origin parameter type description
+     * @return Suitable parameter dscriptor.
+     */
     public Optional<ParameterMapperDescriptor<A>> findSuitableTranslator(
             TypeDescription originParameterClass) {
 
@@ -96,9 +101,7 @@ public class ParameterMappersCollection<A> {
             }
         }
 
-        return Optional.ofNullable(parent)
-                .map(t -> t.findSuitableTranslator(originParameterClass))
-                .map(t -> t.orElse(null));
+        return Optional.ofNullable(parent).flatMap(t -> t.findSuitableTranslator(originParameterClass));
     }
 
     public ParameterMappersCollection<A> createChild() {

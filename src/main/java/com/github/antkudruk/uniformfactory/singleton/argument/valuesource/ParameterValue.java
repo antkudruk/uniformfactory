@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package com.github.antkudruk.uniformfactory.singleton.argument.valuesource;
 
-import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
+import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnyParameterFilter;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialParameterDescriptor;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialParameterDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.ParameterFilter;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnnotationParameterFilter;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.ParameterTypeFilter;
@@ -33,6 +33,7 @@ import java.util.function.Function;
 /**
  * Provides parameter from the <b>wrapper</b> method to the <b>origin</b>
  * method.
+ *
  * @param <N> Wrapper parameter class.
  */
 public class ParameterValue<N> implements ValueSource {
@@ -58,8 +59,9 @@ public class ParameterValue<N> implements ValueSource {
     }
 
     @Override
-    public Optional<PartialDescriptor> getSource(int originIndex,
-                                                 TypeDescription originParameterType) {
+    public Optional<PartialDescriptor> getSource(
+            int originIndex,
+            TypeDescription originParameterType) {
 
         return mapper
                 .findSuitableTranslator(originParameterType)
@@ -76,7 +78,7 @@ public class ParameterValue<N> implements ValueSource {
      * @param <W> Wrapper parameter class (parameter source class)
      * @param <T> Parent wrapper type
      */
-    public static class ShortcutBuilder<W, T extends AbstractMethodDescriptorImpl.ShortcutBuilder> {
+    public static class ShortcutBuilder<W, T extends HasParameterTranslator> {
 
         private final T parentBuilder;
         private final Class<W> wrapperParameterClass;
@@ -90,6 +92,10 @@ public class ParameterValue<N> implements ValueSource {
 
         public WithDefinedTargets applyTo(ParameterFilter filter) {
             return new WithDefinedTargets(filter);
+        }
+
+        public WithDefinedTargets applyToAny() {
+            return new WithDefinedTargets(new AnyParameterFilter());
         }
 
         public WithDefinedTargets applyToAnnotated(Class<? extends Annotation> parameterAnnotation) {

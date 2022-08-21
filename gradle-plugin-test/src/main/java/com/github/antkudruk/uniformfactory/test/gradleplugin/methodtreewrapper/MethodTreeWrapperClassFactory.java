@@ -13,7 +13,7 @@ public class MethodTreeWrapperClassFactory {
 
     static  {
         try {
-            classFactory = new ClassFactory.ShortcutBuilder<>(Wrapper.class)
+            classFactory = new ClassFactory.Builder<>(Wrapper.class)
 
                     .addMethodMap(Wrapper.class.getMethod("getWrappers"), String.class)
                     .setMarkerAnnotation(FunctionalElement.class, FunctionalElement::value)

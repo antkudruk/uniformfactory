@@ -115,7 +115,7 @@ public class ClassFactorySingletonWithParameterMapperTest {
     private ClassFactory<Wrapper> createClassFactory() throws ReflectiveOperationException {
         return new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
-                        new MethodSingletonDescriptor.ShortcutBuilder<>(
+                        new MethodSingletonDescriptor.Builder<>(
                                 Wrapper.class.getMethod("common", String.class, String.class),
                                 String.class
                         )

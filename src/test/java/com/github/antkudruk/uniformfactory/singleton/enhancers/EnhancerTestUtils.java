@@ -8,9 +8,9 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.scaffold.subclass.ConstructorStrategy;
 import net.bytebuddy.implementation.MethodCall;
 
-class EnhancerTestUtils {
+public class EnhancerTestUtils {
 
-    static <W> Class<? extends W> mimicWrapperClass(
+    public static <W> Class<? extends W> mimicWrapperClass(
             Class<W> wrapperInterface,
             Class originClass,
             Enhancer enhancer) {

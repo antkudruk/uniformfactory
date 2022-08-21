@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,6 +26,19 @@ import net.bytebuddy.implementation.Implementation;
  * aware of exact origin class members they operate with.
  */
 public interface Enhancer {
+
+    /**
+     * Adds static initialization.
+     *
+     * Your enhancer may require static fields. This method is introduced for
+     * the sake of static fields initialization.
+     *
+     * @param existingImplementation Existing static initialization
+     * @return Updated static initialization
+     */
+    default Implementation.Composable addStaticInitiation(Implementation.Composable existingImplementation) {
+        return existingImplementation;
+    }
 
     /**
      * Enhances wrapper class constructor.

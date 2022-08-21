@@ -1,7 +1,8 @@
 package com.github.antkudruk.uniformfactory.singleton.descriptors;
 
 import com.github.antkudruk.uniformfactory.base.Enhancer;
-import com.github.antkudruk.uniformfactory.seletor.MemberSelector;
+import com.github.antkudruk.uniformfactory.base.MethodDescriptor;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToFieldEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToMethodEnhancer;
@@ -79,7 +80,7 @@ public class MethodSingletonDescriptorTest {
 
     }
 
-    public static class TestBuilder implements MethodSingletonDescriptor.BuilderInterface<String> {
+    private static class TestBuilder implements MethodSingletonDescriptor.BuilderInterface<String> {
 
         private final ParameterBindersSource partialMapper;
         private final ResultMapperCollection<String> resultMapper;
@@ -102,7 +103,12 @@ public class MethodSingletonDescriptorTest {
         }
 
         @Override
-        public ResultMapperCollection<String> getResultMapper() {
+        public MethodDescriptor build() {
+            return new MethodSingletonDescriptor<>(this);
+        }
+
+        @Override
+        public ResultMapperCollection<String> resultMapper() {
             return resultMapper;
         }
 
@@ -111,18 +117,14 @@ public class MethodSingletonDescriptorTest {
             return partialMapper;
         }
 
-        MethodSingletonDescriptor build() {
-            return new MethodSingletonDescriptor<>(this);
+        @Override
+        public String defaultValue() {
+            return null;
         }
 
         @Override
         public boolean hasDefaultValue() {
             return false;
-        }
-
-        @Override
-        public String getDefaultValue() {
-            return null;
         }
     }
 
@@ -201,7 +203,7 @@ public class MethodSingletonDescriptorTest {
         mockMethodList(1, singletonOriginMethod);
         mockFieldList(0, null);
 
-        MethodSingletonDescriptor methodSingletonDescriptor
+        MethodDescriptor methodSingletonDescriptor
                 = new TestBuilder(partialMapper, resultMapper, memberSelector).build();
 
         Enhancer enhancer = methodSingletonDescriptor.getEnhancer(originClass);
@@ -232,11 +234,13 @@ public class MethodSingletonDescriptorTest {
         mockMethodList(0, null);
         mockFieldList(1, singletonOriginField);
 
-        MethodSingletonDescriptor methodSingletonDescriptor
+        MethodDescriptor methodSingletonDescriptor
                 = new TestBuilder(partialMapper, resultMapper, memberSelector).build();
 
+        // when
         Enhancer enhancer = methodSingletonDescriptor.getEnhancer(originClass);
 
+        // then
         assertEquals(expectedEnhancer, enhancer);
         PowerMockito
                 .verifyNew(SingletonMethodToFieldEnhancer.class)
@@ -263,7 +267,7 @@ public class MethodSingletonDescriptorTest {
         mockMethodList(1, singletonOriginMethod);
         mockFieldList(1, singletonOriginField);
 
-        MethodSingletonDescriptor methodSingletonDescriptor
+        MethodDescriptor methodSingletonDescriptor
                 = new TestBuilder(partialMapper, resultMapper, memberSelector).build();
 
         methodSingletonDescriptor.getEnhancer(originClass);
@@ -275,7 +279,7 @@ public class MethodSingletonDescriptorTest {
         mockMethodList(0, null);
         mockFieldList(0, null);
 
-        MethodSingletonDescriptor methodSingletonDescriptor
+        MethodDescriptor methodSingletonDescriptor
                 = new TestBuilder(partialMapper, resultMapper, memberSelector).build();
 
         methodSingletonDescriptor.getEnhancer(originClass);
@@ -291,7 +295,7 @@ public class MethodSingletonDescriptorTest {
         mockMethodList(2, singletonOriginMethod);
         mockFieldList(0, null);
 
-        MethodSingletonDescriptor methodSingletonDescriptor
+        MethodDescriptor methodSingletonDescriptor
                 = new TestBuilder(partialMapper, resultMapper, memberSelector).build();
 
         methodSingletonDescriptor.getEnhancer(originClass);
@@ -307,7 +311,7 @@ public class MethodSingletonDescriptorTest {
         mockMethodList(0, null);
         mockFieldList(2, singletonOriginField);
 
-        MethodSingletonDescriptor methodSingletonDescriptor
+        MethodDescriptor methodSingletonDescriptor
                 = new TestBuilder(partialMapper, resultMapper, memberSelector).build();
 
         methodSingletonDescriptor.getEnhancer(originClass);

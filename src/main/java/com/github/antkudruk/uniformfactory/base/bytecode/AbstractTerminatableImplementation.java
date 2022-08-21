@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -54,7 +54,8 @@ public abstract class AbstractTerminatableImplementation implements Implementati
         return new Compound.Composable(cloneNotTerminated(), implementation);
     }
 
-    boolean isTerminating() {
+    @SuppressWarnings("WeakerAccess")
+    protected final boolean isTerminating() {
         return terminate;
     }
 }

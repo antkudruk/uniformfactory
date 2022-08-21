@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@ public class MethodListEnhancer implements Enhancer {
     private final String fieldName;
     private final TypeDescription originType;
     private final Method wrapperMethod;
-    private final List<DynamicType.Unloaded> functionalList;
+    private final List<DynamicType.Unloaded<?>> functionalList;
 
     public MethodListEnhancer(
             String listFieldName,
             TypeDescription originType,
             Method wrapperMethod,
-            List<DynamicType.Unloaded> functionalListClasses) {
+            List<DynamicType.Unloaded<?>> functionalListClasses) {
 
         this.fieldName = listFieldName;
         this.originType = originType;

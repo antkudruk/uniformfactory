@@ -1,5 +1,5 @@
 /*
-    Copyright 2020 - 2021 Anton Kudruk
+    Copyright 2020 - Present Anton Kudruk
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -67,11 +67,11 @@ public class ResultMapperCollection<A> {
 
     public ResultMapperCollection(Class<A> wrapperResultType) {
         this(wrapperResultType, null);
+        addMapper(wrapperResultType, t -> t);
     }
 
     private ResultMapperCollection(Class<A> wrapperResultType, ResultMapperCollection<A> parent) {
-        addMapper(wrapperResultType, t -> t);
-        this.wrapperResultType = wrapperResultType;
+        this.wrapperResultType = (Class<A>)MethodSingletonDescriptor.getBoxedType(wrapperResultType);
         this.parent = parent;
     }
 
