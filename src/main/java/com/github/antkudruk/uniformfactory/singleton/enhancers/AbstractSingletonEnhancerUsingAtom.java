@@ -19,6 +19,7 @@ package com.github.antkudruk.uniformfactory.singleton.enhancers;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.base.bytecode.InitInnerFieldWithArgumentImplementation;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.Constants;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.Implementation;
@@ -29,19 +30,20 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.reflect.Method;
 
+@RequiredArgsConstructor
 public abstract class AbstractSingletonEnhancerUsingAtom implements Enhancer {
 
     private final String fieldAccessorFieldName;
     private final TypeDescription originClass;
     private final Method wrapperMethod;
-    private final DynamicType.Unloaded atomClassUnloaded;
+    private final DynamicType.Unloaded<?> atomClassUnloaded;
     private final TypeDescription atomClass;
 
     public AbstractSingletonEnhancerUsingAtom(
             String fieldAccessorFieldName,
             TypeDescription originClass,
             Method wrapperMethod,
-            DynamicType.Unloaded atomClassUnloaded) {
+            DynamicType.Unloaded<?> atomClassUnloaded) {
 
         this.fieldAccessorFieldName = fieldAccessorFieldName;
         this.originClass = originClass;

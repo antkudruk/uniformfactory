@@ -29,7 +29,7 @@ import net.bytebuddy.description.type.TypeDescription;
 
 /**
  * Element factory for setter field
- * @param <F>
+ * @param <F> Interface that has the setter method
  */
 public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterTranslator {
 

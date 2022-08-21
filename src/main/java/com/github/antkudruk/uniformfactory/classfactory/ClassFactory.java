@@ -24,6 +24,7 @@ import com.github.antkudruk.uniformfactory.methodmap.descriptors.MethodMapDescri
 import com.github.antkudruk.uniformfactory.setter.descriptors.SetterDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.Constants;
 import com.github.antkudruk.uniformfactory.singleton.descriptors.MethodSingletonDescriptor;
+import com.github.antkudruk.uniformfactory.stackmanipulation.BbImplementationMethodDescriptor;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
@@ -214,6 +215,10 @@ public class ClassFactory<W> {
         public <R> SetterDescriptor.ShortcutBuilder<W, R> addSetter(
                 Method wrapperMethod) {
             return new SetterDescriptor.ShortcutBuilder<>(this, wrapperMethod);
+        }
+
+        public BbImplementationMethodDescriptor.ShortcutBuilder<W> addByteBuddyImplementation(Method wrapperMethod) {
+            return new BbImplementationMethodDescriptor.ShortcutBuilder<>(this, wrapperMethod);
         }
 
         public ClassFactory<W> build() throws ClassFactoryException {

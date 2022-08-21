@@ -44,7 +44,8 @@ public abstract class AbstractAtomGenerator {
      *
      * Parameter translators are taken from {@code partialDescriptors}
      *
-     * @param originMethod Origin method to invoke
+     * @param originMethod Origin method to invoke.
+     * @param partialDescriptors Collection of descriptors to map method parameters.
      * @return Method call to invoke origin method with its parameter translators.
      */
     protected static MethodCall createMethodCall(

@@ -19,13 +19,15 @@ package com.github.antkudruk.uniformfactory.singleton.argument.valuesource;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapper;
 
 /**
- *
+ * Method descriptor for a method that has parameters and therefore requires
+ * parameter translator.
  */
 public interface HasParameterTranslator {
     /**
-     *
-     * @param partialMapper
-     * @return
+     * Adds parameter mapper to the method.
+     * @param partialMapper Partial parameter mapper to add.
+     * @return this translator.
      */
+    // TODO: Rename "translator" to "mapper
     Object addParameterTranslator(PartialMapper partialMapper);
 }
