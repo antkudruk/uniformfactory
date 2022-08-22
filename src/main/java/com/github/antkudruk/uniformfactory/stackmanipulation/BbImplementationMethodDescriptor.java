@@ -14,6 +14,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.FixedValue;
 import net.bytebuddy.implementation.Implementation;
+import net.bytebuddy.implementation.bytecode.constant.ClassConstant;
 import net.bytebuddy.implementation.bytecode.constant.FieldConstant;
 import net.bytebuddy.implementation.bytecode.constant.MethodConstant;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
@@ -91,6 +92,19 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
             if (fieldDescription != null) {
                 setImplementation(new Implementation.Simple(
                         new FieldConstant(fieldDescription.asDefined()),
+                        MethodReturn.REFERENCE
+                ));
+            } else {
+                setImplementation(FixedValue.nullValue());
+            }
+            return (T) this;
+        }
+
+        public T typeConstant(TypeDescription typeDescription) {
+            if (typeDescription != null) {
+
+                setImplementation(new Implementation.Simple(
+                        ClassConstant.of(typeDescription),
                         MethodReturn.REFERENCE
                 ));
             } else {

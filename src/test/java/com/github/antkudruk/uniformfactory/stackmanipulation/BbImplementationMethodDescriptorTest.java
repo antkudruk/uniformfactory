@@ -38,6 +38,10 @@ public class BbImplementationMethodDescriptorTest {
         Field get();
     }
 
+    public interface AdaptorWithType {
+        Class get();
+    }
+
     public interface AdaptorWithMethod {
         Method get();
     }
@@ -172,6 +176,38 @@ public class BbImplementationMethodDescriptorTest {
                         .nullConstant()
                         .build(),
                 Object.class
+        );
+
+        // then
+        assertNull(obj.get());
+    }
+
+    @Test
+    public void whenType_thenReturnType() throws ReflectiveOperationException, ClassGeneratorException {
+        // when
+        AdaptorWithType obj = getClassFactory(
+                AdaptorWithType.class,
+                new BbImplementationMethodDescriptor
+                        .Builder(AdaptorWithType.class.getMethod("get"))
+                        .typeConstant(new TypeDescription.ForLoadedType(OriginWithMethodAndField.class))
+                        .build(),
+                OriginWithMethodAndField.class
+        );
+
+        // then
+        assertEquals(OriginWithMethodAndField.class, obj.get());
+    }
+
+    @Test
+    public void whenNullTypeConstant_thenReturnNull() throws ReflectiveOperationException, ClassGeneratorException {
+        // when
+        AdaptorWithType obj = getClassFactory(
+                AdaptorWithType.class,
+                new BbImplementationMethodDescriptor
+                        .Builder(AdaptorWithType.class.getMethod("get"))
+                        .typeConstant(null)
+                        .build(),
+                OriginWithMethodAndField.class
         );
 
         // then
