@@ -32,8 +32,8 @@ public interface MemberSelector {
      * Provides a list of methods to work with. Basically, it's methods
      * annotated with a specified annotation.
      *
-     * @param type
-     * @return
+     * @param type Origin type to look for methods.
+     * @return list of methods to map
      */
     default List<MethodDescription> getMethods(TypeDescription type) {
         return Collections.emptyList();
@@ -43,8 +43,8 @@ public interface MemberSelector {
      * Provides a list of fields to work with. Basically, it's fields
      * annotated with a specified annotation.
      *
-     * @param type
-     * @return
+     * @param type Origin type to look for fields.
+     * @return list of methods to map
      */
     default List<FieldDescription> getFields(TypeDescription type) {
         return Collections.emptyList();

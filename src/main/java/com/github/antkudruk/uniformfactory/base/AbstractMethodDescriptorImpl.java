@@ -64,7 +64,7 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
 
     /**
      * Base implementation for
-     * @param <T>
+     * @param <T> Builder subclass
      */
     public static abstract class AbstractBuilder<T extends AbstractBuilder<T>>
             implements BuilderInterface {

@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * Implements a part of a builder that contains desccription of method parameter
- * @param <T>
+ * @param <T> Current class that has ParameterMapperBuilder instance is a field
  */
 public class ParameterMapperBuilder<T extends HasParameterTranslator> implements HasParameterTranslator {
 

@@ -18,6 +18,7 @@ package com.github.antkudruk.uniformfactory.base.exception;
 
 import com.github.antkudruk.uniformfactory.singleton.descriptors.WrapperException;
 
+// TODO: It may be not a magker, but Member Selector. Replace the exception.
 public class NoMarkerAnnotationException extends WrapperException {
     public NoMarkerAnnotationException() {
         super("No marker annotation specified. Please specify marker annotation", null);
