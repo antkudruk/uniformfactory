@@ -32,12 +32,13 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
     @NonNull
     private final Implementation implementation;
 
-    public BbImplementationMethodDescriptor(BuilderInterface builder) {
-        super(builder);
-        this.implementation = builder.getImplementation();
-        this.initiation = builder.getInitiation();
-
-
+    public BbImplementationMethodDescriptor(Method wrapperMethod,
+                                            MemberSelector memberSelector,
+                                            Optional<Implementation.Composable> initiation,
+                                            Implementation implementation) {
+        super(wrapperMethod, memberSelector);
+        this.implementation = implementation;
+        this.initiation = initiation;
     }
 
     @Override
@@ -135,7 +136,10 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         @Override
         public BbImplementationMethodDescriptor build() {
-            return new BbImplementationMethodDescriptor(this);
+            return new BbImplementationMethodDescriptor(wrapperMethod,
+                    getMemberSelector(),
+                    initiation,
+                    implementation);
         }
     }
 
@@ -145,11 +149,6 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
     public static class Builder extends AbstractBuilder<Builder> {
         public Builder(Method wrapperMethod) {
             super(wrapperMethod);
-        }
-
-        @Override
-        public BbImplementationMethodDescriptor build() {
-            return new BbImplementationMethodDescriptor(this);
         }
     }
 

@@ -121,7 +121,7 @@ public class SetFieldImplementationTest {
 
     @Test
     public void testIntegerBoxed() throws Exception {
-        testBoxedAndUnboxed(OriginWithIntImpl.class, "boxedPublicField", new Integer(10));
+        testBoxedAndUnboxed(OriginWithIntImpl.class, "boxedPublicField", Integer.valueOf(10));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class SetFieldImplementationTest {
 
     @Test
     public void testPrivateIntegerBoxed() throws Exception {
-        testBoxedAndUnboxed(OriginWithIntImpl.class, "boxedPrivateField", new Integer(10));
+        testBoxedAndUnboxed(OriginWithIntImpl.class, "boxedPrivateField", Integer.valueOf(10));
     }
 
     @Test

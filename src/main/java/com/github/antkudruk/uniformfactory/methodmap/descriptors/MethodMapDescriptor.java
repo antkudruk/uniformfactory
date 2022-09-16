@@ -20,6 +20,8 @@ import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescript
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.methodmap.enhancers.MemberEntry;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
@@ -53,10 +55,15 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
     private final Function<MethodDescription, StackManipulation> methodKeyGetter;
     private final Function<FieldDescription, StackManipulation> fieldKeyGetter;
 
-    public MethodMapDescriptor(BuilderInterface<F> builder) {
-        super(builder);
-        this.methodKeyGetter = builder.getMethodKeyGetter();
-        this.fieldKeyGetter = builder.getFieldKeyGetter();
+    public MethodMapDescriptor(Method wrapperMethod,
+                               MemberSelector memberSelector,
+                               ElementFactory<F> elementFactory,
+                               Class<F> functionalInterface,
+                               Function<MethodDescription, StackManipulation> methodKeyGetter,
+                               Function<FieldDescription, StackManipulation> fieldKeyGetter) {
+        super(wrapperMethod, memberSelector, elementFactory, functionalInterface);
+        this.methodKeyGetter = methodKeyGetter;
+        this.fieldKeyGetter = fieldKeyGetter;
         validate();
     }
 
@@ -165,7 +172,13 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
 
         @Override
         public MethodMapDescriptor<F> build() {
-            return new MethodMapDescriptor<>(this);
+            return new MethodMapDescriptor<>(
+                    wrapperMethod,
+                    getMemberSelector(),
+                    getElementFactory(),
+                    functionalInterface,
+                    methodKeyGetter,
+                    fieldKeyGetter);
         }
     }
 

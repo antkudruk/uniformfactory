@@ -19,6 +19,7 @@ package com.github.antkudruk.uniformfactory.base;
 import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
 import com.github.antkudruk.uniformfactory.methodcollection.GetterElementFactory;
 import com.github.antkudruk.uniformfactory.methodcollection.SetterElementFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import lombok.Getter;
 
 import java.lang.reflect.Method;
@@ -29,10 +30,13 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
     private final ElementFactory<F> elementFactory;
     private final Class<F> functionalInterface;
 
-    public AbstractMethodCollectionDescriptor(BuilderInterface<F> builder) {
-        super(builder);
-        this.elementFactory = builder.getElementFactory();
-        this.functionalInterface = builder.getFunctionalInterface();
+    public AbstractMethodCollectionDescriptor(Method wrapperMethod,
+                                              MemberSelector memberSelector,
+                                              ElementFactory<F> elementFactory,
+                                              Class<F> functionalInterface) {
+        super(wrapperMethod, memberSelector);
+        this.elementFactory = elementFactory;
+        this.functionalInterface = functionalInterface;
         valiate();
     }
 

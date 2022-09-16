@@ -46,8 +46,11 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
     private final String fieldAccessorFieldName
             = FIELD_NAME_PREFIX + fieldNameIndex.incrementAndGet();
 
-    public SetterDescriptor(BuilderInterface builder) {
-        super(builder);
+    public SetterDescriptor(
+            Method wrapperMethod,
+            MemberSelector memberSelector,
+            ParameterBindersSource parameterMapper) {
+        super(wrapperMethod, memberSelector, parameterMapper);
     }
 
     @Override
@@ -97,7 +100,7 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
         }
 
         public SetterDescriptor<W> build() {
-            return new SetterDescriptor<>(this);
+            return new SetterDescriptor<>(wrapperMethod, memberSelector, getParameterMapper());
         }
 
         public T setAnnotation(Class<? extends Annotation> annotation) {

@@ -22,6 +22,8 @@ import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
+import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.methodlist.enhancers.MethodListEnhancer;
 import lombok.Getter;
 import lombok.experimental.Delegate;
@@ -42,8 +44,11 @@ import java.util.List;
  */
 public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<F> {
 
-    private MethodListDescriptor(BuilderInterface<F> builder) {
-        super(builder);
+    private MethodListDescriptor(Method wrapperMethod,
+                                 MemberSelector memberSelector,
+                                 ElementFactory<F> elementFactory,
+                                 Class<F> functionalInterface) {
+        super(wrapperMethod, memberSelector, elementFactory, functionalInterface);
         validate();
     }
 
@@ -96,7 +101,11 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
 
         @Override
         public MethodListDescriptor<F> build() {
-            return new MethodListDescriptor<>(this);
+            return new MethodListDescriptor<>(
+                    wrapperMethod,
+                    getMemberSelector(),
+                    getElementFactory(),
+                    functionalInterface);
         }
     }
 

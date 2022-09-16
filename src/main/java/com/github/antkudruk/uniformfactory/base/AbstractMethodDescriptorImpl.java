@@ -29,10 +29,11 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
     protected final Method wrapperMethod;
     protected final MemberSelector memberSelector;
 
-    public AbstractMethodDescriptorImpl(BuilderInterface builder) {
+    public AbstractMethodDescriptorImpl(Method wrapperMethod,
+                                        MemberSelector memberSelector) {
 
-        this.memberSelector = builder.getMemberSelector();
-        this.wrapperMethod = builder.getWrapperMethod();
+        this.memberSelector = memberSelector;
+        this.wrapperMethod = wrapperMethod;
 
         validate();
     }
