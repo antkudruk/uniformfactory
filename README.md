@@ -638,7 +638,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 
 | version    | Description                           |
 |------------|---------------------------------------|
-| 0.2.2      | Added pure ByteBuddy implementation   |
+| 0.2.3      | Added pure ByteBuddy implementation   |
 | 0.3.0      | Gave up builder experiments           |
 
 
