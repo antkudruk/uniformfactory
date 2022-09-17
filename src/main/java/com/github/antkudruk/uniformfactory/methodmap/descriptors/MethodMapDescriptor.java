@@ -102,32 +102,9 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
         }
     }
 
-    public interface BuilderInterface<F>
-            extends AbstractMethodCollectionDescriptor.BuilderInterface<F> {
-
-        /**
-         *
-         * @return Type of the map values
-         */
-        Class<F> getFunctionalInterface();
-
-        /**
-         *
-         * @return Operations to get key for a method
-         */
-        Function<MethodDescription, StackManipulation>  getMethodKeyGetter();
-
-        /**
-         *
-         * @return Operations to get key for a field
-         */
-        Function<FieldDescription, StackManipulation>  getFieldKeyGetter();
-    }
-
     @SuppressWarnings("unchecked")
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
-            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T>
-            implements BuilderInterface<F> {
+            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T> {
 
         private final Class<F> functionalInterface;
         private Function<MethodDescription, StackManipulation> methodKeyGetter;
@@ -146,21 +123,6 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
         public T setFieldKeyGetter(Function<FieldDescription, StackManipulation> fieldKeyGetter) {
             this.fieldKeyGetter = fieldKeyGetter;
             return (T) this;
-        }
-
-        @Override
-        public Class<F> getFunctionalInterface() {
-            return functionalInterface;
-        }
-
-        @Override
-        public Function<MethodDescription, StackManipulation> getMethodKeyGetter() {
-            return methodKeyGetter;
-        }
-
-        @Override
-        public Function<FieldDescription, StackManipulation> getFieldKeyGetter() {
-            return fieldKeyGetter;
         }
 
         public <A extends Annotation> T setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {

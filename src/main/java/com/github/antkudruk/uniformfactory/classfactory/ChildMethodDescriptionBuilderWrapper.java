@@ -16,7 +16,9 @@
 
 package com.github.antkudruk.uniformfactory.classfactory;
 
-import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
+
+import com.github.antkudruk.uniformfactory.base.Builds;
+import com.github.antkudruk.uniformfactory.base.MethodDescriptor;
 import lombok.AllArgsConstructor;
 
 /**
@@ -25,7 +27,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ChildMethodDescriptionBuilderWrapper<W> {
     private final ClassFactory.Builder<W> parentBuilder;
-    private final AbstractMethodDescriptorImpl.BuilderInterface builder;
+    private final Builds<MethodDescriptor> builder;
 
     /**
      * Ends description of the method.

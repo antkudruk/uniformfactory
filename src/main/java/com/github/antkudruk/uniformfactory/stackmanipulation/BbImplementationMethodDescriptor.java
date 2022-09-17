@@ -46,19 +46,11 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
         return new BbImplementationEnhancer();
     }
 
-    interface BuilderInterface extends AbstractMethodDescriptorImpl.BuilderInterface {
-        @NonNull
-        Optional<Implementation.Composable> getInitiation();
-
-        @NonNull
-        Implementation getImplementation();
-    }
 
     @SuppressWarnings("unchecked")
     @Getter
     private static class AbstractBuilder<T extends AbstractBuilder<T>>
-            extends AbstractMethodDescriptorImpl.AbstractBuilder<T>
-            implements BuilderInterface {
+            extends AbstractMethodDescriptorImpl.AbstractBuilder<T> {
 
         private Optional<Implementation.Composable> initiation = Optional.empty();
         private Implementation implementation;

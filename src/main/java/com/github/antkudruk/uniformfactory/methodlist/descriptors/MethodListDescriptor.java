@@ -83,14 +83,9 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
                 functionalMapperClasses);
     }
 
-    public interface BuilderInterface<F>
-            extends AbstractMethodCollectionDescriptor.BuilderInterface<F> {
-    }
-
     @Getter
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
-            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T>
-            implements BuilderInterface<F> {
+            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T> {
 
         private final Class<F> functionalInterface;
 
@@ -118,7 +113,7 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
     /**
      * List of methods
      *
-     * @param <F> Type of a list element
+     * @param <F> Type of list element
      */
     public static class ShortcutBuilder<W, F>
             extends AbstractBuilder<F, ShortcutBuilder<W, F>> {

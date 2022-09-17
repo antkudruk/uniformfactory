@@ -36,13 +36,10 @@ public abstract class AbstractMethodWithMappersDescriptorImpl extends AbstractMe
         this.parameterMapper = parameterMapper;
     }
 
-    public interface BuilderInterface extends AbstractMethodDescriptorImpl.BuilderInterface {
-        ParameterBindersSource getParameterMapper();
-    }
 
     public static abstract class AbstractBuilder<T extends AbstractBuilder<T>>
             extends AbstractMethodDescriptorImpl.AbstractBuilder<T>
-            implements BuilderInterface, HasParameterTranslator {
+            implements HasParameterTranslator {
 
         @SuppressWarnings("unchecked")
         @Delegate

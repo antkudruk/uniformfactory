@@ -16,7 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.methodcollection;
 
-import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescriptor;
+import com.github.antkudruk.uniformfactory.base.Builds;
 import lombok.AllArgsConstructor;
 
 /**
@@ -24,10 +24,14 @@ import lombok.AllArgsConstructor;
  * @param <M> Parent method descriptor
  */
 @AllArgsConstructor
-class ElementFactoryBuilderParentReference<F, M extends AbstractMethodCollectionDescriptor.BuilderInterface<F>> {
+public class ElementFactoryBuilderParentReference<F, M extends ElementFactoryBuilderParentReference.Has<F>> {
+
+    public interface Has <F> {
+        Object setElementFactory(ElementFactory<F> elementFactory);
+    }
 
     private final M parentElementFactoryBuilder;
-    private final ElementFactory.BuilderInterface<F> elementFactoryBuilder;
+    private final Builds<ElementFactory<F>> elementFactoryBuilder;
 
     public M finishElementFactory() {
         parentElementFactoryBuilder.setElementFactory(elementFactoryBuilder.build());

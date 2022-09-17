@@ -16,9 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.setter.descriptors;
 
-import com.github.antkudruk.uniformfactory.base.AbstractMethodWithMappersDescriptorImpl;
-import com.github.antkudruk.uniformfactory.base.Enhancer;
-import com.github.antkudruk.uniformfactory.base.ParameterMapperBuilder;
+import com.github.antkudruk.uniformfactory.base.*;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
@@ -77,15 +75,9 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
         }
     }
 
-    public interface BuilderInterface extends AbstractMethodWithMappersDescriptorImpl.BuilderInterface {
-        MemberSelector getMemberSelector();
-        Method getWrapperMethod();
-        ParameterBindersSource getParameterMapper();
-    }
-
     @SuppressWarnings("unchecked")
     public static abstract class AbstractBuilder<W, T extends AbstractBuilder<W, T>>
-            implements BuilderInterface, HasParameterTranslator {
+            implements HasParameterTranslator, Builds<MethodDescriptor> {
 
         @Getter
         private Method wrapperMethod;

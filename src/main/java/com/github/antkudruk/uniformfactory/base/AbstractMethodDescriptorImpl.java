@@ -20,6 +20,8 @@ import com.github.antkudruk.uniformfactory.base.exception.NoMarkerAnnotationExce
 import com.github.antkudruk.uniformfactory.base.exception.NoWrapperMethodException;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelectorByAnnotation;
+import lombok.Generated;
+import lombok.Getter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -57,19 +59,14 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
         }
     }
 
-    public interface BuilderInterface {
-        MemberSelector getMemberSelector();         // TODO: check to have ONLY ONE if it's singleton
-        Method getWrapperMethod();
-        MethodDescriptor build();
-    }
-
     /**
      * Base implementation for
      * @param <T> Builder subclass
      */
     public static abstract class AbstractBuilder<T extends AbstractBuilder<T>>
-            implements BuilderInterface {
+    implements Builds<MethodDescriptor> {
 
+        @Getter
         private MemberSelector memberSelector;
         protected final Method wrapperMethod;
 
@@ -87,16 +84,6 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
         public T setMemberSelector(MemberSelector memberSelector) {
             this.memberSelector = memberSelector;
             return (T)this;
-        }
-
-        @Override
-        public MemberSelector getMemberSelector() {
-            return memberSelector;
-        }
-
-        @Override
-        public Method getWrapperMethod() {
-            return wrapperMethod;
         }
 
         public abstract AbstractMethodDescriptorImpl build();

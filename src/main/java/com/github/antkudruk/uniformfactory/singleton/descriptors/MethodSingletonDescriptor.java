@@ -123,30 +123,10 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
         }
     }
 
-    public interface BuilderInterface<R> extends AbstractMethodWithMappersDescriptorImpl.BuilderInterface {
-        /**
-         *
-         * @return Mapper to map a value returning by the origin method to the wrapper one
-         */
-        ResultMapperCollection<R> resultMapper();
-
-        /**
-         *
-         * @return default value returning if the method is absent.
-         */
-        R defaultValue();
-
-        /**
-         * Indicates whether default value has been det up or not.
-         * @return True if there's a default value, otherwise false
-         */
-        boolean hasDefaultValue();
-    }
 
     @SuppressWarnings("unchecked")
     public static abstract class AbstractBuilder<R, T extends AbstractBuilder<R, T>>
-            extends AbstractMethodWithMappersDescriptorImpl.AbstractBuilder<T>
-            implements BuilderInterface<R> {
+            extends AbstractMethodWithMappersDescriptorImpl.AbstractBuilder<T> {
 
         private boolean hasDefaultValue;
         private R defaultValue;
@@ -171,29 +151,6 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
                     defaultValue,
                     hasDefaultValue
             );
-        }
-        /**
-         * {inheritDoc}
-         */
-        @Override
-        public boolean hasDefaultValue() {
-            return hasDefaultValue;
-        }
-
-        /**
-         * {inheritDoc}
-         */
-        @Override
-        public ResultMapperCollection<R> resultMapper() {
-            return resultMapper;
-        }
-
-        /**
-         * {inheritDoc}
-         */
-        @Override
-        public R defaultValue() {
-            return defaultValue;
         }
 
         public T setDefaultValue(R defaultValue) {
