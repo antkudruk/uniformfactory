@@ -18,10 +18,13 @@ package com.github.antkudruk.uniformfactory.singleton.descriptors;
 
 import com.github.antkudruk.uniformfactory.base.AbstractMethodWithMappersDescriptorImpl;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
+import com.github.antkudruk.uniformfactory.base.TypeShortcuts;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToConstantEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToFieldEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToMethodEnhancer;
@@ -31,9 +34,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
@@ -55,11 +56,18 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
     protected final boolean hasDefaultValue;
     protected final R defaultValue;
 
-    public MethodSingletonDescriptor(BuilderInterface<R> builder) {
-        super(builder);
-        this.resultMapper = builder.resultMapper();
-        this.defaultValue = builder.defaultValue();
-        this.hasDefaultValue = builder.hasDefaultValue();
+    public MethodSingletonDescriptor(
+            Method wrapperMethod,
+            MemberSelector memberSelector,
+            ParameterBindersSource parameterMapper,
+            ResultMapperCollection<R> resultMapper,
+            R defaultValue,
+            boolean hasDefaultValue
+    ) {
+        super(wrapperMethod, memberSelector, parameterMapper);
+        this.resultMapper = resultMapper;
+        this.defaultValue = defaultValue;
+        this.hasDefaultValue = hasDefaultValue;
         validate();
     }
 
@@ -110,49 +118,15 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
     }
 
     private void validate() {
-        if (getBoxedType(wrapperMethod.getReturnType()) != resultMapper.getWrapperReturnType()) {
+        if (TypeShortcuts.getBoxedType(wrapperMethod.getReturnType()) != resultMapper.getWrapperReturnType()) {
             throw new WrongTypeException(wrapperMethod.getReturnType(), resultMapper.getWrapperReturnType());
         }
     }
 
-    // TODO: optimize, move outside the cass
-    public static Class<?> getBoxedType(Class<?> in) {
-        Map<Class<?>, Class<?>> unboxedTypes = new HashMap<>();
-        unboxedTypes.put(int.class, Integer.class);
-        unboxedTypes.put(byte.class, Byte.class);
-        unboxedTypes.put(char.class, Character.class);
-        unboxedTypes.put(long.class, Long.class);
-        unboxedTypes.put(boolean.class, Boolean.class);
-        unboxedTypes.put(double.class, Double.class);
-        unboxedTypes.put(float.class, Float.class);
-        unboxedTypes.put(void.class, Void.class);
-        return unboxedTypes.getOrDefault(in, in);
-    }
-
-    public interface BuilderInterface<R> extends AbstractMethodWithMappersDescriptorImpl.BuilderInterface {
-        /**
-         *
-         * @return Mapper to map a value returning by the origin method to the wrapper one
-         */
-        ResultMapperCollection<R> resultMapper();
-
-        /**
-         *
-         * @return default value returning if the method is absent.
-         */
-        R defaultValue();
-
-        /**
-         * Indicates whether default value has been det up or not.
-         * @return True if there's a default value, otherwise false
-         */
-        boolean hasDefaultValue();
-    }
 
     @SuppressWarnings("unchecked")
     public static abstract class AbstractBuilder<R, T extends AbstractBuilder<R, T>>
-            extends AbstractMethodWithMappersDescriptorImpl.AbstractBuilder<T>
-            implements BuilderInterface<R> {
+            extends AbstractMethodWithMappersDescriptorImpl.AbstractBuilder<T> {
 
         private boolean hasDefaultValue;
         private R defaultValue;
@@ -166,33 +140,17 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
         /**
          * {inheritDoc}
          */
+
         @Override
         public MethodSingletonDescriptor<R> build() {
-            return new MethodSingletonDescriptor<>(this);
-        }
-
-        /**
-         * {inheritDoc}
-         */
-        @Override
-        public boolean hasDefaultValue() {
-            return hasDefaultValue;
-        }
-
-        /**
-         * {inheritDoc}
-         */
-        @Override
-        public ResultMapperCollection<R> resultMapper() {
-            return resultMapper;
-        }
-
-        /**
-         * {inheritDoc}
-         */
-        @Override
-        public R defaultValue() {
-            return defaultValue;
+            return new MethodSingletonDescriptor<>(
+                    wrapperMethod,
+                    getMemberSelector(),
+                    getParameterMapper(),
+                    resultMapper,
+                    defaultValue,
+                    hasDefaultValue
+            );
         }
 
         public T setDefaultValue(R defaultValue) {
@@ -225,11 +183,6 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
     public static class Builder<R> extends AbstractBuilder<R, Builder<R>> {
         public Builder(Method wrapperMethod, Class<R> methodResultType) {
             super(wrapperMethod, methodResultType);
-        }
-
-        @Override
-        public MethodSingletonDescriptor<R> build() {
-            return new MethodSingletonDescriptor<>(this);
         }
     }
 

@@ -16,7 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.methodcollection;
 
-import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescriptor;
+import com.github.antkudruk.uniformfactory.base.Builds;
 import com.github.antkudruk.uniformfactory.base.ParameterMapperBuilder;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.SpecifiedFieldSelector;
@@ -65,7 +65,7 @@ public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterT
 
     @SuppressWarnings("unchecked")
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
-            implements ElementFactory.BuilderInterface<F>, HasParameterTranslator {
+            implements Builds<ElementFactory<F>>, HasParameterTranslator {
 
         private final Class<F> elementType;
         @SuppressWarnings("unchecked")
@@ -88,7 +88,7 @@ public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterT
         }
     }
 
-    public static class ShortcutBuilder<M extends AbstractMethodCollectionDescriptor.BuilderInterface<F>, F>
+    public static class ShortcutBuilder<M extends ElementFactoryBuilderParentReference.Has<F>, F>
             extends AbstractBuilder<F, ShortcutBuilder<M, F>> {
 
         @Delegate

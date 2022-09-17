@@ -16,9 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.setter.descriptors;
 
-import com.github.antkudruk.uniformfactory.base.AbstractMethodWithMappersDescriptorImpl;
-import com.github.antkudruk.uniformfactory.base.Enhancer;
-import com.github.antkudruk.uniformfactory.base.ParameterMapperBuilder;
+import com.github.antkudruk.uniformfactory.base.*;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
@@ -46,8 +44,11 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
     private final String fieldAccessorFieldName
             = FIELD_NAME_PREFIX + fieldNameIndex.incrementAndGet();
 
-    public SetterDescriptor(BuilderInterface builder) {
-        super(builder);
+    public SetterDescriptor(
+            Method wrapperMethod,
+            MemberSelector memberSelector,
+            ParameterBindersSource parameterMapper) {
+        super(wrapperMethod, memberSelector, parameterMapper);
     }
 
     @Override
@@ -74,15 +75,9 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
         }
     }
 
-    public interface BuilderInterface extends AbstractMethodWithMappersDescriptorImpl.BuilderInterface {
-        MemberSelector getMemberSelector();
-        Method getWrapperMethod();
-        ParameterBindersSource getParameterMapper();
-    }
-
     @SuppressWarnings("unchecked")
     public static abstract class AbstractBuilder<W, T extends AbstractBuilder<W, T>>
-            implements BuilderInterface, HasParameterTranslator {
+            implements HasParameterTranslator, Builds<MethodDescriptor> {
 
         @Getter
         private Method wrapperMethod;
@@ -97,7 +92,7 @@ public class SetterDescriptor<A> extends AbstractMethodWithMappersDescriptorImpl
         }
 
         public SetterDescriptor<W> build() {
-            return new SetterDescriptor<>(this);
+            return new SetterDescriptor<>(wrapperMethod, memberSelector, getParameterMapper());
         }
 
         public T setAnnotation(Class<? extends Annotation> annotation) {

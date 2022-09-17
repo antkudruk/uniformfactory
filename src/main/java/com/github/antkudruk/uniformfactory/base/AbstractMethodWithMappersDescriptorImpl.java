@@ -16,6 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.base;
 
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.HasParameterTranslator;
 import lombok.experimental.Delegate;
@@ -26,18 +27,19 @@ public abstract class AbstractMethodWithMappersDescriptorImpl extends AbstractMe
 
     protected final ParameterBindersSource parameterMapper;
 
-    public AbstractMethodWithMappersDescriptorImpl(BuilderInterface builder) {
-        super(builder);
-        this.parameterMapper = builder.getParameterMapper();
+    public AbstractMethodWithMappersDescriptorImpl(
+            Method wrapperMethod,
+            MemberSelector memberSelector,
+            ParameterBindersSource parameterMapper
+    ) {
+        super(wrapperMethod, memberSelector);
+        this.parameterMapper = parameterMapper;
     }
 
-    public interface BuilderInterface extends AbstractMethodDescriptorImpl.BuilderInterface {
-        ParameterBindersSource getParameterMapper();
-    }
 
     public static abstract class AbstractBuilder<T extends AbstractBuilder<T>>
             extends AbstractMethodDescriptorImpl.AbstractBuilder<T>
-            implements BuilderInterface, HasParameterTranslator {
+            implements HasParameterTranslator {
 
         @SuppressWarnings("unchecked")
         @Delegate

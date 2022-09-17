@@ -144,7 +144,7 @@ Here is an example for Gradle:
 
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.2.3'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.3.0'
 }
 ```
 
@@ -154,7 +154,7 @@ and for Maven:
 <dependency>
     <groupId>com.github.antkudruk</groupId>
     <artifactId>uniform-factory</artifactId>
-    <version>0.2.3</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
@@ -633,6 +633,14 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 }
 
 ```
+
+## History
+
+| version    | Description                           |
+|------------|---------------------------------------|
+| 0.2.2      | Added pure ByteBuddy implementation   |
+| 0.3.0      | Gave up builder experiments           |
+
 
 ## License
 

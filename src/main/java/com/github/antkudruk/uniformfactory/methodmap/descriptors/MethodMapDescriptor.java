@@ -20,6 +20,8 @@ import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescript
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.methodmap.enhancers.MemberEntry;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
@@ -53,10 +55,15 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
     private final Function<MethodDescription, StackManipulation> methodKeyGetter;
     private final Function<FieldDescription, StackManipulation> fieldKeyGetter;
 
-    public MethodMapDescriptor(BuilderInterface<F> builder) {
-        super(builder);
-        this.methodKeyGetter = builder.getMethodKeyGetter();
-        this.fieldKeyGetter = builder.getFieldKeyGetter();
+    public MethodMapDescriptor(Method wrapperMethod,
+                               MemberSelector memberSelector,
+                               ElementFactory<F> elementFactory,
+                               Class<F> functionalInterface,
+                               Function<MethodDescription, StackManipulation> methodKeyGetter,
+                               Function<FieldDescription, StackManipulation> fieldKeyGetter) {
+        super(wrapperMethod, memberSelector, elementFactory, functionalInterface);
+        this.methodKeyGetter = methodKeyGetter;
+        this.fieldKeyGetter = fieldKeyGetter;
         validate();
     }
 
@@ -95,32 +102,9 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
         }
     }
 
-    public interface BuilderInterface<F>
-            extends AbstractMethodCollectionDescriptor.BuilderInterface<F> {
-
-        /**
-         *
-         * @return Type of the map values
-         */
-        Class<F> getFunctionalInterface();
-
-        /**
-         *
-         * @return Operations to get key for a method
-         */
-        Function<MethodDescription, StackManipulation>  getMethodKeyGetter();
-
-        /**
-         *
-         * @return Operations to get key for a field
-         */
-        Function<FieldDescription, StackManipulation>  getFieldKeyGetter();
-    }
-
     @SuppressWarnings("unchecked")
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
-            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T>
-            implements BuilderInterface<F> {
+            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T> {
 
         private final Class<F> functionalInterface;
         private Function<MethodDescription, StackManipulation> methodKeyGetter;
@@ -141,21 +125,6 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
             return (T) this;
         }
 
-        @Override
-        public Class<F> getFunctionalInterface() {
-            return functionalInterface;
-        }
-
-        @Override
-        public Function<MethodDescription, StackManipulation> getMethodKeyGetter() {
-            return methodKeyGetter;
-        }
-
-        @Override
-        public Function<FieldDescription, StackManipulation> getFieldKeyGetter() {
-            return fieldKeyGetter;
-        }
-
         public <A extends Annotation> T setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {
             setMarkerAnnotation(marker);
             setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(Objects.requireNonNull(md.getDeclaredAnnotations().ofType(marker)).load())));
@@ -165,7 +134,13 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
 
         @Override
         public MethodMapDescriptor<F> build() {
-            return new MethodMapDescriptor<>(this);
+            return new MethodMapDescriptor<>(
+                    wrapperMethod,
+                    getMemberSelector(),
+                    getElementFactory(),
+                    functionalInterface,
+                    methodKeyGetter,
+                    fieldKeyGetter);
         }
     }
 

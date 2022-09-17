@@ -16,6 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.singleton.atomicaccessor;
 
+import com.github.antkudruk.uniformfactory.base.TypeShortcuts;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.descriptors.MethodSingletonDescriptor;
 import net.bytebuddy.description.method.MethodDescription;
@@ -91,7 +92,7 @@ public abstract class AbstractAtomGenerator {
     protected static Class<?>[] getParameterClasses(Parameter[] parameters) {
         return Arrays.stream(parameters)
                 .map(Parameter::getType)
-                .map(MethodSingletonDescriptor::getBoxedType)
+                .map(TypeShortcuts::getBoxedType)
                 .toArray(Class[]::new);
     }
 

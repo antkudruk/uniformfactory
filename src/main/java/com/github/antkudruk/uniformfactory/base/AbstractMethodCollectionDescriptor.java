@@ -17,8 +17,10 @@
 package com.github.antkudruk.uniformfactory.base;
 
 import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.ElementFactoryBuilderParentReference;
 import com.github.antkudruk.uniformfactory.methodcollection.GetterElementFactory;
 import com.github.antkudruk.uniformfactory.methodcollection.SetterElementFactory;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import lombok.Getter;
 
 import java.lang.reflect.Method;
@@ -29,10 +31,13 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
     private final ElementFactory<F> elementFactory;
     private final Class<F> functionalInterface;
 
-    public AbstractMethodCollectionDescriptor(BuilderInterface<F> builder) {
-        super(builder);
-        this.elementFactory = builder.getElementFactory();
-        this.functionalInterface = builder.getFunctionalInterface();
+    public AbstractMethodCollectionDescriptor(Method wrapperMethod,
+                                              MemberSelector memberSelector,
+                                              ElementFactory<F> elementFactory,
+                                              Class<F> functionalInterface) {
+        super(wrapperMethod, memberSelector);
+        this.elementFactory = elementFactory;
+        this.functionalInterface = functionalInterface;
         valiate();
     }
 
@@ -42,31 +47,11 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
         }
     }
 
-    /**
-     *
-     * @param <F> Type of the collection element
-     */
-    public interface BuilderInterface<F> extends AbstractMethodDescriptorImpl.BuilderInterface {
-        /**
-         * @return Interface implemented by the list element
-         */
-        Class<F> getFunctionalInterface();
-
-        /**
-         * @return Factory that returns class factory for each method or field.
-         */
-        ElementFactory<F> getElementFactory();
-
-        Object setElementFactory(ElementFactory<F> elementFactory);
-
-        AbstractMethodCollectionDescriptor<F> build();
-    }
-
     @SuppressWarnings("unchecked")
     @Getter
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
             extends AbstractMethodDescriptorImpl.AbstractBuilder<T>
-            implements BuilderInterface<F> {
+            implements Builds<MethodDescriptor>, ElementFactoryBuilderParentReference.Has<F> {
 
         private final Class<F> elementType;
         private ElementFactory<F> elementFactory;

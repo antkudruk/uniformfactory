@@ -16,6 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.singleton.descriptors;
 
+import com.github.antkudruk.uniformfactory.base.TypeShortcuts;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
 import net.bytebuddy.description.type.TypeDescription;
 
@@ -71,7 +72,7 @@ public class ResultMapperCollection<A> {
     }
 
     private ResultMapperCollection(Class<A> wrapperResultType, ResultMapperCollection<A> parent) {
-        this.wrapperResultType = (Class<A>)MethodSingletonDescriptor.getBoxedType(wrapperResultType);
+        this.wrapperResultType = (Class<A>) TypeShortcuts.getBoxedType(wrapperResultType);
         this.parent = parent;
     }
 
