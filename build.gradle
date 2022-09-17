@@ -5,7 +5,7 @@ plugins {
 }
 
 // The current version
-def libraryVersion='0.2.3'
+def libraryVersion='0.3.0'
 
 group = 'com.github.antkudruk'
 version = libraryVersion
@@ -25,10 +25,10 @@ repositories {
 dependencies {
     implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.12.6'
 
-    testImplementation 'junit:junit:4.12',
-            'org.powermock:powermock-core:2.0.4',
-            'org.powermock:powermock-module-junit4:2.0.4',
-            'org.powermock:powermock-api-mockito2:2.0.4'
+    testImplementation 'junit:junit:4.13.2',
+            'org.powermock:powermock-core:2.0.9',
+            'org.powermock:powermock-module-junit4:2.0.9',
+            'org.powermock:powermock-api-mockito2:2.0.9'
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
     testCompileOnly 'org.projectlombok:lombok:1.18.24'
