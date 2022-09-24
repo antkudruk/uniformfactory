@@ -84,6 +84,7 @@ public class MethodListTest {
                         new MethodListDescriptor.Builder<>(
                                     Fun.class,
                                     Wrapper.class.getMethod("getFunctionsList"))
+                                .defaultElementSource()
 
                                 .setMarkerAnnotation(MethodMarker.class)
                                 .getterElementFactory(String.class)
@@ -97,6 +98,7 @@ public class MethodListTest {
                                 .finishParameterDescription()
                                 .finishElementFactory()
 
+                                .endElementSource()
                                 .build()
                 )
                 .build();
@@ -131,6 +133,7 @@ public class MethodListTest {
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(new MethodListDescriptor.Builder<>(
                         Fun.class, Wrapper.class.getMethod("getFunctionsList"))
+                        .defaultElementSource()
 
                         .setMarkerAnnotation(MethodMarker.class)
                         .getterElementFactory(String.class)
@@ -144,6 +147,7 @@ public class MethodListTest {
                         .applyToAnnotated(Index.class)
 
                         .finishElementFactory()
+                        .endElementSource()
 
                         .build()
                 )
@@ -181,6 +185,8 @@ public class MethodListTest {
                                 Fun.class,
                                 Wrapper.class.getMethod("getFunctionsList"))
 
+                                .defaultElementSource()
+
                                 .setMarkerAnnotation(MethodMarker.class)
 
                                 .getterElementFactory(String.class)
@@ -197,6 +203,8 @@ public class MethodListTest {
                                 ))
 
                                 .finishElementFactory()
+
+                                .endElementSource()
 
                                 .build()
                 )
@@ -230,7 +238,6 @@ public class MethodListTest {
     @Test(expected = WrongTypeException.class)
     public void inappropriateMethodReturnType() throws ReflectiveOperationException {
         new MethodListDescriptor.Builder<>(Fun.class, WrapperOfMaps.class.getMethod("getFunctionsList"))
-                .setMarkerAnnotation(MethodMarker.class)
                 .build();
     }
 }

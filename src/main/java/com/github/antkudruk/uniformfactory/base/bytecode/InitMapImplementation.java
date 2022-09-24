@@ -17,15 +17,16 @@
 package com.github.antkudruk.uniformfactory.base.bytecode;
 
 import com.github.antkudruk.uniformfactory.common.TypeDescriptionShortcuts;
-import com.github.antkudruk.uniformfactory.methodmap.enhancers.MemberEntry;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.implementation.bytecode.Duplication;
 import net.bytebuddy.implementation.bytecode.Removal;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.implementation.bytecode.TypeCreation;
+import net.bytebuddy.implementation.bytecode.constant.TextConstant;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
 import net.bytebuddy.implementation.bytecode.member.MethodInvocation;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
@@ -61,16 +62,16 @@ import java.util.Map;
  * </pre>
  *
  */
-public class InitMapImplementation extends AbstractImplementation {
+public class InitMapImplementation<F> extends AbstractImplementation {
 
     private final String fieldName;
     private final TypeDescription originType;
-    private final List<MemberEntry> functionalObjects;
+    private final Map<String, DynamicType.Unloaded<F>> functionalObjects;
 
     public InitMapImplementation(
             String fieldName,
             TypeDescription originType,
-            List<MemberEntry> functionalObjects
+            Map<String, DynamicType.Unloaded<F>> functionalObjects
     ) {
         this(fieldName, originType, functionalObjects, true);
     }
@@ -78,7 +79,7 @@ public class InitMapImplementation extends AbstractImplementation {
     private InitMapImplementation(
             String fieldName,
             TypeDescription originType,
-            List<MemberEntry> functionalObjects,
+            Map<String, DynamicType.Unloaded<F>> functionalObjects,
             boolean isTerminating
     ) {
         super(isTerminating);
@@ -95,7 +96,7 @@ public class InitMapImplementation extends AbstractImplementation {
 
     @Override
     protected AbstractTerminatableImplementation cloneNotTerminated() {
-        return new InitMapImplementation(fieldName, originType, functionalObjects, false);
+        return new InitMapImplementation<>(fieldName, originType, functionalObjects, false);
     }
 
     public class Appender implements ByteCodeAppender {
@@ -123,9 +124,9 @@ public class InitMapImplementation extends AbstractImplementation {
                     )
             ));
 
-            for (MemberEntry entry : functionalObjects) {
+            for (Map.Entry<String, DynamicType.Unloaded<F>> entry : functionalObjects.entrySet()) {
                 operands.addAll(getEachElementInstructions(
-                        entry.getKey(),
+                        new TextConstant(entry.getKey()),
                         entry.getValue().getTypeDescription(),
                         instrumentedMethod));
             }

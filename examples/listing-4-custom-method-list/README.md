@@ -58,6 +58,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
     public ClassFactoryGeneratorImpl() throws NoSuchMethodException {
         this.classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodList(Wrapper.class.getMethod("getProcessors"), Processor.class)
+                .defaultElementSource()
                 .setMarkerAnnotation(Processor.Process.class)
 
                 // Setting up element factory for the list - getters
@@ -76,6 +77,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
                 .finishParameterDescription()
 
                 .finishElementFactory()
+                .endElementSource()
                 .endMethodDescription()
                 .build();
     }

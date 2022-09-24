@@ -24,6 +24,7 @@ import com.github.antkudruk.uniformfactory.methodcollection.seletor.SpecifiedMet
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.HasParameterTranslator;
 import com.github.antkudruk.uniformfactory.singleton.descriptors.ResultMapperCollection;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
@@ -39,21 +40,12 @@ import java.util.function.Function;
  * @param <F> Functional interface
  * @param <R> Method result type
  */
+@RequiredArgsConstructor
 public class GetterElementFactory<F, R> implements ElementFactory<F> {
 
     private final Class<F> elementType;
     private final ResultMapperCollection<R> resultMapper;
     private final ParameterBindersSource parameterMapper;
-
-    public GetterElementFactory(
-            Class<F> elementType,
-            ResultMapperCollection<R> resultMapper,
-            ParameterBindersSource parameterMapper) {
-
-        this.elementType = elementType;
-        this.resultMapper = resultMapper;
-        this.parameterMapper = parameterMapper;
-    }
 
     @Override
     public ClassFactory<F> getFieldElement(
@@ -132,18 +124,18 @@ public class GetterElementFactory<F, R> implements ElementFactory<F> {
         }
     }
 
-    public static final class ShortcutBuilder<M extends ElementFactoryBuilderParentReference.Has<F>, F, R>
+    public static final class ShortcutBuilder<M extends ElementFactoryBuilderParentReference.ParentBuilder<F>, F, R>
             extends AbstractBuilder<F, R, ShortcutBuilder<M, F, R>> {
         @Delegate
         private final ElementFactoryBuilderParentReference<F, M> parentReference;
 
         public ShortcutBuilder(
-                M builder,
+                M parentBuilder,
                 Class<F> elementType,
                 Class<R> resultType) {
             super(elementType, resultType);
             parentReference = new ElementFactoryBuilderParentReference<>(
-                    builder,
+                    parentBuilder,
                     this);
         }
     }

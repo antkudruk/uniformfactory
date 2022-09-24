@@ -33,10 +33,9 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
     private final Implementation implementation;
 
     public BbImplementationMethodDescriptor(Method wrapperMethod,
-                                            MemberSelector memberSelector,
                                             Optional<Implementation.Composable> initiation,
                                             Implementation implementation) {
-        super(wrapperMethod, memberSelector);
+        super(wrapperMethod);
         this.implementation = implementation;
         this.initiation = initiation;
     }
@@ -128,8 +127,8 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         @Override
         public BbImplementationMethodDescriptor build() {
-            return new BbImplementationMethodDescriptor(wrapperMethod,
-                    getMemberSelector(),
+            return new BbImplementationMethodDescriptor(
+                    wrapperMethod,
                     initiation,
                     implementation);
         }

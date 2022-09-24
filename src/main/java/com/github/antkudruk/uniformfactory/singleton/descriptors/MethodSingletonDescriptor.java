@@ -24,6 +24,7 @@ import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBu
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
+import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelectorByAnnotation;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.ParameterBindersSource;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToConstantEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToFieldEnhancer;
@@ -33,6 +34,7 @@ import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -172,6 +174,11 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
 
         public T setResultMapper(ResultMapperCollection<R> resultMapper) {
             this.resultMapper = resultMapper.createChild();
+            return (T) this;
+        }
+
+        public <A extends Annotation> T setMarkerAnnotation(Class<A> annotation) {
+            this.setMemberSelector(new MemberSelectorByAnnotation(annotation));
             return (T) this;
         }
     }

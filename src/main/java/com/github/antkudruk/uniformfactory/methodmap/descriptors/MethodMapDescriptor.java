@@ -20,26 +20,14 @@ import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescript
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
-import com.github.antkudruk.uniformfactory.methodmap.enhancers.MemberEntry;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodmap.enhancers.MethodMapEnhancer;
 import lombok.experimental.Delegate;
-import net.bytebuddy.description.field.FieldDescription;
-import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.implementation.bytecode.StackManipulation;
-import net.bytebuddy.implementation.bytecode.constant.TextConstant;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
 
 /**
  *
@@ -52,18 +40,13 @@ import java.util.function.Function;
  */
 public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F> {
 
-    private final Function<MethodDescription, StackManipulation> methodKeyGetter;
-    private final Function<FieldDescription, StackManipulation> fieldKeyGetter;
+    private final MapElementSource<F> mapElementSource;
 
     public MethodMapDescriptor(Method wrapperMethod,
-                               MemberSelector memberSelector,
-                               ElementFactory<F> elementFactory,
                                Class<F> functionalInterface,
-                               Function<MethodDescription, StackManipulation> methodKeyGetter,
-                               Function<FieldDescription, StackManipulation> fieldKeyGetter) {
-        super(wrapperMethod, memberSelector, elementFactory, functionalInterface);
-        this.methodKeyGetter = methodKeyGetter;
-        this.fieldKeyGetter = fieldKeyGetter;
+                               MapElementSource<F> mapElementSource) {
+        super(wrapperMethod, functionalInterface);
+        this.mapElementSource = mapElementSource;
         validate();
     }
 
@@ -72,28 +55,11 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
      */
     @Override
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
-
-        List<MemberEntry> functionalMapperClasses = new ArrayList<>();
-
-        for (MethodDescription originMethod : memberSelector.getMethods(originType)) {
-            functionalMapperClasses.add(new MemberEntry(
-                    methodKeyGetter.apply(originMethod),
-                    getElementFactory().getMethodElement(originType, originMethod).build(originType)
-            ));
-        }
-
-        for (FieldDescription field : memberSelector.getFields(originType)) {
-            functionalMapperClasses.add(new MemberEntry(
-                    fieldKeyGetter.apply(field),
-                    getElementFactory().getFieldElement(originType, field).build(originType)
-            ));
-        }
-
-        return new MethodMapEnhancer(
+        return new MethodMapEnhancer<>(
                 "values",
                 originType,
                 wrapperMethod,
-                functionalMapperClasses);
+                mapElementSource.memberEntries(originType));
     }
 
     private void validate() {
@@ -104,43 +70,31 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
 
     @SuppressWarnings("unchecked")
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
-            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T> {
-
+            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T>
+            implements AnnotationMapElementSource.ShortcutBuilder.ParentBuilder<F>
+    {
         private final Class<F> functionalInterface;
-        private Function<MethodDescription, StackManipulation> methodKeyGetter;
-        private Function<FieldDescription, StackManipulation> fieldKeyGetter;
-
+        private MapElementSource<F> mapElementSource;
         public AbstractBuilder(Class<F> functionalInterface, Method wrapperMethod) {
             super(wrapperMethod, functionalInterface);
             this.functionalInterface = functionalInterface;
         }
 
-        public T setMethodKeyGetter(Function<MethodDescription, StackManipulation> methodKeyGetter) {
-            this.methodKeyGetter = methodKeyGetter;
+        public T setMapElementSource(MapElementSource<F> mapElementSource) {
+            this.mapElementSource = mapElementSource;
             return (T) this;
         }
 
-        public T setFieldKeyGetter(Function<FieldDescription, StackManipulation> fieldKeyGetter) {
-            this.fieldKeyGetter = fieldKeyGetter;
-            return (T) this;
-        }
-
-        public <A extends Annotation> T setMarkerAnnotation(Class<A> marker, Function<A, String> keyGetter) {
-            setMarkerAnnotation(marker);
-            setMethodKeyGetter(md -> new TextConstant(keyGetter.apply(Objects.requireNonNull(md.getDeclaredAnnotations().ofType(marker)).load())));
-            setFieldKeyGetter(fd -> new TextConstant(keyGetter.apply(Objects.requireNonNull(fd.getDeclaredAnnotations().ofType(marker)).load())));
-            return (T) this;
+        public AnnotationMapElementSource.ShortcutBuilder<T, F> annotationMapElementSource() {
+            return new AnnotationMapElementSource.ShortcutBuilder<>((T) this, functionalInterface);
         }
 
         @Override
         public MethodMapDescriptor<F> build() {
             return new MethodMapDescriptor<>(
                     wrapperMethod,
-                    getMemberSelector(),
-                    getElementFactory(),
                     functionalInterface,
-                    methodKeyGetter,
-                    fieldKeyGetter);
+                    mapElementSource);
         }
     }
 

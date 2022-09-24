@@ -18,30 +18,22 @@ package com.github.antkudruk.uniformfactory.base;
 
 import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
 import com.github.antkudruk.uniformfactory.methodcollection.ElementFactoryBuilderParentReference;
-import com.github.antkudruk.uniformfactory.methodcollection.GetterElementFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.SetterElementFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import lombok.Getter;
 
 import java.lang.reflect.Method;
 
 @Getter
 public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMethodDescriptorImpl {
-
-    private final ElementFactory<F> elementFactory;
     private final Class<F> functionalInterface;
 
     public AbstractMethodCollectionDescriptor(Method wrapperMethod,
-                                              MemberSelector memberSelector,
-                                              ElementFactory<F> elementFactory,
                                               Class<F> functionalInterface) {
-        super(wrapperMethod, memberSelector);
-        this.elementFactory = elementFactory;
+        super(wrapperMethod);
         this.functionalInterface = functionalInterface;
-        valiate();
+        validate();
     }
 
-    private void valiate() {
+    private void validate() {
         if (functionalInterface == null) {
             throw new RuntimeException("You haven't defined a functional interface");
         }
@@ -51,7 +43,7 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
     @Getter
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
             extends AbstractMethodDescriptorImpl.AbstractBuilder<T>
-            implements Builds<MethodDescriptor>, ElementFactoryBuilderParentReference.Has<F> {
+            implements Builds<MethodDescriptor>, ElementFactoryBuilderParentReference.ParentBuilder<F> {
 
         private final Class<F> elementType;
         private ElementFactory<F> elementFactory;
@@ -64,14 +56,6 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
         public T setElementFactory(ElementFactory<F> elementFactory) {
             this.elementFactory = elementFactory;
             return (T) this;
-        }
-
-        public <R> GetterElementFactory.ShortcutBuilder<T, F, R> getterElementFactory(Class<R> resultType) {
-            return new GetterElementFactory.ShortcutBuilder<>((T) this, elementType, resultType);
-        }
-
-        public SetterElementFactory.ShortcutBuilder<T, F> setterElementFactory() {
-            return new SetterElementFactory.ShortcutBuilder<>((T) this, elementType);
         }
     }
 }

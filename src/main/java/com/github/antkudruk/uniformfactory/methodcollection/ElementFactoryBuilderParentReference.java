@@ -24,10 +24,10 @@ import lombok.AllArgsConstructor;
  * @param <M> Parent method descriptor
  */
 @AllArgsConstructor
-public class ElementFactoryBuilderParentReference<F, M extends ElementFactoryBuilderParentReference.Has<F>> {
+public class ElementFactoryBuilderParentReference<F, M extends ElementFactoryBuilderParentReference.ParentBuilder<F>> {
 
-    public interface Has <F> {
-        Object setElementFactory(ElementFactory<F> elementFactory);
+    public interface ParentBuilder<F> {
+        ParentBuilder<F> setElementFactory(ElementFactory<F> elementFactory);
     }
 
     private final M parentElementFactoryBuilder;

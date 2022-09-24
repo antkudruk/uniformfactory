@@ -81,20 +81,19 @@ public class MethodMapTest {
                 .addMethodDescriptor(
                         new MethodMapDescriptor.Builder<>(Fun.class,
                                 Wrapper.class.getMethod("getFunctionsList"))
-
+                                .annotationMapElementSource()
                                 .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
-
                                 .getterElementFactory(String.class)
-                                    .parameterSource(String.class, 0)
-                                    .applyToAnnotated(Name.class)
-                                    .finishParameterDescription()
+                                .parameterSource(String.class, 0)
+                                .applyToAnnotated(Name.class)
+                                .finishParameterDescription()
 
-                                    .parameterSource(Long.class, 1)
-                                    .applyToAnnotated(Index.class)
-                                    .addTranslator(Integer.class, Long::intValue)
-                                    .finishParameterDescription()
+                                .parameterSource(Long.class, 1)
+                                .applyToAnnotated(Index.class)
+                                .addTranslator(Integer.class, Long::intValue)
+                                .finishParameterDescription()
                                 .finishElementFactory()
-
+                                .endElementSource()
                                 .build()
                 )
                 .build();
@@ -125,6 +124,8 @@ public class MethodMapTest {
                         Fun.class,
                         Wrapper.class.getMethod("getFunctionsList"))
 
+                        .annotationMapElementSource()
+
                         .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
 
                         .getterElementFactory(String.class)
@@ -139,6 +140,8 @@ public class MethodMapTest {
                         .applyToAnnotated(Index.class)
 
                         .finishElementFactory()
+
+                        .endElementSource()
 
                         .build()
                 )
@@ -167,6 +170,9 @@ public class MethodMapTest {
                         new MethodMapDescriptor.Builder<>(
                                 Fun.class,
                                 Wrapper.class.getMethod("getFunctionsList"))
+
+                                .annotationMapElementSource()
+
                                 .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
 
                                 .getterElementFactory(String.class)
@@ -183,6 +189,8 @@ public class MethodMapTest {
                                 ))
 
                                 .finishElementFactory()
+
+                                .endElementSource()
 
                                 .build()
                 )
@@ -212,8 +220,6 @@ public class MethodMapTest {
         new MethodMapDescriptor.Builder<>(
                 Fun.class,
                 WrapperOfList.class.getMethod("getFunctionsList")
-        )
-                .setMarkerAnnotation(MethodMarker.class, MethodMarker::value)
-                .build();
+        ).build();
     }
 }

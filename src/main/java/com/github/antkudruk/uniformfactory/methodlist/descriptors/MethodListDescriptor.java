@@ -22,18 +22,12 @@ import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
-import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.methodlist.enhancers.MethodListEnhancer;
 import lombok.Getter;
 import lombok.experimental.Delegate;
-import net.bytebuddy.description.field.FieldDescription;
-import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.DynamicType;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,11 +38,13 @@ import java.util.List;
  */
 public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<F> {
 
+    private final ListElementSource<F> elementSource;
+
     private MethodListDescriptor(Method wrapperMethod,
-                                 MemberSelector memberSelector,
-                                 ElementFactory<F> elementFactory,
-                                 Class<F> functionalInterface) {
-        super(wrapperMethod, memberSelector, elementFactory, functionalInterface);
+                                 Class<F> functionalInterface,
+                                 ListElementSource<F> elementSource) {
+        super(wrapperMethod, functionalInterface);
+        this.elementSource = elementSource;
         validate();
     }
 
@@ -63,44 +59,44 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
      */
     @Override
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
-        List<DynamicType.Unloaded<?>> functionalMapperClasses = new ArrayList<>();
-        for (MethodDescription originMethod : memberSelector.getMethods(originType)) {
-            functionalMapperClasses.add(
-                    getElementFactory().getMethodElement(originType, originMethod).build(originType)
-            );
-        }
-
-        for (FieldDescription field : memberSelector.getFields(originType)) {
-            functionalMapperClasses.add(
-                    getElementFactory().getFieldElement(originType, field).build(originType)
-            );
-        }
-
-        return new MethodListEnhancer(
+        return new MethodListEnhancer<>(
                 "values",
                 originType,
                 wrapperMethod,
-                functionalMapperClasses);
+                elementSource.elements(originType));
     }
 
+    @SuppressWarnings("unchecked")
     @Getter
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
-            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T> {
+            extends AbstractMethodCollectionDescriptor.AbstractBuilder<F, T>
+            implements DefaultListElementSource.ShortcutBuilder.ParentBuilder<F> {
 
         private final Class<F> functionalInterface;
+        private ListElementSource<F> elementSource;
 
         public AbstractBuilder(Class<F> functionalInterface, Method wrapperMethod) {
             super(wrapperMethod, functionalInterface);
             this.functionalInterface = functionalInterface;
         }
 
+        public T setElementSource(ListElementSource<F> elementSource) {
+            this.elementSource = elementSource;
+            return (T) this;
+        }
+
+        public <R> DefaultListElementSource.ShortcutBuilder<T, F, R> defaultElementSource() {
+            return new DefaultListElementSource.ShortcutBuilder<>(
+                    (T) this,
+                    functionalInterface);
+        }
+
         @Override
         public MethodListDescriptor<F> build() {
             return new MethodListDescriptor<>(
                     wrapperMethod,
-                    getMemberSelector(),
-                    getElementFactory(),
-                    functionalInterface);
+                    functionalInterface,
+                    elementSource);
         }
     }
 

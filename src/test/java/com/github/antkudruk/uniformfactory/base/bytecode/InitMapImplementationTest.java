@@ -1,22 +1,19 @@
 package com.github.antkudruk.uniformfactory.base.bytecode;
 
 import com.github.antkudruk.uniformfactory.common.TypeDescriptionShortcuts;
-import com.github.antkudruk.uniformfactory.methodmap.enhancers.MemberEntry;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.scaffold.subclass.ConstructorStrategy;
 import net.bytebuddy.implementation.MethodCall;
-import net.bytebuddy.implementation.bytecode.constant.TextConstant;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.reflect.Whitebox;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
@@ -59,13 +56,12 @@ public class InitMapImplementationTest {
     @Test
     public void test() throws ReflectiveOperationException {
         ByteBuddy byteBuddy = new ByteBuddy();
+        Map<String, DynamicType.Unloaded> types = new HashMap<String, DynamicType.Unloaded>(){{
+            put("alpha", createUnloaded(IntermediateWrapper0.class));
+            put("beta", createUnloaded(IntermediateWrapper1.class));
+        }};
 
-        List<MemberEntry> types = Arrays.asList(
-                new MemberEntry(new TextConstant("alpha"), createUnloaded(IntermediateWrapper0.class)),
-                new MemberEntry(new TextConstant("beta"), createUnloaded(IntermediateWrapper1.class))
-        );
-
-        Class wrapperClass = byteBuddy
+        Class<?> wrapperClass = byteBuddy
                 .subclass(Object.class, ConstructorStrategy.Default.NO_CONSTRUCTORS)
                 .defineField(FIELD_NAME_0, Map.class, Opcodes.ACC_PRIVATE)
                 .defineConstructor(Visibility.PUBLIC)
@@ -96,11 +92,10 @@ public class InitMapImplementationTest {
     @Test
     public void testTwoMethods() throws ReflectiveOperationException {
         ByteBuddy byteBuddy = new ByteBuddy();
-
-        List<MemberEntry> types = Arrays.asList(
-                new MemberEntry(new TextConstant("alpha"), createUnloaded(IntermediateWrapper0.class)),
-                new MemberEntry(new TextConstant("beta"), createUnloaded(IntermediateWrapper1.class))
-        );
+        Map<String, Object> types = new HashMap<String, Object>(){{
+            put("alpha", createUnloaded(IntermediateWrapper0.class));
+            put("beta", createUnloaded(IntermediateWrapper1.class));
+        }};
 
         Class wrapperClass = byteBuddy
                 .subclass(Object.class, ConstructorStrategy.Default.NO_CONSTRUCTORS)

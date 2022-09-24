@@ -88,7 +88,7 @@ public class SetterElementFactory<F> implements ElementFactory<F>, HasParameterT
         }
     }
 
-    public static class ShortcutBuilder<M extends ElementFactoryBuilderParentReference.Has<F>, F>
+    public static class ShortcutBuilder<M extends ElementFactoryBuilderParentReference.ParentBuilder<F>, F>
             extends AbstractBuilder<F, ShortcutBuilder<M, F>> {
 
         @Delegate
