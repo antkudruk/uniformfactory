@@ -28,18 +28,18 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MethodListEnhancer implements Enhancer {
+public class MethodListEnhancer<F> implements Enhancer {
 
     private final String fieldName;
     private final TypeDescription originType;
     private final Method wrapperMethod;
-    private final List<DynamicType.Unloaded<?>> functionalList;
+    private final List<DynamicType.Unloaded<F>> functionalList;
 
     public MethodListEnhancer(
             String listFieldName,
             TypeDescription originType,
             Method wrapperMethod,
-            List<DynamicType.Unloaded<?>> functionalListClasses) {
+            List<DynamicType.Unloaded<F>> functionalListClasses) {
 
         this.fieldName = listFieldName;
         this.originType = originType;

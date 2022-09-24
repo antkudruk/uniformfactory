@@ -23,7 +23,7 @@ import lombok.experimental.Delegate;
 
 import java.lang.reflect.Method;
 
-public abstract class AbstractMethodWithMappersDescriptorImpl extends AbstractMethodDescriptorImpl {
+public abstract class AbstractMethodWithMappersDescriptorImpl extends MethodWithSelectorDescriptor {
 
     protected final ParameterBindersSource parameterMapper;
 

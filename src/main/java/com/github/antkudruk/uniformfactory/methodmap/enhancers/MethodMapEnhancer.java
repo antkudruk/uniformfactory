@@ -18,6 +18,7 @@ package com.github.antkudruk.uniformfactory.methodmap.enhancers;
 
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.base.bytecode.InitMapImplementation;
+import lombok.AllArgsConstructor;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.FieldAccessor;
@@ -25,39 +26,27 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.jar.asm.Opcodes;
 
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Enhancer for Method Map.
  * Defines {@code Map} field and initiates it using {@code InitMapImplementation} class.
  * Implements <b>origin</b> method to access that field.
  */
-public class MethodMapEnhancer implements Enhancer {
+@AllArgsConstructor
+public class MethodMapEnhancer<F> implements Enhancer {
 
     private final String fieldName;
     private final TypeDescription originType;
     private final Method wrapperMethod;
-    private final List<MemberEntry> functionalMap;
-
-    public MethodMapEnhancer(
-            String mapFieldName,
-            TypeDescription originType,
-            Method wrapperMethod,
-            List<MemberEntry> functionalMapperClasses) {
-
-        this.fieldName = mapFieldName;
-        this.originType = originType;
-        this.wrapperMethod = wrapperMethod;
-        this.functionalMap = functionalMapperClasses;
-    }
+    private final Map<String, DynamicType.Unloaded<F>> functionalMap;
 
     @Override
     public Implementation.Composable addInitiation(
             Implementation.Composable methodCall) {
 
-        return methodCall.andThen(new InitMapImplementation(
+        return methodCall.andThen(new InitMapImplementation<F>(
                 fieldName,
                 originType,
                 functionalMap
@@ -70,6 +59,6 @@ public class MethodMapEnhancer implements Enhancer {
                 .defineField(fieldName, Map.class, Opcodes.ACC_PRIVATE)
                 .define(wrapperMethod)
                 .intercept(FieldAccessor.ofField(fieldName))
-                .require(functionalMap.stream().map(MemberEntry::getValue).collect(Collectors.toList()));
+                .require(new ArrayList<>(functionalMap.values()));
     }
 }

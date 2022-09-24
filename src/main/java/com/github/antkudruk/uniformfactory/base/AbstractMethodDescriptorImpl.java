@@ -16,11 +16,9 @@
 
 package com.github.antkudruk.uniformfactory.base;
 
-import com.github.antkudruk.uniformfactory.base.exception.NoMarkerAnnotationException;
 import com.github.antkudruk.uniformfactory.base.exception.NoWrapperMethodException;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelectorByAnnotation;
-import lombok.Generated;
 import lombok.Getter;
 
 import java.lang.annotation.Annotation;
@@ -29,12 +27,8 @@ import java.lang.reflect.Method;
 public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
 
     protected final Method wrapperMethod;
-    protected final MemberSelector memberSelector;
 
-    public AbstractMethodDescriptorImpl(Method wrapperMethod,
-                                        MemberSelector memberSelector) {
-
-        this.memberSelector = memberSelector;
+    public AbstractMethodDescriptorImpl(Method wrapperMethod) {
         this.wrapperMethod = wrapperMethod;
 
         validate();
@@ -49,11 +43,6 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
     }
 
     private void validate() {
-
-        if (memberSelector == null) {
-            throw new NoMarkerAnnotationException();
-        }
-
         if (wrapperMethod == null) {
             throw new NoWrapperMethodException();
         }
@@ -74,11 +63,7 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
             this.wrapperMethod = wrapperMethod;
         }
 
-        @SuppressWarnings("unchecked")
-        public <M extends Annotation> T setMarkerAnnotation(Class<M> marker) {
-            setMemberSelector(new MemberSelectorByAnnotation(marker));
-            return (T)this;
-        }
+
 
         @SuppressWarnings("unchecked")
         public T setMemberSelector(MemberSelector memberSelector) {
