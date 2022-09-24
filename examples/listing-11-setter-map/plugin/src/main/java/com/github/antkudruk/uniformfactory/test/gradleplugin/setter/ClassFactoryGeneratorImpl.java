@@ -12,6 +12,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Adapter> 
     public ClassFactoryGeneratorImpl() throws ReflectiveOperationException {
         super(new ClassFactory.Builder<>(Adapter.class)
                 .addMethodMap(Adapter.class.getDeclaredMethod("setters"), Fun.class)
+                .annotationMapElementSource()
                 .setMarkerAnnotation(Css.class, Css::value)
 
                 .setterElementFactory()
@@ -22,10 +23,11 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Adapter> 
                 .addTranslator(long.class, Long::parseLong)
                 .addTranslator(Integer.class, Integer::parseInt)
                 .addTranslator(int.class, Integer::parseInt)
-                        .finishParameterDescription()
-                        .finishElementFactory()
-                        .endMethodDescription()
-                        .build()
+                .finishParameterDescription()
+                .finishElementFactory()
+                .endElementSource()
+                .endMethodDescription()
+                .build()
         );
     }
 }

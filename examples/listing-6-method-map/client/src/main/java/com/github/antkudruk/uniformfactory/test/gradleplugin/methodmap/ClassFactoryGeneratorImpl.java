@@ -9,10 +9,13 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<PointWrap
         super(new ClassFactory.Builder<>(PointWrapper.class)
 
                 .addMethodMap(PointWrapper.class.getMethod("getCoords"), Coordinate.class)
+                .annotationMapElementSource()
                 .setMarkerAnnotation(CoordinateMarker.class, CoordinateMarker::value)
 
+                // Creating map of getters
                 .getterElementFactory(long.class)
 
+                // Describes mapping of parameter from the adapter type to origin types
                 .parameterSource(Long.class, 0)
 
                 .applyTo(new AnyParameterFilter())
@@ -26,6 +29,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<PointWrap
                 .addResultTranslator(int.class, Integer::longValue)
 
                 .finishElementFactory()
+                .endElementSource()
                 .endMethodDescription()
 
                 .build());
