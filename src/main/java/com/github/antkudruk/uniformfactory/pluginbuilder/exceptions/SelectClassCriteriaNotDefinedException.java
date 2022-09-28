@@ -18,6 +18,6 @@ package com.github.antkudruk.uniformfactory.pluginbuilder.exceptions;
 
 public class SelectClassCriteriaNotDefinedException extends PluginBuilderException {
     public SelectClassCriteriaNotDefinedException() {
-        super("Type marker is not defined");
+        super("Criteria to pick up the class is not defined");
     }
 }

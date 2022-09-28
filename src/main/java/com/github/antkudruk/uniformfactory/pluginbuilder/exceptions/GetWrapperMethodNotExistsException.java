@@ -17,7 +17,7 @@
 package com.github.antkudruk.uniformfactory.pluginbuilder.exceptions;
 
 public class GetWrapperMethodNotExistsException extends PluginBuilderException {
-    public GetWrapperMethodNotExistsException(String methodName, Class originInterface) {
+    public GetWrapperMethodNotExistsException(String methodName, Class<?> originInterface) {
         super("No " + methodName + " method exists in the origin interface "
                 + originInterface.getName());
     }

@@ -21,11 +21,7 @@ import com.github.antkudruk.uniformfactory.base.bytecode.EmptyImplementation;
 import com.github.antkudruk.uniformfactory.base.bytecode.InitFieldWithDefaultConstructorImplementation;
 import com.github.antkudruk.uniformfactory.classfactory.EnhancerBasedEnhancer;
 import com.github.antkudruk.uniformfactory.classfactory.WrapperEnhancer;
-import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.AmbiguousGetWrapperMethodException;
-import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.GetWrapperMethodNotExistsException;
-import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.GetWrapperMethodWrongTypeException;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.OriginInterfaceNotDefinedException;
-import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.StaticConstructorGeneratorException;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.SelectClassCriteriaNotDefinedException;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.build.Plugin;
@@ -42,7 +38,6 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -82,9 +77,22 @@ public class WrapperPlugin implements Plugin {
         this.classGeneratorSingletonContainer = wrappers
                 .stream()
                 .collect(Collectors.toMap(
-                        WrapperDescriptor::getFieldName,
+                        WrapperDescriptor::getAdaptorField,
                         e -> createSingletonHolder(e.getWrapperClassFactory())
                 ));
+        validate();
+    }
+
+    private void validate() {
+        if (originInterface == null) {
+            throw new OriginInterfaceNotDefinedException();
+        }
+
+        if (selectTypeCriteria == null) {
+            throw new SelectClassCriteriaNotDefinedException();
+        }
+
+        wrappers.forEach(e -> e.validateForOrigin(originInterface));
     }
 
     /**
@@ -378,9 +386,9 @@ public class WrapperPlugin implements Plugin {
 
     private Enhancer getWrapperEnhancer(WrapperDescriptor<?> wrapperDescriptor) {
         String getWrapperMethodName = wrapperDescriptor.getMethodName();
-        String wrapperFieldName = wrapperDescriptor.getFieldName();
+        String wrapperFieldName = wrapperDescriptor.getAdaptorField();
         Class<?> wrapperClass = wrapperDescriptor.getWrapperClass();
-        String classFactoryGeneratorFieldName = wrapperDescriptor.getClassFactoryGeneratorFieldName();
+        String classFactoryGeneratorFieldName = wrapperDescriptor.getAdaptorFactoryField();
         Class<? extends MetaClassFactory<?>> classFactoryGenerator = wrapperDescriptor.getWrapperClassFactory();
 
         return new WrapperEnhancer(
@@ -485,55 +493,6 @@ public class WrapperPlugin implements Plugin {
         public Builder<W> setClassFactoryGenerator(Class<? extends MetaClassFactory<W>> staticConstructorGenerator) {
             this.classFactoryGenerator = staticConstructorGenerator;
             return this;
-        }
-
-        public WrapperPlugin build() {
-
-            if (originInterface == null) {
-                throw new OriginInterfaceNotDefinedException();
-            }
-
-            if (selectClassCriteria == null) {
-                throw new SelectClassCriteriaNotDefinedException();
-            }
-
-            if (classFactoryGenerator == null) {
-                throw new StaticConstructorGeneratorException(
-                        "You should specify static method returning a constructor "
-                                + "for your wrapper class according to the origin object type"
-                );
-            }
-
-            if (getWrapperMethodName == null) {
-                if (originInterface.getDeclaredMethods().length != 1) {
-                    throw new AmbiguousGetWrapperMethodException();
-                } else {
-                    getWrapperMethodName = originInterface.getDeclaredMethods()[0].getName();
-                }
-            }
-
-            Method getWrapperMethod;
-            try {
-                //noinspection unchecked
-                getWrapperMethod = originInterface.getMethod(getWrapperMethodName);
-            } catch (NoSuchMethodException ignore) {
-                throw new GetWrapperMethodNotExistsException(
-                        getWrapperMethodName, originInterface);
-            }
-            if (!getWrapperMethod.getReturnType().equals(wrapperClass)) {
-                throw new GetWrapperMethodWrongTypeException(
-                        getWrapperMethodName, originInterface, wrapperClass);
-            }
-
-            return new WrapperPlugin(
-                    originInterface,
-                    getWrapperMethodName,
-                    wrapperClass,
-                    selectClassCriteria,
-                    wrapperFieldName,
-                    wrapperClassFactoryFieldName,
-                    classFactoryGenerator
-            );
         }
     }
 }
