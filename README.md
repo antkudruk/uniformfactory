@@ -636,11 +636,12 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 
 ## History
 
-| version    | Description                                                      |
-|------------|------------------------------------------------------------------|
-| 0.2.2      | Added pure ByteBuddy implementation                              |
-| 0.3.0      | Gave up builder experiments                                      |
-| 0.4.1      | Added an opportunity to iplement custom method map               
+| version | Description                                                      |
+|---------|------------------------------------------------------------------|
+| 0.2.2   | Added pure ByteBuddy implementation                              |
+| 0.3.0   | Gave up builder experiments                                      |
+| 0.4.0   | Added an opportunity to iplement custom method map               |
+| 0.4.1   | Clened up exceptions                                             |
 
 
 ## License
