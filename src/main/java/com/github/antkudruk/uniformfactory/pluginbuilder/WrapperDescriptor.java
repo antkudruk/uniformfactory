@@ -1,59 +1,59 @@
 package com.github.antkudruk.uniformfactory.pluginbuilder;
 
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.*;
-import lombok.SneakyThrows;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.method.MethodList;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatchers;
 
 public class WrapperDescriptor<W> {
     private final String methodName;
-    private final String adaptorField;
-    private final String adaptorFactoryField;
+    private final String wrapperField;
+    private final String wrapperFactoryField;
     private final Class<W> wrapperClass;
     private final Class<? extends MetaClassFactory<W>> wrapperClassFactory;
 
     public WrapperDescriptor(
             String methodName,
-            String adaptorField,
-            String adaptorFactoryField,
+            String wrapperField,
+            String wrapperFactoryField,
             Class<W> wrapperClass,
             Class<? extends MetaClassFactory<W>> wrapperClassFactory) {
         this.methodName = methodName;
-        this.adaptorField = adaptorField;
-        this.adaptorFactoryField = adaptorFactoryField;
+        this.wrapperField = wrapperField;
+        this.wrapperFactoryField = wrapperFactoryField;
         this.wrapperClass = wrapperClass;
         this.wrapperClassFactory = wrapperClassFactory;
         validate();
     }
 
     private void validate() {
-        if(adaptorField == null) {
-            throw new AdaptorFieldNotSpecifiedException();
+        if(wrapperField == null) {
+            throw new WrapperFieldNotSpecifiedException();
+        }
+        if(methodName == null) {
+            throw new MethodNameNotSpecifiedException(wrapperField);
+        }
+        if(wrapperFactoryField == null) {
+            throw new WrapperFactoryFieldNotSpecifiedException(wrapperField);
+        }
+        if(wrapperClass == null) {
+            throw new NoWrapperClassSpecifiedException(wrapperField);
+        }
+        if(wrapperClassFactory == null) {
+            throw new NoClassFactoryException(wrapperField);
         }
     }
 
-    @SneakyThrows(ReflectiveOperationException.class)
     void validateForOrigin(Class<?> originClass) {
-        if(methodName == null) {
-            throw new MethodNameNotSpecifiedException(adaptorField);
-        }
-        if(adaptorFactoryField == null) {
-            throw new AdaptorFactoryFieldNotSpecifiedException(adaptorField);
-        }
-        if(wrapperClass == null) {
-            throw new NoWrapperClassSpecifiedException(adaptorField);
-        }
-        if(wrapperClassFactory == null) {
-            throw new NoClassFactoryException(adaptorField);
-        }
-        if(new TypeDescription
+        MethodList<MethodDescription.InDefinedShape> methods = new TypeDescription
                 .ForLoadedType(originClass)
                 .getDeclaredMethods()
-                .filter(ElementMatchers.named(methodName).and(ElementMatchers.takesNoArguments()))
-                .size() == 0) {
-            throw new WrongMethodNameException(methodName, originClass);
+                .filter(ElementMatchers.named(methodName).and(ElementMatchers.takesNoArguments()));
+        if(methods.size() == 0) {
+            throw new GetWrapperMethodNotExistsException(methodName, originClass);
         }
-        if(originClass.getDeclaredMethod(methodName).getClass().isAssignableFrom(wrapperClass)) {
+        if(!methods.getOnly().getReturnType().asErasure().isAssignableFrom(wrapperClass)) {
             throw new GetWrapperMethodWrongTypeException(methodName, originClass, wrapperClass);
         }
     }
@@ -62,12 +62,12 @@ public class WrapperDescriptor<W> {
         return methodName;
     }
 
-    public String getAdaptorField() {
-        return adaptorField;
+    public String getWrapperField() {
+        return wrapperField;
     }
 
-    public String getAdaptorFactoryField() {
-        return adaptorFactoryField;
+    public String getWrapperFactoryField() {
+        return wrapperFactoryField;
     }
 
     public Class<W> getWrapperClass() {

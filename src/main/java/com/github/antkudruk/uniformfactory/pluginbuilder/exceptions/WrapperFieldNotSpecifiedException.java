@@ -1,7 +1,7 @@
 package com.github.antkudruk.uniformfactory.pluginbuilder.exceptions;
 
-public class AdaptorFieldNotSpecifiedException extends PluginBuilderException {
-    public AdaptorFieldNotSpecifiedException() {
+public class WrapperFieldNotSpecifiedException extends PluginBuilderException {
+    public WrapperFieldNotSpecifiedException() {
         super("No adaptor factory field name specified");
     }
 }

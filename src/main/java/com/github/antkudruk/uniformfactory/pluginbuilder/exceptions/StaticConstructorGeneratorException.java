@@ -16,6 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.pluginbuilder.exceptions;
 
+// TODO: Test
 public class StaticConstructorGeneratorException extends PluginBuilderException {
     public StaticConstructorGeneratorException(String message) {
         super(message);
