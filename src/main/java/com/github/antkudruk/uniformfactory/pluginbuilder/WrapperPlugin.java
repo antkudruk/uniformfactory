@@ -77,7 +77,7 @@ public class WrapperPlugin implements Plugin {
         this.classGeneratorSingletonContainer = wrappers
                 .stream()
                 .collect(Collectors.toMap(
-                        WrapperDescriptor::getAdaptorField,
+                        WrapperDescriptor::getWrapperField,
                         e -> createSingletonHolder(e.getWrapperClassFactory())
                 ));
         validate();
@@ -386,9 +386,9 @@ public class WrapperPlugin implements Plugin {
 
     private Enhancer getWrapperEnhancer(WrapperDescriptor<?> wrapperDescriptor) {
         String getWrapperMethodName = wrapperDescriptor.getMethodName();
-        String wrapperFieldName = wrapperDescriptor.getAdaptorField();
+        String wrapperFieldName = wrapperDescriptor.getWrapperField();
         Class<?> wrapperClass = wrapperDescriptor.getWrapperClass();
-        String classFactoryGeneratorFieldName = wrapperDescriptor.getAdaptorFactoryField();
+        String classFactoryGeneratorFieldName = wrapperDescriptor.getWrapperFactoryField();
         Class<? extends MetaClassFactory<?>> classFactoryGenerator = wrapperDescriptor.getWrapperClassFactory();
 
         return new WrapperEnhancer(

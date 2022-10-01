@@ -144,7 +144,7 @@ Here is an example for Gradle:
 
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.4.0'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.4.1'
 }
 ```
 
@@ -154,7 +154,7 @@ and for Maven:
 <dependency>
     <groupId>com.github.antkudruk</groupId>
     <artifactId>uniform-factory</artifactId>
-    <version>0.4.0</version>
+    <version>0.4.1</version>
 </dependency>
 ```
 
@@ -400,7 +400,7 @@ public interface Wrapper {
 ```
 
 You can find a compilable example here:
-[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-4-custom-method-list)
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-4-2-custom-method-list)
 
 ## Custom MetaclassGenerator to Generate Wrappers in Java
 
@@ -636,11 +636,12 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 
 ## History
 
-| version    | Description                                                      |
-|------------|------------------------------------------------------------------|
-| 0.2.2      | Added pure ByteBuddy implementation                              |
-| 0.3.0      | Gave up builder experiments                                      |
-| 0.4.0      | Added an opportunity to iplement custom method map               
+| version | Description                                                      |
+|---------|------------------------------------------------------------------|
+| 0.2.2   | Added pure ByteBuddy implementation                              |
+| 0.3.0   | Gave up builder experiments                                      |
+| 0.4.0   | Added an opportunity to iplement custom method map               |
+| 0.4.1   | Clened up exceptions                                             |
 
 
 ## License

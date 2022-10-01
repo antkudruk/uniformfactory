@@ -45,7 +45,7 @@ public class AccessFieldValue extends AbstractAtomGenerator {
         DynamicType.Builder bbBuilder = new ByteBuddy()
                 .subclass(Object.class, ConstructorStrategy.Default.NO_CONSTRUCTORS);
 
-        bbBuilder = createCunstructorSettingUpOrigin(bbBuilder, originClass);
+        bbBuilder = createConstructorSettingUpOrigin(bbBuilder, originClass);
         //bbBuilder = createResultTranslatorField(bbBuilder, resultTranslator);
 
         bbBuilder = bbBuilder

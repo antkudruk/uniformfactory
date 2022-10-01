@@ -18,7 +18,6 @@ package com.github.antkudruk.uniformfactory.singleton.atomicaccessor;
 
 import com.github.antkudruk.uniformfactory.base.TypeShortcuts;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
-import com.github.antkudruk.uniformfactory.singleton.descriptors.MethodSingletonDescriptor;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
@@ -74,7 +73,7 @@ public abstract class AbstractAtomGenerator {
                         new CrossLoadersFunctionAdapter(translator)));
     }
 
-    protected static <B> DynamicType.Builder<B> createCunstructorSettingUpOrigin(
+    protected static <B> DynamicType.Builder<B> createConstructorSettingUpOrigin(
             DynamicType.Builder<B> bbBuilder, TypeDescription originClass) {
         try {
             return bbBuilder.defineField(ORIGIN_FIELD_NAME, originClass,

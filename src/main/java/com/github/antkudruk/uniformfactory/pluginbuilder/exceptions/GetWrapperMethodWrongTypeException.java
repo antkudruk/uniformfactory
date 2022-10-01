@@ -18,7 +18,11 @@ package com.github.antkudruk.uniformfactory.pluginbuilder.exceptions;
 
 public class GetWrapperMethodWrongTypeException extends PluginBuilderException {
     public GetWrapperMethodWrongTypeException(String methodName, Class originClass, Class wrapperClass) {
-        super("Method " + methodName + " in the class " + originClass
-                + " doesn't return a value of type " + wrapperClass);
+        super(String.format(
+                "Method '%s' in the class '%s' doesn't return a value of type '%s'",
+                methodName,
+                originClass,
+                wrapperClass
+        ));
     }
 }
