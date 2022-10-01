@@ -400,7 +400,7 @@ public interface Wrapper {
 ```
 
 You can find a compilable example here:
-[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-4-custom-method-list)
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-4-2-custom-method-list)
 
 ## Custom MetaclassGenerator to Generate Wrappers in Java
 
