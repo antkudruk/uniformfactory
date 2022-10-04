@@ -24,5 +24,5 @@ import java.util.List;
 
 @FunctionalInterface
 public interface ListElementSource<F> {
-    List<DynamicType.Unloaded<F>> elements(TypeDescription originType) throws ClassGeneratorException;
+    List<DynamicType.Unloaded<? extends F>> elements(TypeDescription originType) throws ClassGeneratorException;
 }

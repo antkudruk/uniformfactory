@@ -1,6 +1,6 @@
 package com.github.antkudruk.uniformfactory.pluginbuilder.impls;
 
 public interface Origin {
-    Adapter get();
+    Adaptor get();
     String getString();
 }

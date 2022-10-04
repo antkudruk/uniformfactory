@@ -51,16 +51,16 @@ public class AnnotationMapElementSourceTest<F> {
     private MethodDescription methodDescription;
 
     @Mock
-    private ClassFactory<F> fieldClassFactory;
+    private ClassFactory fieldClassFactory;
 
     @Mock
-    private ClassFactory<F> methodClassFactory;
+    private ClassFactory methodClassFactory;
 
     @Mock
-    private DynamicType.Unloaded<F> fieldUnloaded;
+    private DynamicType.Unloaded fieldUnloaded;
 
     @Mock
-    private DynamicType.Unloaded<F> methodUnloaded;
+    private DynamicType.Unloaded methodUnloaded;
 
     // tested object
     private AnnotationMapElementSource<F> testedObject;
@@ -81,7 +81,7 @@ public class AnnotationMapElementSourceTest<F> {
     @Test
     public void whenFieldAndMethod_thenBothAdaptors() throws ClassGeneratorException {
         // when
-        Map<String, DynamicType.Unloaded<F>> result = testedObject.memberEntries(origin);
+        Map<String, DynamicType.Unloaded<? extends F>> result = testedObject.memberEntries(origin);
 
         // then
         assertThat(result.get(FIELD_ADAPTOR_NAME), equalTo(fieldUnloaded));

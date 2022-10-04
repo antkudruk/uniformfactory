@@ -21,6 +21,7 @@ import com.github.antkudruk.uniformfactory.base.bytecode.EmptyImplementation;
 import com.github.antkudruk.uniformfactory.base.bytecode.InitFieldWithDefaultConstructorImplementation;
 import com.github.antkudruk.uniformfactory.classfactory.EnhancerBasedEnhancer;
 import com.github.antkudruk.uniformfactory.classfactory.WrapperEnhancer;
+import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.AmbiguousGetWrapperMethodException;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.OriginInterfaceNotDefinedException;
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.SelectClassCriteriaNotDefinedException;
 import net.bytebuddy.ByteBuddy;
@@ -38,9 +39,7 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -92,8 +91,22 @@ public class WrapperPlugin implements Plugin {
             throw new SelectClassCriteriaNotDefinedException();
         }
 
+        validateMethodNames();
+
         wrappers.forEach(e -> e.validateForOrigin(originInterface));
     }
+
+    private void validateMethodNames() {
+        Set<String> methodNames = new HashSet<>();
+        wrappers
+                .stream()
+                .map(WrapperDescriptor::getMethodName)
+                .peek(n -> {
+                    if (methodNames.contains(n)) throw new AmbiguousGetWrapperMethodException(n);
+                })
+                .forEach(methodNames::add);
+    }
+
 
     /**
      * Creates the plugin to build wrappers.
@@ -280,15 +293,11 @@ public class WrapperPlugin implements Plugin {
 
     // TODO: Builder does not process default parameters unless it's build method called. Make the constructor work .
     @SuppressWarnings("unused")
-    public <W> WrapperPlugin(Builder<W> builder) {
+    public <W> WrapperPlugin(Builder builder) {
         this(
                 builder.originInterface,
-                builder.getWrapperMethodName,
-                builder.wrapperClass,
                 builder.selectClassCriteria,
-                builder.wrapperFieldName,
-                builder.wrapperClassFactoryFieldName,
-                builder.classFactoryGenerator
+                builder.wrappers
         );
     }
 
@@ -447,51 +456,41 @@ public class WrapperPlugin implements Plugin {
         return !target.isInterface() && !target.isAnnotation() && selectTypeCriteria.test(target);
     }
 
-    public static class Builder<W> {
-        private final Class<W> wrapperClass;
-        private Class originInterface;
-        private String getWrapperMethodName = null;
+    public static class Builder {
+        private Class<?> originInterface;
         private Predicate<TypeDescription> selectClassCriteria;
-        private String wrapperFieldName = "wrapper";
-        private String wrapperClassFactoryFieldName = "wrapperClassFactory";
-        private Class<? extends MetaClassFactory<W>> classFactoryGenerator;
 
-        public Builder(Class<W> wrapperClass) {
-            this.wrapperClass = wrapperClass;
+        private final List<WrapperDescriptor<?>> wrappers = new ArrayList<>();
+
+        public Builder() {
         }
 
-        public Builder<W> setOriginInterface(Class originInterface) {
+        public Builder setOriginInterface(Class originInterface) {
             this.originInterface = originInterface;
             return this;
         }
 
-        public Builder<W> setGetWrapperMethodName(String getWrapperMethodName) {
-            this.getWrapperMethodName = getWrapperMethodName;
-            return this;
-        }
-
-        public Builder<W> setTypeMarker(Class<? extends Annotation> typeMarker) {
+        public Builder setTypeMarker(Class<? extends Annotation> typeMarker) {
             this.selectClassCriteria = (td) -> td.getDeclaredAnnotations().isAnnotationPresent(typeMarker);
             return this;
         }
 
-        public Builder<W> setSelectClassCriteria(Predicate<TypeDescription> selectClassCriteria) {
+        public Builder setSelectClassCriteria(Predicate<TypeDescription> selectClassCriteria) {
             this.selectClassCriteria = selectClassCriteria;
             return this;
         }
 
-        public Builder<W> setWrapperFieldName(String wrapperFieldName) {
-            this.wrapperFieldName = wrapperFieldName;
+        public Builder clearWrappers() {
+            wrappers.clear();
             return this;
         }
 
-        public Builder<W> setWrapperClassFactoryFieldName(String wrapperClassFactoryFieldName) {
-            this.wrapperClassFactoryFieldName = wrapperClassFactoryFieldName;
-            return this;
+        public <W> WrapperDescriptor.ShortcutBuilder<Builder, W> addWrapper(Class<W> type) {
+            return new WrapperDescriptor.ShortcutBuilder<>(this, type);
         }
 
-        public Builder<W> setClassFactoryGenerator(Class<? extends MetaClassFactory<W>> staticConstructorGenerator) {
-            this.classFactoryGenerator = staticConstructorGenerator;
+        public <W> Builder addWrapperDescriptor(WrapperDescriptor<W> wrapperDescriptor) {
+            wrappers.add(wrapperDescriptor);
             return this;
         }
     }

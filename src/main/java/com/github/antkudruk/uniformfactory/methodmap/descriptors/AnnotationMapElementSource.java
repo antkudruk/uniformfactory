@@ -50,8 +50,8 @@ public class AnnotationMapElementSource<F> implements MapElementSource<F> {
     private final ElementFactory<F> elementFactory;
 
     @Override
-    public Map<String, DynamicType.Unloaded<F>> memberEntries(TypeDescription originType) throws ClassGeneratorException {
-        Map<String, DynamicType.Unloaded<F>> functionalMapperClasses = new HashMap<>();
+    public Map<String, DynamicType.Unloaded<? extends F>> memberEntries(TypeDescription originType) throws ClassGeneratorException {
+        Map<String, DynamicType.Unloaded<? extends F>> functionalMapperClasses = new HashMap<>();
 
         for (MethodDescription originMethod : memberSelector.getMethods(originType)) {
             functionalMapperClasses.put(

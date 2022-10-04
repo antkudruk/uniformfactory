@@ -16,8 +16,6 @@
 
 package com.github.antkudruk.uniformfactory.base;
 
-import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.ElementFactoryBuilderParentReference;
 import lombok.Getter;
 
 import java.lang.reflect.Method;
@@ -39,23 +37,15 @@ public abstract class AbstractMethodCollectionDescriptor<F> extends AbstractMeth
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Getter
     public static abstract class AbstractBuilder<F, T extends AbstractBuilder<F, T>>
             extends AbstractMethodDescriptorImpl.AbstractBuilder<T>
-            implements Builds<MethodDescriptor>, ElementFactoryBuilderParentReference.ParentBuilder<F> {
+            implements Builds<MethodDescriptor> {
 
         private final Class<F> elementType;
-        private ElementFactory<F> elementFactory;
-
         public AbstractBuilder(Method wrapperMethod, Class<F> elementType) {
             super(wrapperMethod);
             this.elementType = elementType;
-        }
-
-        public T setElementFactory(ElementFactory<F> elementFactory) {
-            this.elementFactory = elementFactory;
-            return (T) this;
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.github.antkudruk.uniformfactory.pluginbuilder;
 
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.*;
-import com.github.antkudruk.uniformfactory.pluginbuilder.impls.Adapter;
+import com.github.antkudruk.uniformfactory.pluginbuilder.impls.Adaptor;
 import com.github.antkudruk.uniformfactory.pluginbuilder.impls.MetaClassFactoryImpl;
 import com.github.antkudruk.uniformfactory.pluginbuilder.impls.Origin;
 import org.junit.Test;
@@ -18,7 +18,7 @@ public class WrapperDescriptorTest {
                 METHOD_NAME,
                 WRAPPER_FIELD_NAME,
                 CLASS_FACTORY_GENERATOR_FIELD_NAME,
-                Adapter.class,
+                Adaptor.class,
                 MetaClassFactoryImpl.class
         );
     }
@@ -30,7 +30,7 @@ public class WrapperDescriptorTest {
                 null,
                 WRAPPER_FIELD_NAME,
                 CLASS_FACTORY_GENERATOR_FIELD_NAME,
-                Adapter.class,
+                Adaptor.class,
                 MetaClassFactoryImpl.class
         );
     }
@@ -42,7 +42,7 @@ public class WrapperDescriptorTest {
                 METHOD_NAME,
                 null,
                 CLASS_FACTORY_GENERATOR_FIELD_NAME,
-                Adapter.class,
+                Adaptor.class,
                 MetaClassFactoryImpl.class
         );
     }
@@ -54,7 +54,7 @@ public class WrapperDescriptorTest {
                 METHOD_NAME,
                 WRAPPER_FIELD_NAME,
                 null,
-                Adapter.class,
+                Adaptor.class,
                 MetaClassFactoryImpl.class
         );
     }
@@ -78,7 +78,7 @@ public class WrapperDescriptorTest {
                 METHOD_NAME,
                 WRAPPER_FIELD_NAME,
                 CLASS_FACTORY_GENERATOR_FIELD_NAME,
-                Adapter.class,
+                Adaptor.class,
                 null
         );
     }
@@ -86,11 +86,11 @@ public class WrapperDescriptorTest {
     @Test(expected = GetWrapperMethodNotExistsException.class)
     public void givenNotExistingMethodName_whenValidateForOrigin_thenThrowGetWrapperMethodNotExistsException() {
         // given
-        WrapperDescriptor<Adapter> wrapperDescriptor = new WrapperDescriptor<>(
+        WrapperDescriptor<Adaptor> wrapperDescriptor = new WrapperDescriptor<>(
                 "nonExisting",
                 WRAPPER_FIELD_NAME,
                 CLASS_FACTORY_GENERATOR_FIELD_NAME,
-                Adapter.class,
+                Adaptor.class,
                 MetaClassFactoryImpl.class
         );
 
@@ -101,11 +101,11 @@ public class WrapperDescriptorTest {
     @Test(expected = GetWrapperMethodWrongTypeException.class)
     public void givenReturnTypeDoesNotCoincideWithWrapper_whenValidateForOrigin_thenThrowGetWrapperMethodWrongTypeException() {
         // given
-        WrapperDescriptor<Adapter> wrapperDescriptor = new WrapperDescriptor<>(
+        WrapperDescriptor<Adaptor> wrapperDescriptor = new WrapperDescriptor<>(
                 "getString",
                 WRAPPER_FIELD_NAME,
                 CLASS_FACTORY_GENERATOR_FIELD_NAME,
-                Adapter.class,
+                Adaptor.class,
                 MetaClassFactoryImpl.class
         );
 

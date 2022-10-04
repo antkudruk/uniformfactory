@@ -77,4 +77,67 @@ public class WrapperDescriptor<W> {
     public Class<? extends MetaClassFactory<W>> getWrapperClassFactory() {
         return wrapperClassFactory;
     }
+
+    @SuppressWarnings("unchecked")
+    private static class AbstractBuilder<T extends AbstractBuilder<T, W>,  W> {
+        private final Class<W> wrapperClass;
+        private String methodName;
+        private String wrapperField = "wrapper";
+        private String wrapperFactoryField = "wrapperFactory";
+        private Class<? extends MetaClassFactory<W>> wrapperClassFactory;
+
+        public AbstractBuilder(Class<W> wrapperClass) {
+            this.wrapperClass = wrapperClass;
+        }
+
+        public T setMethodName(String methodName) {
+            this.methodName = methodName;
+            return (T) this;
+        }
+
+        public T setWrapperField(String wrapperField) {
+            this.wrapperField = wrapperField;
+            return (T) this;
+        }
+
+        public T setWrapperFactoryField(String wrapperFactoryField) {
+            this.wrapperFactoryField = wrapperFactoryField;
+            return (T) this;
+        }
+
+        public T setClassFactoryGenerator(Class<? extends MetaClassFactory<W>> wrapperClassFactory) {
+            this.wrapperClassFactory = wrapperClassFactory;
+            return (T) this;
+        }
+
+        public WrapperDescriptor<W> build() {
+            return new WrapperDescriptor<>(
+                    methodName,
+                    wrapperField,
+                    wrapperFactoryField,
+                    wrapperClass,
+                    wrapperClassFactory);
+        }
+    }
+
+    public static class Builder<W> extends AbstractBuilder<Builder<W>, W> {
+        public Builder(Class<W> wrapperClass) {
+            super(wrapperClass);
+        }
+    }
+
+    public static class ShortcutBuilder<P extends WrapperPlugin.Builder, W>
+            extends AbstractBuilder<WrapperDescriptor.ShortcutBuilder<P, W>, W> {
+        private final P parent;
+
+        public ShortcutBuilder(P parent, Class<W> wrapperClass) {
+            super(wrapperClass);
+            this.parent = parent;
+        }
+
+        public P endWrapperDescriptor() {
+            parent.addWrapperDescriptor(build());
+            return parent;
+        }
+    }
 }

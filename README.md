@@ -144,7 +144,7 @@ Here is an example for Gradle:
 
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.4.1'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.5.0'
 }
 ```
 
@@ -154,7 +154,7 @@ and for Maven:
 <dependency>
     <groupId>com.github.antkudruk</groupId>
     <artifactId>uniform-factory</artifactId>
-    <version>0.4.1</version>
+    <version>0.5.0</version>
 </dependency>
 ```
 
@@ -636,12 +636,14 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 
 ## History
 
-| version | Description                                                      |
-|---------|------------------------------------------------------------------|
-| 0.2.2   | Added pure ByteBuddy implementation                              |
-| 0.3.0   | Gave up builder experiments                                      |
-| 0.4.0   | Added an opportunity to iplement custom method map               |
-| 0.4.1   | Clened up exceptions                                             |
+| version | Description                                                |
+|---------|------------------------------------------------------------|
+| 0.2.2   | Added pure ByteBuddy implementation                        |
+| 0.3.0   | Gave up builder experiments                                |
+| 0.4.0   | Added an opportunity to implement custom method map        |
+| 0.4.1   | Clened up exceptions                                       |
+| 0.5.0   | Allowed subclasses in element factories. Cleaned up method |
+|         | collections                                                |
 
 
 ## License

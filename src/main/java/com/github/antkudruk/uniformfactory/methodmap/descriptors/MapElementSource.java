@@ -24,5 +24,5 @@ import java.util.Map;
 
 @FunctionalInterface
 public interface MapElementSource<F> {
-    Map<String, DynamicType.Unloaded<F>> memberEntries(TypeDescription originType) throws ClassGeneratorException;
+    Map<String, DynamicType.Unloaded<? extends F>> memberEntries(TypeDescription originType) throws ClassGeneratorException;
 }

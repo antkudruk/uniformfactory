@@ -5,9 +5,9 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.function.Function;
 
-public class MetaClassFactoryImpl implements MetaClassFactory<Adapter> {
+public class MetaClassFactoryImpl implements MetaClassFactory<Adaptor> {
     @Override
-    public <O> Function<O, ? extends Adapter> generateMetaClass(Class<O> originClass) {
+    public <O> Function<O, ? extends Adaptor> generateMetaClass(Class<O> originClass) {
         throw new NotImplementedException();
     }
 }
