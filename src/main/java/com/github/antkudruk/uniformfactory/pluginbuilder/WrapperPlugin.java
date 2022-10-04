@@ -291,7 +291,6 @@ public class WrapperPlugin implements Plugin {
                 classFactoryGenerator);
     }
 
-    // TODO: Builder does not process default parameters unless it's build method called. Make the constructor work .
     @SuppressWarnings("unused")
     public <W> WrapperPlugin(Builder builder) {
         this(
