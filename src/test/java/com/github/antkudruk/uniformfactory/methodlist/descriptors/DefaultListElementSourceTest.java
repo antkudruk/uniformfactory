@@ -44,16 +44,16 @@ public class DefaultListElementSourceTest<F> {
     private MethodDescription methodDescription;
 
     @Mock
-    private ClassFactory<F> fieldClassFactory;
+    private ClassFactory fieldClassFactory;
 
     @Mock
-    private ClassFactory<F> methodClassFactory;
+    private ClassFactory methodClassFactory;
 
     @Mock
-    private DynamicType.Unloaded<F> fieldUnloaded;
+    private DynamicType.Unloaded fieldUnloaded;
 
     @Mock
-    private DynamicType.Unloaded<F> methodUnloaded;
+    private DynamicType.Unloaded methodUnloaded;
 
     @InjectMocks
     private DefaultListElementSource<F> testedObject;
@@ -71,7 +71,7 @@ public class DefaultListElementSourceTest<F> {
     @Test
     public void whenFieldAndMethod_thenBothAdaptors() throws ClassGeneratorException {
         // when
-        List<DynamicType.Unloaded<F>> result = testedObject.elements(origin);
+        List<DynamicType.Unloaded<? extends F>> result = testedObject.elements(origin);
 
         // then
         assertThat(result, hasItems(fieldUnloaded, methodUnloaded));

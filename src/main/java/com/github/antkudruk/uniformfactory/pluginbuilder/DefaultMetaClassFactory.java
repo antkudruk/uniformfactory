@@ -18,6 +18,7 @@ package com.github.antkudruk.uniformfactory.pluginbuilder;
 
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.lang.reflect.Constructor;
@@ -26,13 +27,10 @@ import java.util.function.Function;
 /**
  * @param <W> Wrapper class
  */
+@RequiredArgsConstructor
 public class DefaultMetaClassFactory<W> implements MetaClassFactory<W> {
 
     private final ClassFactory<W> classFactory;
-
-    public DefaultMetaClassFactory(ClassFactory<W> classFactory) {
-        this.classFactory = classFactory;
-    }
 
     @Override
     public <O> Function<O, ? extends W> generateMetaClass(Class<O> originClass) {

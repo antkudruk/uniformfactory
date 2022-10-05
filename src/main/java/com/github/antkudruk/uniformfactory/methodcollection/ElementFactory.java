@@ -13,10 +13,10 @@ import net.bytebuddy.description.type.TypeDescription;
  * @param <F> Element interface
  */
 public interface ElementFactory<F> {
-    ClassFactory<F> getFieldElement(
+    ClassFactory<? extends F> getFieldElement(
             TypeDescription origin,
             FieldDescription fieldDescription) throws ClassGeneratorException;
-    ClassFactory<F> getMethodElement(
+    ClassFactory<? extends F> getMethodElement(
             TypeDescription origin,
             MethodDescription methodDescription) throws ClassGeneratorException ;
 }

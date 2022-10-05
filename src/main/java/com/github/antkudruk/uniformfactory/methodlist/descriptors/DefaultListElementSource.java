@@ -42,8 +42,8 @@ public class DefaultListElementSource<F> implements ListElementSource<F> {
     private final ElementFactory<F> elementFactory;
 
     @Override
-    public List<DynamicType.Unloaded<F>> elements(TypeDescription originType) throws ClassGeneratorException {
-        List<DynamicType.Unloaded<F>> functionalMapperClasses = new ArrayList<>();
+    public List<DynamicType.Unloaded<? extends F>> elements(TypeDescription originType) throws ClassGeneratorException {
+        List<DynamicType.Unloaded<? extends F>> functionalMapperClasses = new ArrayList<>();
         for (MethodDescription originMethod : memberSelector.getMethods(originType)) {
             functionalMapperClasses.add(
                     elementFactory.getMethodElement(originType, originMethod).build(originType)

@@ -33,13 +33,13 @@ public class MethodListEnhancer<F> implements Enhancer {
     private final String fieldName;
     private final TypeDescription originType;
     private final Method wrapperMethod;
-    private final List<DynamicType.Unloaded<F>> functionalList;
+    private final List<DynamicType.Unloaded<? extends F>> functionalList;
 
     public MethodListEnhancer(
             String listFieldName,
             TypeDescription originType,
             Method wrapperMethod,
-            List<DynamicType.Unloaded<F>> functionalListClasses) {
+            List<DynamicType.Unloaded<? extends F>> functionalListClasses) {
 
         this.fieldName = listFieldName;
         this.originType = originType;

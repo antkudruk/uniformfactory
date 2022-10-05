@@ -40,7 +40,7 @@ public class MethodMapEnhancer<F> implements Enhancer {
     private final String fieldName;
     private final TypeDescription originType;
     private final Method wrapperMethod;
-    private final Map<String, DynamicType.Unloaded<F>> functionalMap;
+    private final Map<String, DynamicType.Unloaded<? extends F>> functionalMap;
 
     @Override
     public Implementation.Composable addInitiation(

@@ -66,12 +66,12 @@ public class InitMapImplementation<F> extends AbstractImplementation {
 
     private final String fieldName;
     private final TypeDescription originType;
-    private final Map<String, DynamicType.Unloaded<F>> functionalObjects;
+    private final Map<String, DynamicType.Unloaded<? extends F>> functionalObjects;
 
     public InitMapImplementation(
             String fieldName,
             TypeDescription originType,
-            Map<String, DynamicType.Unloaded<F>> functionalObjects
+            Map<String, DynamicType.Unloaded<? extends F>> functionalObjects
     ) {
         this(fieldName, originType, functionalObjects, true);
     }
@@ -79,7 +79,7 @@ public class InitMapImplementation<F> extends AbstractImplementation {
     private InitMapImplementation(
             String fieldName,
             TypeDescription originType,
-            Map<String, DynamicType.Unloaded<F>> functionalObjects,
+            Map<String, DynamicType.Unloaded<? extends F>> functionalObjects,
             boolean isTerminating
     ) {
         super(isTerminating);
@@ -124,7 +124,7 @@ public class InitMapImplementation<F> extends AbstractImplementation {
                     )
             ));
 
-            for (Map.Entry<String, DynamicType.Unloaded<F>> entry : functionalObjects.entrySet()) {
+            for (Map.Entry<String, DynamicType.Unloaded<? extends F>> entry : functionalObjects.entrySet()) {
                 operands.addAll(getEachElementInstructions(
                         new TextConstant(entry.getKey()),
                         entry.getValue().getTypeDescription(),

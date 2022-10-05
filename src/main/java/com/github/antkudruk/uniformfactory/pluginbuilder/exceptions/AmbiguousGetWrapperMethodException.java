@@ -16,10 +16,10 @@
 
 package com.github.antkudruk.uniformfactory.pluginbuilder.exceptions;
 
-// TODO: Test
 public class AmbiguousGetWrapperMethodException extends PluginBuilderException {
-    public AmbiguousGetWrapperMethodException() {
-        super("Origin interface has more than one method. Please, specify one "
-                + "using setGetWrapperMethodName() method");
+    public AmbiguousGetWrapperMethodException(String methodName) {
+        super(
+                String.format("Origin interface has more than one method with the same name '%s'",
+                        methodName));
     }
 }
