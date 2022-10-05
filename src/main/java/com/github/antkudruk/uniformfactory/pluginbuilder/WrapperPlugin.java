@@ -73,13 +73,13 @@ public class WrapperPlugin implements Plugin {
         this.originInterface = originInterface;
         this.selectTypeCriteria = selectTypeCriteria;
         this.wrappers = wrappers;
+        validate();
         this.classGeneratorSingletonContainer = wrappers
                 .stream()
                 .collect(Collectors.toMap(
                         WrapperDescriptor::getWrapperField,
                         e -> createSingletonHolder(e.getWrapperClassFactory())
                 ));
-        validate();
     }
 
     private void validate() {
