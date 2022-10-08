@@ -201,10 +201,10 @@ public class BbImplementationMethodDescriptorTest {
     @Test
     public void whenText_thenReturnText() throws ReflectiveOperationException, ClassGeneratorException {
         // when
-        AdaptorWithType obj = getClassFactory(
-                AdaptorWithType.class,
+        AdaptorWithString obj = getClassFactory(
+                AdaptorWithString.class,
                 new BbImplementationMethodDescriptor
-                        .Builder(AdaptorWithType.class.getMethod("get"))
+                        .Builder(AdaptorWithString.class.getMethod("get"))
                         .stringConstant("value")
                         .build(),
                 OriginWithMethodAndField.class
