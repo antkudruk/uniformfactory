@@ -199,6 +199,22 @@ public class BbImplementationMethodDescriptorTest {
     }
 
     @Test
+    public void whenText_thenReturnText() throws ReflectiveOperationException, ClassGeneratorException {
+        // when
+        AdaptorWithString obj = getClassFactory(
+                AdaptorWithString.class,
+                new BbImplementationMethodDescriptor
+                        .Builder(AdaptorWithString.class.getMethod("get"))
+                        .stringConstant("value")
+                        .build(),
+                OriginWithMethodAndField.class
+        );
+
+        // then
+        assertEquals("value", obj.get());
+    }
+
+    @Test
     public void whenNullTypeConstant_thenReturnNull() throws ReflectiveOperationException, ClassGeneratorException {
         // when
         AdaptorWithType obj = getClassFactory(

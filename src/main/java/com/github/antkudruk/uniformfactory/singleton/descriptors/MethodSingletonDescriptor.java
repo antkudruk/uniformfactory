@@ -29,6 +29,7 @@ import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.Par
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToConstantEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToFieldEnhancer;
 import com.github.antkudruk.uniformfactory.singleton.enhancers.SingletonMethodToMethodEnhancer;
+import lombok.Getter;
 import lombok.experimental.Delegate;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
@@ -134,6 +135,9 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
         private R defaultValue;
         private ResultMapperCollection<R> resultMapper;
 
+        @Getter
+        private MemberSelector memberSelector;
+
         public AbstractBuilder(Method wrapperMethod, Class<R> methodResultType) {
             super(wrapperMethod);
             this.resultMapper = new ResultMapperCollection<>(methodResultType);
@@ -180,6 +184,12 @@ public class MethodSingletonDescriptor<R> extends AbstractMethodWithMappersDescr
         public <A extends Annotation> T setMarkerAnnotation(Class<A> annotation) {
             this.setMemberSelector(new MemberSelectorByAnnotation(annotation));
             return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T setMemberSelector(MemberSelector memberSelector) {
+            this.memberSelector = memberSelector;
+            return (T)this;
         }
     }
 

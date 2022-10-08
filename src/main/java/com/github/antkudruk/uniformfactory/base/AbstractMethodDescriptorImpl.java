@@ -17,11 +17,7 @@
 package com.github.antkudruk.uniformfactory.base;
 
 import com.github.antkudruk.uniformfactory.base.exception.NoWrapperMethodException;
-import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
-import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelectorByAnnotation;
-import lombok.Getter;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
@@ -55,20 +51,10 @@ public abstract class AbstractMethodDescriptorImpl implements MethodDescriptor {
     public static abstract class AbstractBuilder<T extends AbstractBuilder<T>>
     implements Builds<MethodDescriptor> {
 
-        @Getter
-        private MemberSelector memberSelector;
         protected final Method wrapperMethod;
 
         public AbstractBuilder(Method wrapperMethod) {
             this.wrapperMethod = wrapperMethod;
-        }
-
-
-
-        @SuppressWarnings("unchecked")
-        public T setMemberSelector(MemberSelector memberSelector) {
-            this.memberSelector = memberSelector;
-            return (T)this;
         }
 
         public abstract AbstractMethodDescriptorImpl build();

@@ -144,7 +144,7 @@ Here is an example for Gradle:
 
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.5.1'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.5.2'
 }
 ```
 
@@ -154,7 +154,7 @@ and for Maven:
 <dependency>
     <groupId>com.github.antkudruk</groupId>
     <artifactId>uniform-factory</artifactId>
-    <version>0.5.1</version>
+    <version>0.5.2</version>
 </dependency>
 ```
 
@@ -302,6 +302,8 @@ public abstract class Wrapper {
 }
 
 ``` 
+
+Note that the abstract class **must be public**.
 
 You can use that kind of wrapper exactly the same way as for the
 interface case. See compilable exampless and detailed description
@@ -636,14 +638,16 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 
 ## History
 
-| version | Description                                                |
-|---------|------------------------------------------------------------|
-| 0.2.2   | Added pure ByteBuddy implementation                        |
-| 0.3.0   | Gave up builder experiments                                |
-| 0.4.0   | Added an opportunity to implement custom method map        |
-| 0.4.1   | Clened up exceptions                                       |
-| 0.5.1   | Allowed subclasses in element factories. Cleaned up method |
-|         | collections                                                |
+| version | Description                                                       |
+|---------|-------------------------------------------------------------------|
+| 0.2.2   | Added pure ByteBuddy implementation                               |
+| 0.3.0   | Gave up builder experiments                                       |
+| 0.4.0   | Added an opportunity to implement custom method map               |
+| 0.4.1   | Clened up exceptions                                              |
+| 0.5.1   | Allowed subclasses in element factories. Cleaned up method        |
+|         | collections                                                       |
+| 0.5.2   | Cleaned up messages in some exceptions.                           |
+|         | Cleaned up method descriptors and builders from spare properties. |
 
 
 ## License

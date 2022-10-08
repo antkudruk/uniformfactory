@@ -4,7 +4,6 @@ import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Delegate;
@@ -17,6 +16,7 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.constant.ClassConstant;
 import net.bytebuddy.implementation.bytecode.constant.FieldConstant;
 import net.bytebuddy.implementation.bytecode.constant.MethodConstant;
+import net.bytebuddy.implementation.bytecode.constant.TextConstant;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
 
 import java.lang.reflect.Method;
@@ -105,23 +105,20 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
             return (T) this;
         }
 
-        public T nullConstant() {
-            setImplementation(FixedValue.nullValue());
+        public T stringConstant(String text) {
+            if (text != null) {
+                setImplementation(new Implementation.Simple(
+                        new TextConstant(text),
+                        MethodReturn.REFERENCE
+                ));
+            } else {
+                setImplementation(FixedValue.nullValue());
+            }
             return (T) this;
         }
 
-        @Override
-        public MemberSelector getMemberSelector() {
-            return new MemberSelector() {
-            };
-        }
-
-        /**
-         * Has no effect on BbImplementationMethodDescriptor instance
-         *
-         * @return this builder
-         */
-        public T setMemberSelector() {
+        public T nullConstant() {
+            setImplementation(FixedValue.nullValue());
             return (T) this;
         }
 

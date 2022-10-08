@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     implementation 'net.bytebuddy:byte-buddy:1.12.6'
-    implementation group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.5.1'
+    implementation group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.5.2'
     implementation group: 'com.github.antkudruk', name: 'listing-4-custom-meta-class-factory', version: '1.0-SNAPSHOT'
     testImplementation 'org.powermock:powermock-core:2.0.9'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.4'
