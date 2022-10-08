@@ -4,7 +4,6 @@ import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
-import com.github.antkudruk.uniformfactory.methodcollection.seletor.MemberSelector;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Delegate;
@@ -107,21 +106,6 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         public T nullConstant() {
             setImplementation(FixedValue.nullValue());
-            return (T) this;
-        }
-
-        @Override
-        public MemberSelector getMemberSelector() {
-            return new MemberSelector() {
-            };
-        }
-
-        /**
-         * Has no effect on BbImplementationMethodDescriptor instance
-         *
-         * @return this builder
-         */
-        public T setMemberSelector() {
             return (T) this;
         }
 
