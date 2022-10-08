@@ -16,6 +16,7 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.constant.ClassConstant;
 import net.bytebuddy.implementation.bytecode.constant.FieldConstant;
 import net.bytebuddy.implementation.bytecode.constant.MethodConstant;
+import net.bytebuddy.implementation.bytecode.constant.TextConstant;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
 
 import java.lang.reflect.Method;
@@ -96,6 +97,18 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
                 setImplementation(new Implementation.Simple(
                         ClassConstant.of(typeDescription),
+                        MethodReturn.REFERENCE
+                ));
+            } else {
+                setImplementation(FixedValue.nullValue());
+            }
+            return (T) this;
+        }
+
+        public T stringConstant(String text) {
+            if (text != null) {
+                setImplementation(new Implementation.Simple(
+                        new TextConstant(text),
                         MethodReturn.REFERENCE
                 ));
             } else {
