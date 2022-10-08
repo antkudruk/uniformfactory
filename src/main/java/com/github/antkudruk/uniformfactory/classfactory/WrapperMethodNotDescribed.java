@@ -36,7 +36,7 @@ public class WrapperMethodNotDescribed extends ClassFactoryException {
     @Override
     public String getMessage() {
         return "The following methods are not described: "
-                + String.join("", methodNames);
+                + String.join(", ", methodNames);
     }
 }
 
