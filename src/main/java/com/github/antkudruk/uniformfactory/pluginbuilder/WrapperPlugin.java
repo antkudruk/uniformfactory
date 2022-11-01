@@ -45,7 +45,6 @@ import java.util.stream.Collectors;
 
 /**
  * Gradle plugin.
- *
  * Generates wrapper objects for each origin object the following way:
  * For each class marked with {@code typeMarker} annotation it instantiates
  * {@code classFactoryGenerator} class and calls
@@ -58,14 +57,14 @@ public class WrapperPlugin implements Plugin {
 
     private static final String INSTANCE_FIELD_NAME = "INSTANCE";
 
-    private final Class originInterface;
+    private final Class<?> originInterface;
     private final Predicate<TypeDescription> selectTypeCriteria;
     private final List<WrapperDescriptor<?>> wrappers;
-    private final Map<String, DynamicType.Unloaded> classGeneratorSingletonContainer;
+    private final Map<String, DynamicType.Unloaded<? extends MetaClassFactory<?>>> classGeneratorSingletonContainer;
 
     @SuppressWarnings("WeakerAccess")
     public WrapperPlugin(
-            Class originInterface,
+            Class<?> originInterface,
             Predicate<TypeDescription> selectTypeCriteria,
             List<WrapperDescriptor<?>> wrappers
     ) {
@@ -122,7 +121,7 @@ public class WrapperPlugin implements Plugin {
      */
     @SuppressWarnings("WeakerAccess")
     public <W> WrapperPlugin(
-            Class originInterface,
+            Class<?> originInterface,
             String getWrapperMethodName,
             Class<W> wrapperClass,
             Predicate<TypeDescription> selectTypeCriteria,
@@ -157,7 +156,7 @@ public class WrapperPlugin implements Plugin {
      */
     @SuppressWarnings("WeakerAccess")
     public <W> WrapperPlugin(
-            Class originInterface,
+            Class<?> originInterface,
             String getWrapperMethodName,
             Class<W> wrapperClass,
             Class<? extends Annotation> typeMarker,
@@ -187,7 +186,7 @@ public class WrapperPlugin implements Plugin {
      */
     @SuppressWarnings("unused")
     public <W> WrapperPlugin(
-            Class originInterface,
+            Class<?> originInterface,
             Class<W> wrapperClass,
             Class<? extends Annotation> typeMarker,
             String pluginName,
@@ -215,7 +214,7 @@ public class WrapperPlugin implements Plugin {
      */
     @SuppressWarnings("unused")
     public <W> WrapperPlugin(
-            Class originInterface,
+            Class<?> originInterface,
             Class<W> wrapperClass,
             Predicate<TypeDescription> selectTypeCriteria,
             String pluginName,
@@ -244,7 +243,7 @@ public class WrapperPlugin implements Plugin {
      */
     @SuppressWarnings("unused")
     public <W> WrapperPlugin(
-            Class originInterface,
+            Class<?> originInterface,
             Class<W> wrapperClass,
             Class<? extends Annotation> typeMarker,
             String wrapperFieldName,
@@ -274,7 +273,7 @@ public class WrapperPlugin implements Plugin {
      */
     @SuppressWarnings("unused")
     public <W> WrapperPlugin(
-            Class originInterface,
+            Class<?> originInterface,
             String getWrapperMethodName,
             Class<W> wrapperClass,
             Class<? extends Annotation> typeMarker,
@@ -361,7 +360,7 @@ public class WrapperPlugin implements Plugin {
             ClassFileLocator classFileLocator) {
 
         // Add interface if needed
-        if (!typeDescription.getInterfaces().contains(new TypeDescription.ForLoadedType(originInterface))) {
+        if (!typeDescription.getInterfaces().contains(new TypeDescription.ForLoadedType(originInterface).asGenericType())) {
             builder = builder.implement(originInterface);
         }
 
@@ -377,7 +376,13 @@ public class WrapperPlugin implements Plugin {
                 .invokable(ElementMatchers.isTypeInitializer())
                 .intercept(enhancerBasedEnhancer.addStaticInitiation(new EmptyImplementation()))
                 .invokable(ElementMatchers.isConstructor())
-                .intercept(enhancerBasedEnhancer.addInitiation(SuperMethodCall.INSTANCE));
+                .intercept(enhancerBasedEnhancer.addInitiation(SuperMethodCall.INSTANCE))
+                .declaredTypes(classGeneratorSingletonContainer
+                        .values()
+                        .stream()
+                        .map(DynamicType::getTypeDescription)
+                        .collect(Collectors.toList()));
+
         builder = enhancerBasedEnhancer.addMethod(builder);
 
         return builder.require(classGeneratorSingletonContainer.values().toArray(new DynamicType.Unloaded[0]));
@@ -433,9 +438,11 @@ public class WrapperPlugin implements Plugin {
                 .isEmpty();
     }
 
-    private DynamicType.Unloaded createSingletonHolder(Class<? extends MetaClassFactory<?>> classFactoryGenerator) {
+    private DynamicType.Unloaded<? extends MetaClassFactory<?>> createSingletonHolder(
+            Class<? extends MetaClassFactory<?>> classFactoryGenerator) {
         ByteBuddy byteBuddy = new ByteBuddy();
-        return byteBuddy
+        //noinspection unchecked,rawtypes
+        return (DynamicType.Unloaded)byteBuddy
                 .subclass(Object.class, ConstructorStrategy.Default.NO_CONSTRUCTORS)
                 .defineField(INSTANCE_FIELD_NAME, classFactoryGenerator, Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC)
                 .invokable(ElementMatchers.isTypeInitializer())
@@ -464,7 +471,7 @@ public class WrapperPlugin implements Plugin {
         public Builder() {
         }
 
-        public Builder setOriginInterface(Class originInterface) {
+        public Builder setOriginInterface(Class<?> originInterface) {
             this.originInterface = originInterface;
             return this;
         }

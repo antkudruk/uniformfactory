@@ -16,7 +16,7 @@ functionality as a framework to share it with other developers. The task is
 just to process the annotated class members.
 
 The common way of doing that is to look through annotated class members each
-time you use them, find them and process. However that approach is too
+time you use them, find them and process. However, that approach is too
 cumbersome. It's slow as well because reflective operations are too expensive.
 
 You'd like to process the annotated members more convenient way.
@@ -144,7 +144,7 @@ Here is an example for Gradle:
 
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.5.2'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.6.0'
 }
 ```
 
@@ -154,7 +154,7 @@ and for Maven:
 <dependency>
     <groupId>com.github.antkudruk</groupId>
     <artifactId>uniform-factory</artifactId>
-    <version>0.5.2</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 
@@ -205,8 +205,8 @@ Let's take a look at some examples.
 
 ## Examples
 
-You can find compilable examples in the examples
-[examples](https://github.com/antkudruk/uniformfactory/tree/develop/examples)
+You can find compilable 
+[example](https://github.com/antkudruk/uniformfactory/tree/develop/examples)
 folder of this project.
 
 ### Empty Adapter
@@ -643,11 +643,12 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 | 0.2.2   | Added pure ByteBuddy implementation                               |
 | 0.3.0   | Gave up builder experiments                                       |
 | 0.4.0   | Added an opportunity to implement custom method map               |
-| 0.4.1   | Clened up exceptions                                              |
+| 0.4.1   | Clean up exceptions                                               |
 | 0.5.1   | Allowed subclasses in element factories. Cleaned up method        |
 |         | collections                                                       |
 | 0.5.2   | Cleaned up messages in some exceptions.                           |
 |         | Cleaned up method descriptors and builders from spare properties. |
+| 0.5.3   | Small cleanup                                                     |
 
 
 ## License

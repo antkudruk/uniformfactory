@@ -1,11 +1,13 @@
 package com.github.antkudruk.uniformfactory.pluginbuilder;
 
 import com.github.antkudruk.uniformfactory.pluginbuilder.exceptions.*;
+import lombok.Getter;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.method.MethodList;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatchers;
 
+@Getter
 public class WrapperDescriptor<W> {
     private final String methodName;
     private final String wrapperField;
@@ -56,26 +58,6 @@ public class WrapperDescriptor<W> {
         if(!methods.getOnly().getReturnType().asErasure().isAssignableFrom(wrapperClass)) {
             throw new GetWrapperMethodWrongTypeException(methodName, originClass, wrapperClass);
         }
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public String getWrapperField() {
-        return wrapperField;
-    }
-
-    public String getWrapperFactoryField() {
-        return wrapperFactoryField;
-    }
-
-    public Class<W> getWrapperClass() {
-        return wrapperClass;
-    }
-
-    public Class<? extends MetaClassFactory<W>> getWrapperClassFactory() {
-        return wrapperClassFactory;
     }
 
     @SuppressWarnings("unchecked")
