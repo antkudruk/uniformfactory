@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.5.2'
+    implementation group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.5.3'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.12.6'
 }

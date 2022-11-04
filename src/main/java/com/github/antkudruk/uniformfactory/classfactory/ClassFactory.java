@@ -18,6 +18,7 @@ package com.github.antkudruk.uniformfactory.classfactory;
 
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.base.MethodDescriptor;
+import com.github.antkudruk.uniformfactory.exception.AlienMethodException;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodlist.descriptors.MethodListDescriptor;
 import com.github.antkudruk.uniformfactory.methodmap.descriptors.MethodMapDescriptor;
@@ -65,7 +66,7 @@ public class ClassFactory<W> {
      * For a class defined by {@code originClass} type description creates a wrapper class.
      *
      * @param originClass Class to generate the builder for.
-     * @return Wrapper cclass for the origin argument
+     * @return Wrapper class for the origin argument
      * @throws ClassGeneratorException Thrown
      */
     public DynamicType.Unloaded<W> build(TypeDescription originClass)
@@ -124,8 +125,7 @@ public class ClassFactory<W> {
                 .collect(Collectors.joining("\n"));
 
         if (message.length() != 0) {
-            throw new RuntimeException("The following methods are irrelevant\n"
-                    + message);
+            throw new AlienMethodException(message);
         }
     }
 

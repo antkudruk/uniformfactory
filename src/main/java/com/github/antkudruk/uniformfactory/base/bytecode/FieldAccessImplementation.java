@@ -18,6 +18,7 @@ package com.github.antkudruk.uniformfactory.base.bytecode;
 
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.ForStaticField;
 import com.github.antkudruk.uniformfactory.common.TypeDescriptionShortcuts;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -40,10 +41,11 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Generates bytecode that returns fields field value, even if the field is private.
+ * Generates bytecode that returns field value, even if the field is private.
  *
  * <pre>
  * {@code
@@ -57,23 +59,14 @@ import java.util.function.Function;
  * </pre>
  *
  */
+@RequiredArgsConstructor
 public class FieldAccessImplementation implements Implementation {
 
     private static final String RESULT_TRANSLATOR_FIELD_NAME = "RESULT_TRANSLATOR";
 
     private final String originFieldName;
     private final FieldDescription valueField;
-    private final Function resultTranslator;
-
-    public FieldAccessImplementation(
-            String originFieldName,
-            FieldDescription valueField,
-            Function resultTranslator) {
-
-        this.originFieldName = originFieldName;
-        this.valueField = valueField;
-        this.resultTranslator = resultTranslator;
-    }
+    private final Function<?, ?> resultTranslator;
 
     @Override
     public ByteCodeAppender appender(Target implementationTarget) {
@@ -129,10 +122,11 @@ public class FieldAccessImplementation implements Implementation {
                     // TODO: Use public field stack manipulation if it's direct class field, too, \
                     //  'cause it's accessible regardless of modifier
                     valueField.isPublic()
+                            || Objects.equals(instrumentedMethod.getDeclaringType().asErasure().getDeclaringType(), originField.getDeclaringType())
                             ? publicFieldStackManipulation()
                             : privateFieldStackManipulation(),
 
-                    instrumentedMethod.getReturnType().equals(new TypeDescription.ForLoadedType(void.class))
+                    instrumentedMethod.getReturnType().equals(new TypeDescription.ForLoadedType(void.class).asGenericType())
                     ? MethodReturn.VOID
                     : new StackManipulation.Compound(
                             // Apply method on the field
@@ -204,8 +198,8 @@ public class FieldAccessImplementation implements Implementation {
          * {@code
          * <p>
          * Object invoke () {
-         * return valueField.get(this.origin);
-         * }
+         *          return origin.value;
+         *      }
          * }
          *
          * @return Stack manipulation to access public field.

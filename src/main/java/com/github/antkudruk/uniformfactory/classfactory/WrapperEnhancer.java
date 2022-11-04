@@ -20,6 +20,7 @@ import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.base.bytecode.InitFieldUsingClassInstanceMethodImplementation;
 import com.github.antkudruk.uniformfactory.base.bytecode.InitFieldWithConstructorFieldUsingThisImplementation;
 import com.github.antkudruk.uniformfactory.pluginbuilder.MetaClassFactory;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.FieldAccessor;
@@ -63,34 +64,16 @@ import java.util.function.Function;
  *     <li>Adapter object</li>
  * </ul>
  */
+@RequiredArgsConstructor
 public class WrapperEnhancer implements Enhancer {
 
-    private final Class originInterface;
+    private final Class<?> originInterface;
     private final Class<? extends MetaClassFactory<?>> metaClassFactoryGenerator;
     private final TypeDescription classGeneratorSingleton;
     private final String classFactoryGeneratorFieldName;
     private final Class<?> wrapperClass;
     private final String wrapperFieldName;
     private final String getWrapperMethodName;
-
-    public WrapperEnhancer(
-            Class originInterface,
-            Class<? extends MetaClassFactory<?>> metaClassFactoryGenerator,
-
-            TypeDescription classGeneratorSingleton,
-            String classFactoryGeneratorFieldName,
-
-            Class<?> wrapperClass,
-            String wrapperFieldName,
-            String getWrapperMethodName) {
-        this.originInterface = originInterface;
-        this.metaClassFactoryGenerator = metaClassFactoryGenerator;
-        this.classGeneratorSingleton = classGeneratorSingleton;
-        this.classFactoryGeneratorFieldName = classFactoryGeneratorFieldName;
-        this.wrapperClass = wrapperClass;
-        this.wrapperFieldName = wrapperFieldName;
-        this.getWrapperMethodName = getWrapperMethodName;
-    }
 
     @Override
     public Implementation.Composable addStaticInitiation(Implementation.Composable existingImplementation) {
