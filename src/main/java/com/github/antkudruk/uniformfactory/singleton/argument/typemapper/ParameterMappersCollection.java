@@ -16,6 +16,7 @@
 
 package com.github.antkudruk.uniformfactory.singleton.argument.typemapper;
 
+import lombok.Getter;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.util.Iterator;
@@ -96,7 +97,7 @@ public class ParameterMappersCollection<A> {
 
         while (it.hasNext()) {
             ParameterMapperDescriptor<A> descriptor = it.next();
-            if (descriptor.getOriginParameterClass().isAssignableFrom(originParameterClass)) {
+            if (originParameterClass.asBoxed().isAssignableFrom(descriptor.getOriginParameterClass().asBoxed())) {
                 return Optional.of(descriptor);
             }
         }
@@ -113,6 +114,7 @@ public class ParameterMappersCollection<A> {
      *
      * @param <A> Wrapper parameter class.
      */
+    @Getter
     public static class ParameterMapperDescriptor<A> {
         private final TypeDescription originParameterClass;
         private final Function<A, ?> translator;
@@ -123,19 +125,11 @@ public class ParameterMappersCollection<A> {
             this.translator = translator;
         }
 
-        ParameterMapperDescriptor(Class originParameterClass,
+        ParameterMapperDescriptor(Class<?> originParameterClass,
                                   Function<A, ?> translator) {
             this.originParameterClass
                     = new TypeDescription.ForLoadedType(originParameterClass);
             this.translator = translator;
-        }
-
-        TypeDescription getOriginParameterClass() {
-            return originParameterClass;
-        }
-
-        public Function<A, ?> getTranslator() {
-            return translator;
         }
     }
 }
