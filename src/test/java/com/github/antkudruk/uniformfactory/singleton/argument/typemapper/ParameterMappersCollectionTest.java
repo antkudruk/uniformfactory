@@ -2,6 +2,7 @@ package com.github.antkudruk.uniformfactory.singleton.argument.typemapper;
 
 import net.bytebuddy.description.type.TypeDescription;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -15,6 +16,9 @@ public class ParameterMappersCollectionTest {
 
     private static final String PARAMETER_CLASS_STRING_REPRESENTATION
             = "parameterClass test object";
+
+    public static class AlienParameterClass {
+    }
 
     public static class ParentParameterClass {
     }
@@ -79,14 +83,9 @@ public class ParameterMappersCollectionTest {
         assertNotEquals(firstTranslator, suitableTranslator.getTranslator());
     }
 
-    @SuppressWarnings("Convert2Lambda")
-    private Function mockRepeater() {
-        return new Function() {
-            @Override
-            public Object apply(Object o) {
-                return o;
-            }
-        };
+    private <I, O> Function<I, O> mockRepeater() {
+        //noinspection unchecked
+        return Mockito.mock(Function.class);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -133,36 +132,38 @@ public class ParameterMappersCollectionTest {
         assertFalse(mapper.findSuitableTranslator(notDefinedTargetType).isPresent());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void translatorFromParentMapperTest() {
-
+    public void givenNoTypeDescription_whenFindSuitableTranslator_thenUseParentTranslator() {
+        // given
         ParameterMappersCollection<ParameterClass> parentMapper
                 = new ParameterMappersCollection<>(ParameterClass.class);
 
         TypeDescription parentParameterTypeDescription = new TypeDescription.ForLoadedType(
                 ParentParameterClass.class);
 
-        TypeDescription wrongTypeDescription = new TypeDescription.ForLoadedType(
-                String.class);
+        TypeDescription wrongTypeDescription = new TypeDescription.ForLoadedType(AlienParameterClass.class);
 
-        Function parentTranslator = mockRepeater();
+        Function<ParameterClass, ?> parentTranslator = mockRepeater();
         parentMapper = parentMapper.add(parentParameterTypeDescription, parentTranslator);
 
         ParameterMappersCollection<ParameterClass> childMapper = parentMapper.createChild();
-        Function childTranslator = mockRepeater();
+        Function<ParameterClass, ?> childTranslator = mockRepeater();
         childMapper.add(wrongTypeDescription, childTranslator);
 
-        ParameterMappersCollection.ParameterMapperDescriptor<ParameterClass>
-                suitableTranslator = childMapper.findSuitableTranslator(parentParameterTypeDescription).orElseThrow(RuntimeException::new);
+        // when
+        Function<?, ?> suitableTranslator = childMapper
+                .findSuitableTranslator(parentParameterTypeDescription)
+                .map(ParameterMappersCollection.ParameterMapperDescriptor::getTranslator)
+                .orElseThrow(RuntimeException::new);
 
-        assertEquals(parentTranslator, suitableTranslator.getTranslator());
+        // then
+        assertEquals(parentTranslator, suitableTranslator);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void translatorFromChildMapperTest() {
-
+        // given
         ParameterMappersCollection<ParameterClass> parentMapper
                 = new ParameterMappersCollection<>(ParameterClass.class);
 
@@ -176,9 +177,12 @@ public class ParameterMappersCollectionTest {
         Function childTranslator = mockRepeater();
         childMapper.add(parentParameterTypeDescription, childTranslator);
 
+        // when
         ParameterMappersCollection.ParameterMapperDescriptor<ParameterClass>
-                suitableTranslator = childMapper.findSuitableTranslator(parentParameterTypeDescription).orElseThrow(RuntimeException::new);
-
+                suitableTranslator = childMapper
+                .findSuitableTranslator(parentParameterTypeDescription)
+                .orElseThrow(RuntimeException::new);
+        // then
         assertEquals(childTranslator, suitableTranslator.getTranslator());
     }
 

@@ -58,15 +58,15 @@ public class ParameterMappersCollection<A> {
 
     public ParameterMappersCollection(Class<A> wrapperParameterType) {
         this(wrapperParameterType, null);
+        parameterTranslators.add(
+                new ParameterMapperDescriptor<>(wrapperParameterType, t -> t));
+        parameterTranslators.add(
+                new ParameterMapperDescriptor<>(String.class, Object::toString));
     }
 
     private ParameterMappersCollection(Class<A> wrapperParameterType, ParameterMappersCollection<A> parent) {
         this.parent = parent;
         this.parameterClass = wrapperParameterType;
-        parameterTranslators.add(
-                new ParameterMapperDescriptor<>(wrapperParameterType, t -> t));
-        parameterTranslators.add(
-                new ParameterMapperDescriptor<>(String.class, Object::toString));
     }
 
     /**
