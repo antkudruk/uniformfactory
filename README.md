@@ -649,7 +649,8 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 | 0.5.2   | Cleaned up messages in some exceptions.                           |
 |         | Cleaned up method descriptors and builders from spare properties. |
 | 0.5.3   | Small cleanup                                                     |
-
+| 0.6.0   | Fixed bug for parameter mapper super types.                       |
+|         | Added automated boxing of primitives.                             |
 
 ## License
 
