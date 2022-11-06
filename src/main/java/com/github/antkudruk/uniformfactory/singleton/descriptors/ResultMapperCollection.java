@@ -91,11 +91,7 @@ public class ResultMapperCollection<A> {
     private <O> Optional<Function<O, A>> getTranslator(TypeDescription originResultClass) {
         return entries
                 .stream()
-                .filter(t -> originResultClass
-                        .asBoxed()
-                        .asErasure()
-                        .isAssignableTo(TypeShortcuts.getBoxedType(t.getOriginResultClass()))
-                )
+                .filter(t -> assignable(originResultClass, t.getOriginResultClass()))
                 .findFirst()
                 .map((Function<Entry<?>, Function<?, ?>>) Entry::getTranslator)
                 .map(t -> (Function<O, A>) t)
@@ -104,6 +100,19 @@ public class ResultMapperCollection<A> {
                         .ofNullable(parent)
                         .flatMap(t -> t.getTranslator(originResultClass))
                 );
+    }
+
+    // TODO: Add unit test coverage
+    private TypeDescription box(TypeDescription td) {
+        if(td.equals(new TypeDescription.ForLoadedType(void.class))) {
+            return new TypeDescription.ForLoadedType(Void.class);
+        } else {
+            return td.asBoxed();
+        }
+    }
+
+    private boolean assignable(TypeDescription from, Class<?> to) {
+        return box(from).isAssignableTo(TypeShortcuts.getBoxedType(to));
     }
 
     public <O> Function<O, A> getTranslatorOrThrow(TypeDescription originResultClass) throws WrapperMethodTypesException {
