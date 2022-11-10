@@ -16,7 +16,6 @@
 
 package com.github.antkudruk.uniformfactory.singleton.argument.typemapper;
 
-import lombok.Getter;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.util.Iterator;
@@ -53,15 +52,15 @@ public class ParameterMappersCollection<A> {
 
     private final ParameterMappersCollection<A> parent;
     private final Class<A> parameterClass;
-    private final LinkedList<ParameterMapperDescriptor<A>> parameterTranslators
+    private final LinkedList<SingleParameterTranslator<A>> parameterTranslators
             = new LinkedList<>();
 
     public ParameterMappersCollection(Class<A> wrapperParameterType) {
         this(wrapperParameterType, null);
         parameterTranslators.add(
-                new ParameterMapperDescriptor<>(wrapperParameterType, t -> t));
+                new ExtendsParameterTranslator<>(wrapperParameterType, t -> t));
         parameterTranslators.add(
-                new ParameterMapperDescriptor<>(String.class, Object::toString));
+                new ExtendsParameterTranslator<>(String.class, Object::toString));
     }
 
     private ParameterMappersCollection(Class<A> wrapperParameterType, ParameterMappersCollection<A> parent) {
@@ -72,33 +71,28 @@ public class ParameterMappersCollection<A> {
     /**
      * Adds parameter translator from originClass to the wrapper argument type.
      *
-     * @param originClass A case of origin parameter type
      * @param translator Translates the origin class to wrapper parameter class.
      * @return This object as a builder.
      */
-    public ParameterMappersCollection<A> add(
-            TypeDescription originClass, Function<A, ?> translator) {
-
-        parameterTranslators.add(new ParameterMapperDescriptor<>(
-                originClass, translator));
-
+    public ParameterMappersCollection<A> add(SingleParameterTranslator<A> translator) {
+        parameterTranslators.add(translator);
         return this;
     }
 
     /**
      * Returns a suitable translator from wrapper parameter type to origin parameter type
      * @param originParameterClass Origin parameter type description
-     * @return Suitable parameter dscriptor.
+     * @return Suitable parameter descriptor.
      */
-    public Optional<ParameterMapperDescriptor<A>> findSuitableTranslator(
+    public Optional<Function<A, ?>> findSuitableTranslator(
             TypeDescription originParameterClass) {
 
-        Iterator<ParameterMapperDescriptor<A>> it = parameterTranslators.descendingIterator();
+        Iterator<SingleParameterTranslator<A>> it = parameterTranslators.descendingIterator();
 
         while (it.hasNext()) {
-            ParameterMapperDescriptor<A> descriptor = it.next();
-            if (originParameterClass.asBoxed().isAssignableFrom(descriptor.getOriginParameterClass().asBoxed())) {
-                return Optional.of(descriptor);
+            SingleParameterTranslator<A> descriptor = it.next();
+            if (descriptor.isApplicable(originParameterClass)) {
+                return Optional.of(descriptor).map(SingleParameterTranslator::getTranslator);
             }
         }
 
@@ -107,29 +101,5 @@ public class ParameterMappersCollection<A> {
 
     public ParameterMappersCollection<A> createChild() {
         return new ParameterMappersCollection<>(parameterClass, this);
-    }
-
-    /**
-     * {@code ParameterMappersCollection} entry.
-     *
-     * @param <A> Wrapper parameter class.
-     */
-    @Getter
-    public static class ParameterMapperDescriptor<A> {
-        private final TypeDescription originParameterClass;
-        private final Function<A, ?> translator;
-
-        ParameterMapperDescriptor(TypeDescription originParameterClass,
-                                  Function<A, ?> translator) {
-            this.originParameterClass = originParameterClass;
-            this.translator = translator;
-        }
-
-        ParameterMapperDescriptor(Class<?> originParameterClass,
-                                  Function<A, ?> translator) {
-            this.originParameterClass
-                    = new TypeDescription.ForLoadedType(originParameterClass);
-            this.translator = translator;
-        }
     }
 }

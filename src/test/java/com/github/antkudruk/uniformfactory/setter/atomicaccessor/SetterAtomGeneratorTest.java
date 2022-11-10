@@ -160,6 +160,7 @@ public class SetterAtomGeneratorTest {
                                         new PartialMapperImpl(
                                                 new AnyParameterFilter(),
                                                 new ParameterValue<>(String.class, 0)
+                                                        .addSuper(new TypeDescription.ForLoadedType(Object.class), t -> t)
                                         )
                                 )
                                 .build(),
