@@ -35,14 +35,14 @@ public class ExtendsParameterTranslatorTest {
     }
 
     @Test
-    public void givenSubClass_whenIsApplicable_thenTrue() {
+    public void givenSubClass_whenIsApplicable_thenFalse() {
         // when/then
-        assertTrue(tested.isApplicable(new TypeDescription.ForLoadedType(Baz.class)));
+        assertFalse(tested.isApplicable(new TypeDescription.ForLoadedType(Baz.class)));
     }
 
     @Test
-    public void givenSuperClass_whenIsApplicable_thenFalse() {
+    public void givenSuperClass_whenIsApplicable_thenTrue() {
         // when/then
-        assertFalse(tested.isApplicable(new TypeDescription.ForLoadedType(Foo.class)));
+        assertTrue(tested.isApplicable(new TypeDescription.ForLoadedType(Foo.class)));
     }
 }

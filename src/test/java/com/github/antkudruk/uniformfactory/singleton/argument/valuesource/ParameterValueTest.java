@@ -51,7 +51,7 @@ public class ParameterValueTest {
 
         Function<WrapperParameter, OriginParameter> mapper = t -> new OriginParameter();
 
-        parameterValue = parameterValue.addTranslator(
+        parameterValue = parameterValue.addTranslatorForExtends(
                 originParameterTypeDescription, mapper);
 
         Assert.assertEquals(

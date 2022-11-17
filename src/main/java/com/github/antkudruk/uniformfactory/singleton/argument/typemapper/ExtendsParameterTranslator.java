@@ -23,6 +23,6 @@ public class ExtendsParameterTranslator<A> implements SingleParameterTranslator<
         return this
                 .originParameterClass
                 .asBoxed()
-                .isAssignableFrom(originParameterClass.asBoxed());
+                .isAssignableTo(originParameterClass.asBoxed());
     }
 }

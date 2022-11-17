@@ -29,7 +29,7 @@ public class SuperParameterTranslatorTest {
     private final SuperParameterTranslator<Bar> tested = new SuperParameterTranslator<>(Bar.class, translator);
 
     @Test
-    public void givenSameClass_whenIsApplicable_thenFalse() {
+    public void givenSameClass_whenIsApplicable_thenTrue() {
         // when/then
         assertTrue(tested.isApplicable(new TypeDescription.ForLoadedType(Bar.class)));
     }
@@ -37,12 +37,12 @@ public class SuperParameterTranslatorTest {
     @Test
     public void givenSubClass_whenIsApplicable_thenFalse() {
         // when/then
-        assertFalse(tested.isApplicable(new TypeDescription.ForLoadedType(Baz.class)));
+        assertTrue(tested.isApplicable(new TypeDescription.ForLoadedType(Baz.class)));
     }
 
     @Test
     public void givenSuperClass_whenIsApplicable_thenTrue() {
         // when/then
-        assertTrue(tested.isApplicable(new TypeDescription.ForLoadedType(Foo.class)));
+        assertFalse(tested.isApplicable(new TypeDescription.ForLoadedType(Foo.class)));
     }
 }

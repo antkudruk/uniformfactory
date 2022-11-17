@@ -55,8 +55,8 @@ public class SetterAtomGeneratorTest {
                                         new PartialMapperImpl(
                                                 new AnyParameterFilter(),
                                                 new ParameterValue<>(String.class, 0)
-                                                        .addTranslator(new TypeDescription.ForLoadedType(String.class), s -> TRANSLATED_NEW_VALUE)
-                                                        .addTranslator(new TypeDescription.ForLoadedType(int.class), Integer::parseInt)
+                                                        .addTranslatorForExtends(new TypeDescription.ForLoadedType(String.class), s -> TRANSLATED_NEW_VALUE)
+                                                        .addTranslatorForExtends(new TypeDescription.ForLoadedType(int.class), Integer::parseInt)
                                         )
                                 )
                                 .build(),
@@ -160,7 +160,7 @@ public class SetterAtomGeneratorTest {
                                         new PartialMapperImpl(
                                                 new AnyParameterFilter(),
                                                 new ParameterValue<>(String.class, 0)
-                                                        .addSuper(new TypeDescription.ForLoadedType(Object.class), t -> t)
+                                                        .addTranslatorForSuper(new TypeDescription.ForLoadedType(Object.class), t -> t)
                                         )
                                 )
                                 .build(),

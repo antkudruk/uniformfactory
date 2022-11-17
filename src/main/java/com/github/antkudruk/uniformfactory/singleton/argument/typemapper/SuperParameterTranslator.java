@@ -23,6 +23,6 @@ public class SuperParameterTranslator<A> implements SingleParameterTranslator<A>
         return this
                 .originParameterClass
                 .asBoxed()
-                .isAssignableTo(originParameterClass.asBoxed());
+                .isAssignableFrom(originParameterClass.asBoxed());
     }
 }

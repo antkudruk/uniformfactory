@@ -56,11 +56,7 @@ public class ParameterMappersCollection<A> {
             = new LinkedList<>();
 
     public ParameterMappersCollection(Class<A> wrapperParameterType) {
-        this(wrapperParameterType, null);
-        parameterTranslators.add(
-                new ExtendsParameterTranslator<>(wrapperParameterType, t -> t));
-        parameterTranslators.add(
-                new ExtendsParameterTranslator<>(String.class, Object::toString));
+        this(wrapperParameterType, getDefault(wrapperParameterType));
     }
 
     private ParameterMappersCollection(Class<A> wrapperParameterType, ParameterMappersCollection<A> parent) {
@@ -101,5 +97,15 @@ public class ParameterMappersCollection<A> {
 
     public ParameterMappersCollection<A> createChild() {
         return new ParameterMappersCollection<>(parameterClass, this);
+    }
+
+    private static <A> ParameterMappersCollection<A> getDefault(Class<A> wrapperParameterType) {
+        ParameterMappersCollection<A> collection = new ParameterMappersCollection<>(wrapperParameterType, null);
+        collection.add(
+                new SuperParameterTranslator<>(Object.class, t -> t));
+        collection.add(
+                new ExtendsParameterTranslator<>(wrapperParameterType, t -> t));
+        collection.add(new ExtendsParameterTranslator<>(String.class, Object::toString));
+        return collection;
     }
 }

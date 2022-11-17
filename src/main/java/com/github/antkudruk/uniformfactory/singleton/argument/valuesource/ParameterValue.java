@@ -54,14 +54,14 @@ public class ParameterValue<N> implements ValueSource {
         this.mapper = mapper;
     }
 
-    public ParameterValue<N> addTranslator(TypeDescription originClass,
-                                           Function<N, ?> parameterMapper) {
+    public ParameterValue<N> addTranslatorForExtends(TypeDescription originClass,
+                                                     Function<N, ?> parameterMapper) {
         mapper.add(new ExtendsParameterTranslator<>(originClass, parameterMapper));
         return this;
     }
 
-    public ParameterValue<N> addSuper(TypeDescription originClass,
-                                      Function<N, ?> parameterMapper) {
+    public ParameterValue<N> addTranslatorForSuper(TypeDescription originClass,
+                                                   Function<N, ?> parameterMapper) {
         mapper.add(new SuperParameterTranslator<>(originClass, parameterMapper));
         return this;
     }

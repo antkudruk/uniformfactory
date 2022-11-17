@@ -185,7 +185,7 @@ public class MethodMapTest {
                                 .addParameterTranslator(new PartialMapperImpl(
                                         new AnnotationParameterFilter<>(Index.class),
                                         new ParameterValue<>(Long.class, 1)
-                                                .addTranslator(new TypeDescription.ForLoadedType(Integer.class), Long::intValue)
+                                                .addTranslatorForExtends(new TypeDescription.ForLoadedType(Integer.class), Long::intValue)
                                 ))
 
                                 .finishElementFactory()

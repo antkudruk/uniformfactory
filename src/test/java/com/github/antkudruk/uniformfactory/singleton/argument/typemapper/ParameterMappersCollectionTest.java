@@ -91,7 +91,7 @@ public class ParameterMappersCollectionTest {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     public void hasRepeaterByDefault() {
-
+        // given
         ParameterMappersCollection<ParameterClass> mapper
                 = new ParameterMappersCollection<>(ParameterClass.class);
 
@@ -100,8 +100,28 @@ public class ParameterMappersCollectionTest {
         Function<ParameterClass, ?>
                 suitableTranslator = mapper.findSuitableTranslator(targetType).get();
 
+        // when
         ParameterClass parameter = new ParameterClass();
 
+        // then
+        assertEquals(parameter, suitableTranslator.apply(parameter));
+    }
+
+    @Test
+    public void hasSuperObjectByDefault() {
+        // given
+        ParameterMappersCollection<Object> mapper
+                = new ParameterMappersCollection<>(Object.class);
+
+        TypeDescription targetType = new TypeDescription.ForLoadedType(ParameterClass.class);
+
+        Function<Object, ?>
+                suitableTranslator = mapper.findSuitableTranslator(targetType).orElseThrow(RuntimeException::new);
+
+        // when
+        ParameterClass parameter = new ParameterClass();
+
+        // then
         assertEquals(parameter, suitableTranslator.apply(parameter));
     }
 
@@ -127,7 +147,7 @@ public class ParameterMappersCollectionTest {
         ParameterMappersCollection<ParameterClass> mapper
                 = new ParameterMappersCollection<>(ParameterClass.class);
 
-        TypeDescription notDefinedTargetType = new TypeDescription.ForLoadedType(NotDefinedParameterClass.class);
+        TypeDescription notDefinedTargetType = new TypeDescription.ForLoadedType(Enum.class);
 
         assertFalse(mapper.findSuitableTranslator(notDefinedTargetType).isPresent());
     }
@@ -204,5 +224,17 @@ public class ParameterMappersCollectionTest {
                 suitableTranslator = childMapper.findSuitableTranslator(new TypeDescription.ForLoadedType(boolean.class));
 
         assertFalse(suitableTranslator.isPresent());
+    }
+
+
+    @Test
+    public void givenSuitableTranslator_whenSame_thenReturnTranslator() {
+
+    }
+
+    // Default behaviour
+    @Test
+    public void givenNoTranslator_whenSame_thenParent() {
+
     }
 }
