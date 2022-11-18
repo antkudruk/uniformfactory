@@ -2,14 +2,16 @@ package com.github.antkudruk.uniformfactory.singleton.argument.typemapper;
 
 import net.bytebuddy.description.type.TypeDescription;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.powermock.reflect.Whitebox;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import java.util.function.Function;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("WeakerAccess")
 public class ParameterMappersCollectionTest {
@@ -85,7 +87,7 @@ public class ParameterMappersCollectionTest {
 
     private <I, O> Function<I, O> mockRepeater() {
         //noinspection unchecked
-        return Mockito.mock(Function.class);
+        return mock(Function.class);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -143,12 +145,16 @@ public class ParameterMappersCollectionTest {
     }
 
     @Test
-    public void absentParameterTypeCausesException() {
+    public void absentParameterTypeCausesException() throws InvocationTargetException, InstantiationException, IllegalAccessException {
+        // given
         ParameterMappersCollection<ParameterClass> mapper
-                = new ParameterMappersCollection<>(ParameterClass.class);
+                = (ParameterMappersCollection<ParameterClass>)Whitebox.getConstructor(ParameterMappersCollection.class,
+                        Class.class, ParameterMappersCollection.class)
+                .newInstance(ParameterClass.class, null);
 
-        TypeDescription notDefinedTargetType = new TypeDescription.ForLoadedType(Enum.class);
+        TypeDescription notDefinedTargetType = new TypeDescription.ForLoadedType(Object.class);
 
+        // when/then
         assertFalse(mapper.findSuitableTranslator(notDefinedTargetType).isPresent());
     }
 
@@ -220,21 +226,12 @@ public class ParameterMappersCollectionTest {
         Function<ParameterClass, ?> childTranslator = mockRepeater();
         childMapper.add(new ExtendsParameterTranslator<>(parentParameterTypeDescription, childTranslator));
 
+        // when
         Optional<Function<ParameterClass, ?>>
                 suitableTranslator = childMapper.findSuitableTranslator(new TypeDescription.ForLoadedType(boolean.class));
 
-        assertFalse(suitableTranslator.isPresent());
-    }
-
-
-    @Test
-    public void givenSuitableTranslator_whenSame_thenReturnTranslator() {
-
-    }
-
-    // Default behaviour
-    @Test
-    public void givenNoTranslator_whenSame_thenParent() {
-
+        // then
+        ParameterClass parameterClass = new ParameterClass();
+        assertEquals(parameterClass, suitableTranslator.map(e -> parameterClass).orElseThrow(RuntimeException::new));
     }
 }
