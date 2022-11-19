@@ -34,7 +34,7 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
                 // Describes how to map parameters from the adapter method to origin methods
                 .parameterSource(String.class, 0)
                 .applyTo(new AnyParameterFilter())
-                .addTranslator(Integer.class, Integer::parseInt)
+                .addExtends(Integer.class, Integer::parseInt)
                 .finishParameterDescription()
 
                 .finishElementFactory()

@@ -66,6 +66,13 @@ public class ParameterValue<N> implements ValueSource {
         return this;
     }
 
+    @Deprecated
+    public ParameterValue<N> addTranslator(TypeDescription originClass,
+                                           Function<N, ?> parameterMapper) {
+        addTranslatorForExtends(originClass, parameterMapper);
+        return this;
+    }
+
     @Override
     public Optional<PartialDescriptor> getSource(
             int originIndex,
@@ -129,7 +136,12 @@ public class ParameterValue<N> implements ValueSource {
                 return this;
             }
 
+            @Deprecated
             public <K> WithDefinedTargets addTranslator(Class<K> originParameterClass, Function<W, K> translator) {
+                return addExtends(originParameterClass, translator);
+            }
+
+            public <K> WithDefinedTargets addExtends(Class<K> originParameterClass, Function<W, K> translator) {
                 parameterMapper.add(new ExtendsParameterTranslator<>(originParameterClass, translator));
                 return this;
             }
