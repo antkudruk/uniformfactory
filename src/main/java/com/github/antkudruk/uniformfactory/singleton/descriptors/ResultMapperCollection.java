@@ -18,6 +18,9 @@ package com.github.antkudruk.uniformfactory.singleton.descriptors;
 
 import com.github.antkudruk.uniformfactory.base.TypeShortcuts;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.util.LinkedList;
@@ -36,10 +39,10 @@ import java.util.function.Function;
  * It always has a translator for the case when <b>origin</b> return type is
  * the same as <b>wrapper</b> return type that does nothing but just returns
  * the origin result.
- *
+ * <p>
  * Keep in mind that order of adding translators matters. For example the
  * following code works logically correct
- *
+ * <p>
  * {@code
  * class A {}
  * class B extends A {}
@@ -48,7 +51,7 @@ import java.util.function.Function;
  * }
  *
  * while in the following code translatorB is never used.
- *
+ * <p>
  * {@code
  * class A {}
  * class B extends A {}
@@ -72,7 +75,7 @@ public class ResultMapperCollection<A> {
     }
 
     private ResultMapperCollection(Class<A> wrapperResultType, ResultMapperCollection<A> parent) {
-        this.wrapperResultType = (Class<A>) TypeShortcuts.getBoxedType(wrapperResultType);
+        this.wrapperResultType = TypeShortcuts.getBoxedType(wrapperResultType);
         this.parent = parent;
     }
 
@@ -88,19 +91,35 @@ public class ResultMapperCollection<A> {
     private <O> Optional<Function<O, A>> getTranslator(TypeDescription originResultClass) {
         return entries
                 .stream()
-                .filter(t -> originResultClass.asErasure().isAssignableTo(t.getOriginResultClass()))
+                .filter(t -> assignable(originResultClass, t.getOriginResultClass()))
                 .findFirst()
-                .map((Function<Entry, Function>) Entry::getTranslator)
+                .map((Function<Entry<?>, Function<?, ?>>) Entry::getTranslator)
                 .map(t -> (Function<O, A>) t)
                 .map(Optional::of)
-                .orElse(Optional.ofNullable(parent).flatMap(t -> t.getTranslator(originResultClass)));
+                .orElse(Optional
+                        .ofNullable(parent)
+                        .flatMap(t -> t.getTranslator(originResultClass))
+                );
+    }
+
+    // TODO: Add unit test coverage
+    private TypeDescription box(TypeDescription td) {
+        if(td.equals(new TypeDescription.ForLoadedType(void.class))) {
+            return new TypeDescription.ForLoadedType(Void.class);
+        } else {
+            return td.asBoxed();
+        }
+    }
+
+    private boolean assignable(TypeDescription from, Class<?> to) {
+        return box(from).isAssignableTo(TypeShortcuts.getBoxedType(to));
     }
 
     public <O> Function<O, A> getTranslatorOrThrow(TypeDescription originResultClass) throws WrapperMethodTypesException {
         return this.<O>getTranslator(originResultClass).orElseThrow(() -> new WrapperMethodTypesException(
-                "No method return value translator from origin return type "
+                "No result translator from origin return type '"
                         + originResultClass.getTypeName()
-                        + " to " + wrapperResultType.getSimpleName(), null));
+                        + "' to '" + wrapperResultType.getSimpleName() + "'", null));
     }
 
     public ResultMapperCollection<A> createChild() {
@@ -111,22 +130,11 @@ public class ResultMapperCollection<A> {
         return wrapperResultType;
     }
 
+    @Getter
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     private class Entry<O> {
         private final Class<O> originResultClass;
         private final Function<O, A> translator;
-
-        Entry(Class<O> originResultClass, Function<O, A> translator) {
-            this.originResultClass = originResultClass;
-            this.translator = translator;
-        }
-
-        Class<O> getOriginResultClass() {
-            return originResultClass;
-        }
-
-        Function<O, A> getTranslator() {
-            return translator;
-        }
     }
 }
 

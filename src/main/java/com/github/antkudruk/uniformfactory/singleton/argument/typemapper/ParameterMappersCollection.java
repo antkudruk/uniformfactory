@@ -52,52 +52,43 @@ public class ParameterMappersCollection<A> {
 
     private final ParameterMappersCollection<A> parent;
     private final Class<A> parameterClass;
-    private final LinkedList<ParameterMapperDescriptor<A>> parameterTranslators
+    private final LinkedList<SingleParameterTranslator<A>> parameterTranslators
             = new LinkedList<>();
 
     public ParameterMappersCollection(Class<A> wrapperParameterType) {
-        this(wrapperParameterType, null);
+        this(wrapperParameterType, getDefault(wrapperParameterType));
     }
 
     private ParameterMappersCollection(Class<A> wrapperParameterType, ParameterMappersCollection<A> parent) {
         this.parent = parent;
         this.parameterClass = wrapperParameterType;
-        parameterTranslators.add(
-                new ParameterMapperDescriptor<>(wrapperParameterType, t -> t));
-        parameterTranslators.add(
-                new ParameterMapperDescriptor<>(String.class, Object::toString));
     }
 
     /**
      * Adds parameter translator from originClass to the wrapper argument type.
      *
-     * @param originClass A case of origin parameter type
      * @param translator Translates the origin class to wrapper parameter class.
      * @return This object as a builder.
      */
-    public ParameterMappersCollection<A> add(
-            TypeDescription originClass, Function<A, ?> translator) {
-
-        parameterTranslators.add(new ParameterMapperDescriptor<>(
-                originClass, translator));
-
+    public ParameterMappersCollection<A> add(SingleParameterTranslator<A> translator) {
+        parameterTranslators.add(translator);
         return this;
     }
 
     /**
      * Returns a suitable translator from wrapper parameter type to origin parameter type
      * @param originParameterClass Origin parameter type description
-     * @return Suitable parameter dscriptor.
+     * @return Suitable parameter descriptor.
      */
-    public Optional<ParameterMapperDescriptor<A>> findSuitableTranslator(
+    public Optional<Function<A, ?>> findSuitableTranslator(
             TypeDescription originParameterClass) {
 
-        Iterator<ParameterMapperDescriptor<A>> it = parameterTranslators.descendingIterator();
+        Iterator<SingleParameterTranslator<A>> it = parameterTranslators.descendingIterator();
 
         while (it.hasNext()) {
-            ParameterMapperDescriptor<A> descriptor = it.next();
-            if (descriptor.getOriginParameterClass().isAssignableFrom(originParameterClass)) {
-                return Optional.of(descriptor);
+            SingleParameterTranslator<A> descriptor = it.next();
+            if (descriptor.isApplicable(originParameterClass)) {
+                return Optional.of(descriptor).map(SingleParameterTranslator::getTranslator);
             }
         }
 
@@ -108,34 +99,13 @@ public class ParameterMappersCollection<A> {
         return new ParameterMappersCollection<>(parameterClass, this);
     }
 
-    /**
-     * {@code ParameterMappersCollection} entry.
-     *
-     * @param <A> Wrapper parameter class.
-     */
-    public static class ParameterMapperDescriptor<A> {
-        private final TypeDescription originParameterClass;
-        private final Function<A, ?> translator;
-
-        ParameterMapperDescriptor(TypeDescription originParameterClass,
-                                  Function<A, ?> translator) {
-            this.originParameterClass = originParameterClass;
-            this.translator = translator;
-        }
-
-        ParameterMapperDescriptor(Class originParameterClass,
-                                  Function<A, ?> translator) {
-            this.originParameterClass
-                    = new TypeDescription.ForLoadedType(originParameterClass);
-            this.translator = translator;
-        }
-
-        TypeDescription getOriginParameterClass() {
-            return originParameterClass;
-        }
-
-        public Function<A, ?> getTranslator() {
-            return translator;
-        }
+    private static <A> ParameterMappersCollection<A> getDefault(Class<A> wrapperParameterType) {
+        ParameterMappersCollection<A> collection = new ParameterMappersCollection<>(wrapperParameterType, null);
+        collection.add(
+                new SuperParameterTranslator<>(Object.class, t -> t));
+        collection.add(
+                new ExtendsParameterTranslator<>(wrapperParameterType, t -> t));
+        collection.add(new ExtendsParameterTranslator<>(String.class, Object::toString));
+        return collection;
     }
 }

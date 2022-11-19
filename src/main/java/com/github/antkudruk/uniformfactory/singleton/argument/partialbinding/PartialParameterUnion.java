@@ -78,7 +78,6 @@ public class PartialParameterUnion implements ParameterBindersSource {
                     .filter(i -> binders.get(i) == null)
                     .map(t -> "  Method: " + originMethod.getName() + ", argument: " + t + " : "
                             + originMethod.getParameters().get(t).getType().getTypeName()
-                            + " " + originMethod.getParameters().get(t).getInternalName()
                     )
                     .collect(Collectors.joining(",\n"));
 

@@ -18,11 +18,8 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Adapter> 
                 .setterElementFactory()
                 .parameterSource(String.class, 0)
                 .applyTo(new AnyParameterFilter())
-
-                .addTranslator(Long.class, Long::parseLong)
-                .addTranslator(long.class, Long::parseLong)
-                .addTranslator(Integer.class, Integer::parseInt)
-                .addTranslator(int.class, Integer::parseInt)
+                .addExtends(long.class, Long::parseLong)
+                .addExtends(Integer.class, Integer::parseInt)
                 .finishParameterDescription()
                 .finishElementFactory()
                 .endElementSource()

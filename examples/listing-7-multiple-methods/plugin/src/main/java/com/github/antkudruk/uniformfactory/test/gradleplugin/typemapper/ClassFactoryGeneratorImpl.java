@@ -6,12 +6,14 @@ import com.github.antkudruk.uniformfactory.pluginbuilder.DefaultMetaClassFactory
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnyParameterFilter;
 import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.ParameterMappersCollection;
 import net.bytebuddy.description.type.TypeDescription;
+import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.ExtendsParameterTranslator;
+import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.SuperParameterTranslator;
 
 public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> {
 
     private static ParameterMappersCollection<Integer> parameterMapper = new ParameterMappersCollection<>(Integer.class)
-            .add(new TypeDescription.ForLoadedType(String.class), Object::toString)
-            .add(new TypeDescription.ForLoadedType(Long.class), Integer::longValue);
+            .add(new SuperParameterTranslator<>(String.class, Object::toString))
+            .add(new SuperParameterTranslator<>(Long.class, Integer::longValue));
 
     private static ResultMapperCollection<String> resultMapperCollection = new ResultMapperCollection<>(String.class)
             .addMapper(Long.class, Object::toString)

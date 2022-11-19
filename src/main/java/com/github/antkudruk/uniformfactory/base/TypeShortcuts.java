@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TypeShortcuts {
-    public static Class<?> getBoxedType(Class<?> in) {
+    public static <E> Class<E> getBoxedType(Class<E> in) {
         Map<Class<?>, Class<?>> unboxedTypes = new HashMap<>();
         unboxedTypes.put(int.class, Integer.class);
         unboxedTypes.put(byte.class, Byte.class);
@@ -14,6 +14,7 @@ public class TypeShortcuts {
         unboxedTypes.put(double.class, Double.class);
         unboxedTypes.put(float.class, Float.class);
         unboxedTypes.put(void.class, Void.class);
-        return unboxedTypes.getOrDefault(in, in);
+        //noinspection unchecked
+        return (Class<E>) unboxedTypes.getOrDefault(in, in);
     }
 }

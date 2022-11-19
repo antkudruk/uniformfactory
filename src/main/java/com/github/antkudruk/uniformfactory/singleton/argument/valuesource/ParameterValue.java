@@ -23,7 +23,9 @@ import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.par
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.ParameterFilter;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnnotationParameterFilter;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.ParameterTypeFilter;
+import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.ExtendsParameterTranslator;
 import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.ParameterMappersCollection;
+import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.SuperParameterTranslator;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.lang.annotation.Annotation;
@@ -52,9 +54,22 @@ public class ParameterValue<N> implements ValueSource {
         this.mapper = mapper;
     }
 
+    public ParameterValue<N> addTranslatorForExtends(TypeDescription originClass,
+                                                     Function<N, ?> parameterMapper) {
+        mapper.add(new ExtendsParameterTranslator<>(originClass, parameterMapper));
+        return this;
+    }
+
+    public ParameterValue<N> addTranslatorForSuper(TypeDescription originClass,
+                                                   Function<N, ?> parameterMapper) {
+        mapper.add(new SuperParameterTranslator<>(originClass, parameterMapper));
+        return this;
+    }
+
+    @Deprecated
     public ParameterValue<N> addTranslator(TypeDescription originClass,
                                            Function<N, ?> parameterMapper) {
-        mapper.add(originClass, parameterMapper);
+        addTranslatorForExtends(originClass, parameterMapper);
         return this;
     }
 
@@ -65,7 +80,6 @@ public class ParameterValue<N> implements ValueSource {
 
         return mapper
                 .findSuitableTranslator(originParameterType)
-                .map(ParameterMappersCollection.ParameterMapperDescriptor::getTranslator)
                 .map(p -> new PartialParameterDescriptor<>(
                                 originIndex,
                                 wrapperParameterIndex,
@@ -122,8 +136,18 @@ public class ParameterValue<N> implements ValueSource {
                 return this;
             }
 
+            @Deprecated
             public <K> WithDefinedTargets addTranslator(Class<K> originParameterClass, Function<W, K> translator) {
-                parameterMapper.add(new TypeDescription.ForLoadedType(originParameterClass), translator);
+                return addExtends(originParameterClass, translator);
+            }
+
+            public <K> WithDefinedTargets addExtends(Class<K> originParameterClass, Function<W, K> translator) {
+                parameterMapper.add(new ExtendsParameterTranslator<>(originParameterClass, translator));
+                return this;
+            }
+
+            public <K> WithDefinedTargets addSuper(Class<K> originParameterClass, Function<W, K> translator) {
+                parameterMapper.add(new SuperParameterTranslator<>(originParameterClass, translator));
                 return this;
             }
 

@@ -82,7 +82,7 @@ public class TypeDescriptionShortcuts {
     }
 
     public static Optional<MethodDescription.InDefinedShape> findStaticMethod(
-            Class type,
+            Class<?> type,
             Class<?> returnType,
             String name,
             Class<?>... parameterTypes) {
@@ -116,12 +116,12 @@ public class TypeDescriptionShortcuts {
     }
 
     public static Optional<MethodDescription.InDefinedShape> findConstructor(
-            Class type, Class... parameters) {
+            Class<?> type, Class<?>... parameters) {
         return findConstructor(new TypeDescription.ForLoadedType(type), parameters);
     }
 
     public static Optional<MethodDescription.InDefinedShape> findConstructor(
-            TypeDescription type, Class... parameterTypes) {
+            TypeDescription type, Class<?>... parameterTypes) {
         return toOptional(type.getDeclaredMethods()
                 .filter(ElementMatchers.isConstructor().and(
                         ElementMatchers.takesArguments(parameterTypes)

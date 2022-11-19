@@ -16,7 +16,6 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Adapter> 
                                 .parameterSource(String.class, 0)
                                 .applyToAny()
                                 .addTranslator(Integer.class, Integer::parseInt)
-                                .addTranslator(int.class, Integer::parseInt)
                                 .finishParameterDescription()
                                 .build()
                 )

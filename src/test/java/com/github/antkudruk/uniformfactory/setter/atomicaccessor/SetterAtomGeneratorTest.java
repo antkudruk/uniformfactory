@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("ALL")
 public class SetterAtomGeneratorTest {
 
     private static final String NEW_VALUE_SETTER = "New Value";
@@ -37,11 +38,15 @@ public class SetterAtomGeneratorTest {
         private int field = 13;
     }
 
+    public static class OriginWithPrivateObjectImpl {
+        private Object field;
+    }
+
     public interface Wrapper {
         void setField(String value);
     }
 
-    private Class generateWrapperClass(Class originClass) throws ReflectiveOperationException, ParameterTranslatorNotFound {
+    private Class<?> generateWrapperClass(Class<?> originClass) throws ReflectiveOperationException, ParameterTranslatorNotFound {
         return SetterAtomGenerator.INSTANCE.generateClass(
                         new TypeDescription.ForLoadedType(originClass),
                         Wrapper.class.getDeclaredMethod("setField", String.class),
@@ -50,8 +55,8 @@ public class SetterAtomGeneratorTest {
                                         new PartialMapperImpl(
                                                 new AnyParameterFilter(),
                                                 new ParameterValue<>(String.class, 0)
-                                                        .addTranslator(new TypeDescription.ForLoadedType(String.class), s -> TRANSLATED_NEW_VALUE)
-                                                        .addTranslator(new TypeDescription.ForLoadedType(int.class), Integer::parseInt)
+                                                        .addTranslatorForExtends(new TypeDescription.ForLoadedType(String.class), s -> TRANSLATED_NEW_VALUE)
+                                                        .addTranslatorForExtends(new TypeDescription.ForLoadedType(int.class), Integer::parseInt)
                                         )
                                 )
                                 .build(),
@@ -61,9 +66,8 @@ public class SetterAtomGeneratorTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void setFieldUsingTranslator() throws ReflectiveOperationException, ParameterTranslatorNotFound {
-        Class atomClass = generateWrapperClass(OriginImpl.class);
+        Class<?> atomClass = generateWrapperClass(OriginImpl.class);
         OriginImpl origin = new OriginImpl();
 
         Method method = atomClass.getDeclaredMethod(Constants.METHOD_NAME, String.class);
@@ -78,9 +82,8 @@ public class SetterAtomGeneratorTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void setPrimitiveFieldUsingTranslator() throws ReflectiveOperationException, ParameterTranslatorNotFound {
-        Class atomClass = generateWrapperClass(OriginWithPrimitiveImpl.class);
+        Class<?> atomClass = generateWrapperClass(OriginWithPrimitiveImpl.class);
         OriginWithPrimitiveImpl origin = new OriginWithPrimitiveImpl();
 
         Object atom = atomClass
@@ -97,9 +100,8 @@ public class SetterAtomGeneratorTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void setPrivateFieldUsingTranslator() throws ReflectiveOperationException, ParameterTranslatorNotFound {
-        Class atomClass = generateWrapperClass(OriginWithPrivateStringField.class);
+        Class<?> atomClass = generateWrapperClass(OriginWithPrivateStringField.class);
         OriginWithPrivateStringField origin = new OriginWithPrivateStringField();
 
         Method method = atomClass.getDeclaredMethod(Constants.METHOD_NAME, String.class);
@@ -114,9 +116,8 @@ public class SetterAtomGeneratorTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void setPrivatePrimitiveFieldUsingTranslator() throws ReflectiveOperationException, ParameterTranslatorNotFound {
-        Class atomClass = generateWrapperClass(OriginWithPrivatePrimitiveImpl.class);
+        Class<?> atomClass = generateWrapperClass(OriginWithPrivatePrimitiveImpl.class);
         OriginWithPrivatePrimitiveImpl origin = new OriginWithPrivatePrimitiveImpl();
 
         Object atom = atomClass
@@ -130,5 +131,41 @@ public class SetterAtomGeneratorTest {
 
         // Then
         assertEquals(13, result);
+    }
+
+    @Test
+    public void setObjectFieldUsingDefaultTranslator() throws ReflectiveOperationException, ParameterTranslatorNotFound {
+        Class<?> atomClass = generateWrapperClassWithDefaultTranslator(OriginWithPrivateObjectImpl.class);
+        OriginWithPrivateObjectImpl origin = new OriginWithPrivateObjectImpl();
+
+        Object atom = atomClass
+                .getConstructor(OriginWithPrivateObjectImpl.class)
+                .newInstance(origin);
+        Method method = atomClass.getDeclaredMethod("invoke", String.class);
+
+        method.invoke(atom, "13");
+
+        Object result = Whitebox.getInternalState(origin, "field");
+
+        // Then
+        assertEquals("13", result);
+    }
+
+    private Class<?> generateWrapperClassWithDefaultTranslator(Class<?> originClass) throws ReflectiveOperationException, ParameterTranslatorNotFound {
+        return SetterAtomGenerator.INSTANCE.generateClass(
+                        new TypeDescription.ForLoadedType(originClass),
+                        Wrapper.class.getDeclaredMethod("setField", String.class),
+                        new PartialParameterUnion.Builder()
+                                .add(
+                                        new PartialMapperImpl(
+                                                new AnyParameterFilter(),
+                                                new ParameterValue<>(String.class, 0)
+                                                        .addTranslatorForSuper(new TypeDescription.ForLoadedType(Object.class), t -> t)
+                                        )
+                                )
+                                .build(),
+                        new FieldDescription.ForLoadedField(originClass.getDeclaredField("field")))
+                .load(getClass().getClassLoader())
+                .getLoaded();
     }
 }

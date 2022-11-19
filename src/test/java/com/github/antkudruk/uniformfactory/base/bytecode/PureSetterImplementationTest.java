@@ -78,10 +78,10 @@ public class PureSetterImplementationTest {
         Implementation implementation = new PureSetterImplementation(ORIGIN_FIELD, valueField);
 
         ByteBuddy byteBuddy = new ByteBuddy();
-        Class wrapper = byteBuddy.subclass(Object.class)
+        Class<?> wrapper = byteBuddy.subclass(Object.class)
                 .defineConstructor(Visibility.PUBLIC)
                 .withParameters(OriginImpl.class)
-                .intercept(MethodCall.invoke(findConstructor(Object.class).orElse(null))
+                .intercept(MethodCall.invoke(findConstructor(Object.class).orElseThrow(RuntimeException::new))
                         .andThen(FieldAccessor.ofField(ORIGIN_FIELD).setsArgumentAt(0)))
                 .defineField(ORIGIN_FIELD, OriginImpl.class, Opcodes.ACC_PRIVATE)
                 .defineMethod(METHOD_NAME, void.class, Opcodes.ACC_PUBLIC)

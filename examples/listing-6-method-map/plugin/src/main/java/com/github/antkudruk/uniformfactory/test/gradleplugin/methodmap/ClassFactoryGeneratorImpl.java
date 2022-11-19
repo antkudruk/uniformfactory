@@ -19,9 +19,9 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<PointWrap
                 // Describes mapping of parameter from the adapter type to origin types
                 .parameterSource(Long.class, 0)
                 .applyTo(new AnyParameterFilter())
-                .addTranslator(boolean.class, t -> t > 0)
-                .addTranslator(String.class, Object::toString)
-                .addTranslator(long.class, t -> t)
+                .addExtends(boolean.class, t -> t > 0)
+                .addExtends(String.class, Object::toString)
+                .addExtends(long.class, t -> t)
                 .finishParameterDescription()
 
                 // Descrives how to map origin type results to the agapter type result

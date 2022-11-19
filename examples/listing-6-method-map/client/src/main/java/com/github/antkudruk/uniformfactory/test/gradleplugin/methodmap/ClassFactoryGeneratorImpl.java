@@ -19,9 +19,9 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<PointWrap
                 .parameterSource(Long.class, 0)
 
                 .applyTo(new AnyParameterFilter())
-                .addTranslator(boolean.class, t -> t > 0)
-                .addTranslator(String.class, Object::toString)
-                .addTranslator(long.class, t -> t)
+                .addExtends(boolean.class, t -> t > 0)
+                .addExtends(String.class, Object::toString)
+                .addExtends(long.class, t -> t)
 
                 .finishParameterDescription()
                 .addResultTranslator(Boolean.class, t -> t ? 1L : -1L)
