@@ -1,23 +1,14 @@
 package com.github.antkudruk.uniformfactory.singleton.argument.valuesource;
 
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialParameterDescriptor;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
 import net.bytebuddy.description.type.TypeDescription;
-import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({PartialParameterDescriptor.class, ParameterValue.class})
-@Ignore
 public class ParameterValueTest {
 
     private static final int WRAPPER_INDEX = 20;
@@ -31,18 +22,9 @@ public class ParameterValueTest {
 
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    public void getSourceTest() throws Exception {
-
-        PartialParameterDescriptor parameterDescriptor
-                = PowerMockito.mock(PartialParameterDescriptor.class);
-
-        PowerMockito
-                .whenNew(PartialParameterDescriptor.class)
-                .withAnyArguments()
-                .thenReturn(parameterDescriptor);
-
+    public void whenGetSource_thenReturnPartialParameterDescriptor() {
+        // given
         TypeDescription originParameterTypeDescription
                 = new TypeDescription.ForLoadedType(OriginParameter.class);
 
@@ -54,12 +36,22 @@ public class ParameterValueTest {
         parameterValue = parameterValue.addTranslatorForExtends(
                 originParameterTypeDescription, mapper);
 
-        Assert.assertEquals(
-                parameterDescriptor,
-                parameterValue.getSource(ORIGIN_INDEX, originParameterTypeDescription).get()
-        );
+        // when
+        PartialDescriptor parameterDescriptor = parameterValue
+                .getSource(ORIGIN_INDEX, originParameterTypeDescription)
+                .orElseThrow(RuntimeException::new);
 
-        PowerMockito.verifyNew(PartialParameterDescriptor.class)
-                .withArguments(eq(ORIGIN_INDEX), eq(WRAPPER_INDEX), eq(mapper));
+        // then
+        assertEquals(
+                ORIGIN_INDEX,
+                (int)Whitebox.getInternalState(parameterDescriptor, "originIndex"));
+
+        assertEquals(
+                WRAPPER_INDEX,
+                (int)Whitebox.getInternalState(parameterDescriptor, "wrapperIndex"));
+
+        assertEquals(
+                mapper,
+                Whitebox.getInternalState(parameterDescriptor, "parameterTranslator"));
     }
 }
