@@ -16,22 +16,27 @@
 
 package com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes;
 
+import com.github.antkudruk.uniformfactory.base.TypeShortcuts;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.ParameterFilter;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.description.method.MethodDescription;
 
 /**
  * Selects <b>origin</b> method parameters with {@code parameterClass} type.
  */
+@RequiredArgsConstructor
 public class ParameterTypeFilter<O> implements ParameterFilter {
 
     private final Class<O> parameterClass;
 
-    public ParameterTypeFilter(Class<O> parameterClass) {
-        this.parameterClass = parameterClass;
-    }
-
     @Override
     public boolean useArgument(MethodDescription method, int originParameterIndex) {
-        return method.getParameters().get(originParameterIndex).getType().represents(parameterClass);
+        return method
+                .getParameters()
+                .get(originParameterIndex)
+                .getType()
+                .asErasure()
+                .asBoxed()
+                .represents(TypeShortcuts.getBoxedType(parameterClass));
     }
 }
