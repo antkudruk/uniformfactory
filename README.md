@@ -144,7 +144,7 @@ Here is an example for Gradle:
 
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.6.0'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.6.1'
 }
 ```
 
@@ -154,7 +154,7 @@ and for Maven:
 <dependency>
     <groupId>com.github.antkudruk</groupId>
     <artifactId>uniform-factory</artifactId>
-    <version>0.6.0</version>
+    <version>0.6.1</version>
 </dependency>
 ```
 
@@ -652,6 +652,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 | 0.6.0   | Fixed bug for parameter mapper super types.                       |
 |         | Added automated boxing of primitives.                             |
 |         | Got rid of default translators in children mappers                |
+| 0.6.1   | Fixed a bug in selecting parameter by type                        |
 
 ## License
 
