@@ -1,6 +1,8 @@
 package com.github.antkudruk.uniformfactory.singleton.argument.filters;
 
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.matcher.ElementMatchers;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 
@@ -26,18 +28,20 @@ public class ParameterFilterTest {
     static class OriginClass {
         @SuppressWarnings({"WeakerAccess", "unused"})
         public void first(@Mark("hz") String alpha, @Mark("t") Long beta,
-                          Boolean gamma, String delta) {
+                          Boolean gamma, String delta, long epsilon) {
 
         }
     }
 
     @Test
-    public void anyArgumentTest() throws Exception {
+    public void anyArgumentTest() {
         ParameterQueryBuilder builder = new ParameterQueryBuilder();
 
-        MethodDescription method = new MethodDescription.ForLoadedMethod(
-                OriginClass.class.getDeclaredMethod("first",
-                        String.class, Long.class, Boolean.class, String.class));
+        MethodDescription method = new TypeDescription.ForLoadedType(OriginClass.class)
+                .getDeclaredMethods()
+                .filter(ElementMatchers.named("first"))
+                .filter(ElementMatchers.takesArguments(String.class, Long.class, Boolean.class, String.class, long.class))
+                .getOnly();
 
         assertTrue(builder.useArgument(method, 0));
         assertTrue(builder.useArgument(method, 1));
@@ -46,13 +50,15 @@ public class ParameterFilterTest {
     }
 
     @Test
-    public void hasTypeStringTest() throws Exception {
+    public void hasTypeStringTest() {
         ParameterQueryBuilder builder = new ParameterQueryBuilder();
         builder = builder.hasType(String.class);
 
-        MethodDescription method = new MethodDescription.ForLoadedMethod(
-                OriginClass.class.getDeclaredMethod("first",
-                        String.class, Long.class, Boolean.class, String.class));
+        MethodDescription method = new TypeDescription.ForLoadedType(OriginClass.class)
+                .getDeclaredMethods()
+                .filter(ElementMatchers.named("first"))
+                .filter(ElementMatchers.takesArguments(String.class, Long.class, Boolean.class, String.class, long.class))
+                .getOnly();
 
         assertTrue(builder.useArgument(method, 0));
         assertFalse(builder.useArgument(method, 1));
@@ -61,28 +67,33 @@ public class ParameterFilterTest {
     }
 
     @Test
-    public void hasTypeLongTest() throws Exception {
+    public void hasTypeLongTest() {
         ParameterQueryBuilder builder = new ParameterQueryBuilder();
         builder.hasType(Long.class);
 
-        MethodDescription method = new MethodDescription.ForLoadedMethod(
-                OriginClass.class.getDeclaredMethod("first",
-                        String.class, Long.class, Boolean.class, String.class));
+        MethodDescription method = new TypeDescription.ForLoadedType(OriginClass.class)
+                .getDeclaredMethods()
+                .filter(ElementMatchers.named("first"))
+                .filter(ElementMatchers.takesArguments(String.class, Long.class, Boolean.class, String.class, long.class))
+                .getOnly();
 
         assertFalse(builder.useArgument(method, 0));
         assertTrue(builder.useArgument(method, 1));
         assertFalse(builder.useArgument(method, 2));
         assertFalse(builder.useArgument(method, 3));
+        assertTrue(builder.useArgument(method, 4));
     }
 
     @Test
-    public void hasAnnotation() throws Exception {
+    public void hasAnnotation() {
         ParameterQueryBuilder builder = new ParameterQueryBuilder();
         builder.annotatedWith(Mark.class);
 
-        MethodDescription method = new MethodDescription.ForLoadedMethod(
-                OriginClass.class.getDeclaredMethod("first",
-                        String.class, Long.class, Boolean.class, String.class));
+        MethodDescription method = new TypeDescription.ForLoadedType(OriginClass.class)
+                .getDeclaredMethods()
+                .filter(ElementMatchers.named("first"))
+                .filter(ElementMatchers.takesArguments(String.class, Long.class, Boolean.class, String.class, long.class))
+                .getOnly();
 
         assertTrue(builder.useArgument(method, 0));
         assertTrue(builder.useArgument(method, 1));
@@ -91,13 +102,15 @@ public class ParameterFilterTest {
     }
 
     @Test
-    public void hasAnnotationWithParameter() throws Exception {
+    public void hasAnnotationWithParameter() {
         ParameterQueryBuilder builder = new ParameterQueryBuilder();
         builder = builder.annotatedWith(Mark.class, a -> "hz".equals(a.value()));
 
-        MethodDescription method = new MethodDescription.ForLoadedMethod(
-                OriginClass.class.getDeclaredMethod("first",
-                        String.class, Long.class, Boolean.class, String.class));
+        MethodDescription method = new TypeDescription.ForLoadedType(OriginClass.class)
+                .getDeclaredMethods()
+                .filter(ElementMatchers.named("first"))
+                .filter(ElementMatchers.takesArguments(String.class, Long.class, Boolean.class, String.class, long.class))
+                .getOnly();
 
         assertTrue(builder.useArgument(method, 0));
         assertFalse(builder.useArgument(method, 1));
@@ -106,20 +119,40 @@ public class ParameterFilterTest {
     }
 
     @Test
-    public void hasAnnotationAndArgumentType() throws Exception {
+    public void hasAnnotationAndArgumentType() {
         ParameterQueryBuilder builder = new ParameterQueryBuilder();
 
         builder.annotatedWith(Mark.class)
                 .hasType(String.class);
 
-        MethodDescription method = new MethodDescription.ForLoadedMethod(
-                OriginClass.class.getDeclaredMethod("first",
-                        String.class, Long.class, Boolean.class, String.class));
+        MethodDescription method = new TypeDescription.ForLoadedType(OriginClass.class)
+                .getDeclaredMethods()
+                .filter(ElementMatchers.named("first"))
+                .filter(ElementMatchers.takesArguments(String.class, Long.class, Boolean.class, String.class, long.class))
+                .getOnly();
 
         assertTrue(builder.useArgument(method, 0));
         assertFalse(builder.useArgument(method, 1));
         assertFalse(builder.useArgument(method, 2));
         assertFalse(builder.useArgument(method, 3));
+    }
+
+    @Test
+    public void boxingUnboxingTest() {
+        ParameterQueryBuilder builder = new ParameterQueryBuilder();
+        builder.hasType(long.class);
+
+        MethodDescription method = new TypeDescription.ForLoadedType(OriginClass.class)
+                .getDeclaredMethods()
+                .filter(ElementMatchers.named("first"))
+                .filter(ElementMatchers.takesArguments(String.class, Long.class, Boolean.class, String.class, long.class))
+                .getOnly();
+
+        assertFalse(builder.useArgument(method, 0));
+        assertTrue(builder.useArgument(method, 1));
+        assertFalse(builder.useArgument(method, 2));
+        assertFalse(builder.useArgument(method, 3));
+        assertTrue(builder.useArgument(method, 4));
     }
 
     @Test

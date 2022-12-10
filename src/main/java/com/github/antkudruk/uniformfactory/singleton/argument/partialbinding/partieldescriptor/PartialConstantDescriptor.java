@@ -17,6 +17,8 @@
 package com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor;
 
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.implementation.MethodCall;
 
 /**
@@ -24,20 +26,12 @@ import net.bytebuddy.implementation.MethodCall;
  *
  * @param <O> Constant type
  */
+@RequiredArgsConstructor
 public class PartialConstantDescriptor<O> implements PartialDescriptor {
 
+    @Getter
     private final int originIndex;
     private final O constant;
-
-    public PartialConstantDescriptor(int originIndex, O constant) {
-        this.originIndex = originIndex;
-        this.constant = constant;
-    }
-
-    @Override
-    public final int getOriginIndex() {
-        return originIndex;
-    }
 
     @Override
     public MethodCall addWith(MethodCall methodCall) {

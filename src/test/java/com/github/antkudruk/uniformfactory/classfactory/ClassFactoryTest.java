@@ -15,7 +15,7 @@ public class ClassFactoryTest {
 
     }
 
-    interface Origin {
+    interface Wrapper {
         String concat(String first, Long value);
     }
 
@@ -25,7 +25,7 @@ public class ClassFactoryTest {
         }
     }
 
-    static class OriginImpl implements Origin {
+    static class WrapperImpl implements Wrapper {
         @Override
         public String concat(String first, Long value) {
             throw new NotImplementedException();
@@ -34,7 +34,7 @@ public class ClassFactoryTest {
 
     @Test(expected = AlienMethodException.class)
     public void givenAlienMethod_whenNew_thenThrow() throws ReflectiveOperationException {
-        new ClassFactory.Builder<>(Origin.class)
+        new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodSingleton(
                         Alien.class.getDeclaredMethod("concat", String.class, Long.class),
                         String.class)
@@ -45,9 +45,9 @@ public class ClassFactoryTest {
 
     @Test
     public void givenOriginMethod_whenNew_thenOk() throws ReflectiveOperationException {
-        new ClassFactory.Builder<>(Origin.class)
+        new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodSingleton(
-                        Origin.class.getDeclaredMethod("concat", String.class, Long.class),
+                        Wrapper.class.getDeclaredMethod("concat", String.class, Long.class),
                         String.class)
                 .setMarkerAnnotation(Marker.class)
                 .endMethodDescription()
@@ -56,9 +56,9 @@ public class ClassFactoryTest {
 
     @Test
     public void givenBaseMethod_whenNew_thenOk() throws ReflectiveOperationException {
-        new ClassFactory.Builder<>(OriginImpl.class)
+        new ClassFactory.Builder<>(WrapperImpl.class)
                 .addMethodSingleton(
-                        Origin.class.getDeclaredMethod("concat", String.class, Long.class),
+                        Wrapper.class.getDeclaredMethod("concat", String.class, Long.class),
                         String.class)
                 .setMarkerAnnotation(Marker.class)
                 .endMethodDescription()

@@ -19,6 +19,8 @@ package com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.pa
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.CrossLoadersFunctionAdapter;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.ForStaticField;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.MethodCall;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
@@ -32,27 +34,18 @@ import java.util.function.Function;
  * @param <O> Origin parameter type.
  * @param <N> Wrapper parameter type.
  */
+@RequiredArgsConstructor
 public class PartialParameterDescriptor<O, N> implements PartialDescriptor {
 
     private static final String PARAMETER_TRANSLATOR = "PARAMETER_TRANSLATOR_";
 
-    private final String mapperName;
+    @Getter
     private final int originIndex;
     private final int wrapperIndex;
     private final Function<N, O> parameterTranslator;
 
-    public PartialParameterDescriptor(int originIndex, int wrapperIndex,
-                                      Function<N, O> parameterTranslator) {
-
-        mapperName = PARAMETER_TRANSLATOR + originIndex;
-        this.originIndex = originIndex;
-        this.wrapperIndex = wrapperIndex;
-        this.parameterTranslator = parameterTranslator;
-    }
-
-    @Override
-    public final int getOriginIndex() {
-        return originIndex;
+    private String getMapperName() {
+        return PARAMETER_TRANSLATOR + originIndex;
     }
 
     /**
@@ -60,9 +53,9 @@ public class PartialParameterDescriptor<O, N> implements PartialDescriptor {
      */
     @Override
     public <F> DynamicType.Builder<F> initiate(DynamicType.Builder<F> bbBuilder) {
-        return bbBuilder.defineField(mapperName, CrossLoadersFunctionAdapter.class,
+        return bbBuilder.defineField(getMapperName(), CrossLoadersFunctionAdapter.class,
                 Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC)
-                .initializer(new ForStaticField(mapperName,
+                .initializer(new ForStaticField(getMapperName(),
                         new CrossLoadersFunctionAdapter(parameterTranslator)));
     }
 
@@ -76,7 +69,7 @@ public class PartialParameterDescriptor<O, N> implements PartialDescriptor {
                     (MethodCall) MethodCall
                             .invoke(CrossLoadersFunctionAdapter.class
                                     .getDeclaredMethod("apply", Object.class))
-                            .onField(mapperName)
+                            .onField(getMapperName())
                             .withArgument(wrapperIndex)
                             .withAssigner(Assigner.DEFAULT, Assigner.Typing.DYNAMIC));
         } catch (NoSuchMethodException ex) {

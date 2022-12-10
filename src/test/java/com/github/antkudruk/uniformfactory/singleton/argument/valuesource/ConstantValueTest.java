@@ -1,21 +1,13 @@
 package com.github.antkudruk.uniformfactory.singleton.argument.valuesource;
 
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialConstantDescriptor;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
 import net.bytebuddy.description.type.TypeDescription;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.eq;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({PartialConstantDescriptor.class, ConstantValue.class})
-@Ignore
 public class ConstantValueTest {
 
     private static final int ORIGIN_INDEX = 10;
@@ -42,16 +34,8 @@ public class ConstantValueTest {
     }
 
     @Test
-    public void getSourceTestWithSameType() throws Exception {
-
-        PartialConstantDescriptor constantDescriptor
-                = PowerMockito.mock(PartialConstantDescriptor.class);
-
-        PowerMockito
-                .whenNew(PartialConstantDescriptor.class)
-                .withAnyArguments()
-                .thenReturn(constantDescriptor);
-
+    public void whenGetSource_thenReturnPartialParameterDescriptor() {
+        // given
         TypeDescription originParameterTypeDescription
                 = new TypeDescription.ForLoadedType(Constant.class);
 
@@ -59,12 +43,15 @@ public class ConstantValueTest {
 
         ConstantValue<Constant> parameterValue = new ConstantValue<>(constant);
 
-        Assert.assertEquals(
-                constantDescriptor,
-                parameterValue.getSource(ORIGIN_INDEX, originParameterTypeDescription).orElseThrow(RuntimeException::new)
-        );
+        // when
+        PartialDescriptor descriptor = parameterValue
+                .getSource(ORIGIN_INDEX, originParameterTypeDescription)
+                .orElseThrow(RuntimeException::new);
 
-        PowerMockito.verifyNew(PartialConstantDescriptor.class)
-                .withArguments(eq(ORIGIN_INDEX), eq(constant));
+        // then
+        Assert.assertEquals(ORIGIN_INDEX, descriptor.getOriginIndex());
+        Assert.assertEquals(
+                constant,
+                Whitebox.getInternalState(descriptor, "constant"));
     }
 }
