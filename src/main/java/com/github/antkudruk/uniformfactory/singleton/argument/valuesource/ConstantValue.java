@@ -21,6 +21,7 @@ import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertype
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.partieldescriptor.PartialConstantDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialDescriptor;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.lang.annotation.Annotation;
@@ -30,13 +31,10 @@ import java.util.Optional;
  * Provides constant parameter to the <b>origin</b>.
  * @param <O> Constant (and wrapper method) parameter.
  */
+@RequiredArgsConstructor
 public class ConstantValue<O> implements ValueSource {
 
     private final O constant;
-
-    public ConstantValue(O constant) {
-        this.constant = constant;
-    }
 
     @Override
     public Optional<PartialDescriptor> getSource(int originIndex, TypeDescription originArgumentClass) {
