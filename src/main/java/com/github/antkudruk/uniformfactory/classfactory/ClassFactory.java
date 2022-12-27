@@ -60,6 +60,7 @@ public class ClassFactory<W> {
         this.wrapperInterface = builder.wrapperInterface;
         this.methodDescriptorBuilders = builder.methodDescriptors;
         checkIfAllMethodsDescribed();
+        validate();
     }
 
     /**
@@ -94,6 +95,12 @@ public class ClassFactory<W> {
         bbBuilder = enhancerBasedEnhancer.addMethod(bbBuilder);
 
         return bbBuilder.make();
+    }
+
+    private void validate() throws ClassFactoryException {
+        if(!Modifier.isPublic(wrapperInterface.getModifiers())) {
+            throw new WrapperInterfaceIsNotPublic(wrapperInterface);
+        }
     }
 
     private void checkIfAllMethodsDescribed() throws WrapperMethodNotDescribed {
@@ -135,6 +142,7 @@ public class ClassFactory<W> {
 
         List<String> missingMethodNames = describedMethods
                 .stream()
+                .filter(d -> !"getOrigin".equals(d.getName()))
                 .filter(d -> Modifier.isAbstract(d.getModifiers()))
                 .filter(d -> !interfaceMethods.contains(d))
                 .map(Method::getName)

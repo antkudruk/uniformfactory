@@ -26,6 +26,7 @@ import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertype
 import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.ExtendsParameterTranslator;
 import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.ParameterMappersCollection;
 import com.github.antkudruk.uniformfactory.singleton.argument.typemapper.SuperParameterTranslator;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.lang.annotation.Annotation;
@@ -38,6 +39,7 @@ import java.util.function.Function;
  *
  * @param <N> Wrapper parameter class.
  */
+@RequiredArgsConstructor
 public class ParameterValue<N> implements ValueSource {
 
     private final int wrapperParameterIndex;
@@ -46,12 +48,6 @@ public class ParameterValue<N> implements ValueSource {
     public ParameterValue(Class<N> wrapperParameterClass, int wrapperParameterIndex) {
         this(wrapperParameterIndex,
                 new ParameterMappersCollection<>(wrapperParameterClass));
-    }
-
-    private ParameterValue(int wrapperParameterIndex,
-                           ParameterMappersCollection<N> mapper) {
-        this.wrapperParameterIndex = wrapperParameterIndex;
-        this.mapper = mapper;
     }
 
     public ParameterValue<N> addTranslatorForExtends(TypeDescription originClass,

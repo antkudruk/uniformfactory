@@ -15,7 +15,15 @@ public class ClassFactoryTest {
 
     }
 
-    interface Wrapper {
+    public interface Wrapper {
+        String concat(String first, Long value);
+    }
+
+    public interface WrapperWithOrigin {
+        Object getOrigin();
+    }
+
+    private interface PrivateWrapper {
         String concat(String first, Long value);
     }
 
@@ -25,11 +33,17 @@ public class ClassFactoryTest {
         }
     }
 
-    static class WrapperImpl implements Wrapper {
+    public static class WrapperImpl implements Wrapper {
         @Override
         public String concat(String first, Long value) {
             throw new NotImplementedException();
         }
+    }
+
+    @Test
+    public void givenOrigin_whenNotDescribed_thenOk() {
+        new ClassFactory.Builder<>(WrapperWithOrigin.class)
+                .build();
     }
 
     @Test(expected = AlienMethodException.class)
@@ -59,6 +73,17 @@ public class ClassFactoryTest {
         new ClassFactory.Builder<>(WrapperImpl.class)
                 .addMethodSingleton(
                         Wrapper.class.getDeclaredMethod("concat", String.class, Long.class),
+                        String.class)
+                .setMarkerAnnotation(Marker.class)
+                .endMethodDescription()
+                .build();
+    }
+
+    @Test(expected = WrapperInterfaceIsNotPublic.class)
+    public void givenWrapperInterfaceNotPublic_whenNew_thenThrow() throws ReflectiveOperationException {
+        new ClassFactory.Builder<>(PrivateWrapper.class)
+                .addMethodSingleton(
+                        PrivateWrapper.class.getDeclaredMethod("concat", String.class, Long.class),
                         String.class)
                 .setMarkerAnnotation(Marker.class)
                 .endMethodDescription()

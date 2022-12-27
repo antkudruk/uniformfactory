@@ -5,7 +5,7 @@ plugins {
 }
 
 // The current version
-def libraryVersion='0.6.1'
+def libraryVersion='0.6.2'
 
 group = 'com.github.antkudruk'
 version = libraryVersion
