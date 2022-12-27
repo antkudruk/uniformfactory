@@ -19,6 +19,10 @@ public class ClassFactoryTest {
         String concat(String first, Long value);
     }
 
+    public interface WrapperWithOrigin {
+        Object getOrigin();
+    }
+
     private interface PrivateWrapper {
         String concat(String first, Long value);
     }
@@ -34,6 +38,12 @@ public class ClassFactoryTest {
         public String concat(String first, Long value) {
             throw new NotImplementedException();
         }
+    }
+
+    @Test
+    public void givenOrigin_whenNotDescribed_thenOk() {
+        new ClassFactory.Builder<>(WrapperWithOrigin.class)
+                .build();
     }
 
     @Test(expected = AlienMethodException.class)

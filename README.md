@@ -653,7 +653,8 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 |         | Added automated boxing of primitives.                             |
 |         | Got rid of default translators in children mappers                |
 | 0.6.1   | Fixed a bug in selecting parameter by type                        |
-| 0.6.2   | Verbose a non-intuitive  message 'Invisible return type interface'|
+| 0.6.2   | Verbose a non-intuitive  message 'Invisible return type interface |
+|         | Enabled getOrigin method in any Wrapper interface                 |
 
 ## License
 

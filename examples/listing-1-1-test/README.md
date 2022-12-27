@@ -21,6 +21,17 @@ of demonstrating the
 public interface Wrapper { }
 ```
 
+We can also write a wrapper that provides the `Origin` object. `ClassFactory` 
+creates read-only property `origin` under the hood. So is we describe a method
+`getOrigin` in the Wrapper interface, it's going to provide the Origin object 
+automatically.
+
+```
+public interface Wrapper {
+    Origin getOrigin();
+}
+```
+
 We are going to tell **Uniform Factory** to force each **origin** class 
 implement `Origin` interface behind the scenes to access the wrapper object. 
 Any `Origin` interface should contain a method returning `Wrapper` instance for

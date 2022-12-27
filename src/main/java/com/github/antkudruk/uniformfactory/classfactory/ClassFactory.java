@@ -142,6 +142,7 @@ public class ClassFactory<W> {
 
         List<String> missingMethodNames = describedMethods
                 .stream()
+                .filter(d -> !"getOrigin".equals(d.getName()))
                 .filter(d -> Modifier.isAbstract(d.getModifiers()))
                 .filter(d -> !interfaceMethods.contains(d))
                 .map(Method::getName)
