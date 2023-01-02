@@ -18,6 +18,7 @@ package com.github.antkudruk.uniformfactory.methodlist.descriptors;
 
 import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescriptor;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
+import com.github.antkudruk.uniformfactory.base.IdentifierGeneratorImpl;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
@@ -60,7 +61,7 @@ public class MethodListDescriptor<F> extends AbstractMethodCollectionDescriptor<
     @Override
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
         return new MethodListEnhancer<>(
-                "values",
+                IdentifierGeneratorImpl.FIELD_ID_GENERATOR.next(),
                 originType,
                 wrapperMethod,
                 elementSource.elements(originType));

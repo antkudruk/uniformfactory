@@ -4,4 +4,5 @@ import java.util.List;
 
 public interface Wrapper {
     List<Processor> getProcessors();
+    List<CssPropertySetter> getDescriptors();
 }
