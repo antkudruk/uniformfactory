@@ -18,6 +18,7 @@ package com.github.antkudruk.uniformfactory.methodmap.descriptors;
 
 import com.github.antkudruk.uniformfactory.base.AbstractMethodCollectionDescriptor;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
+import com.github.antkudruk.uniformfactory.base.IdentifierGeneratorImpl;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
@@ -56,7 +57,7 @@ public class MethodMapDescriptor<F> extends AbstractMethodCollectionDescriptor<F
     @Override
     public Enhancer getEnhancer(TypeDescription originType) throws ClassGeneratorException {
         return new MethodMapEnhancer<>(
-                "values",
+                IdentifierGeneratorImpl.FIELD_ID_GENERATOR.next(),
                 originType,
                 wrapperMethod,
                 mapElementSource.memberEntries(originType));

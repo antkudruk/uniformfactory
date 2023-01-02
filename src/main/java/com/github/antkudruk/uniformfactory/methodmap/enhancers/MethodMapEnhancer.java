@@ -46,7 +46,7 @@ public class MethodMapEnhancer<F> implements Enhancer {
     public Implementation.Composable addInitiation(
             Implementation.Composable methodCall) {
 
-        return methodCall.andThen(new InitMapImplementation<F>(
+        return methodCall.andThen(new InitMapImplementation<>(
                 fieldName,
                 originType,
                 functionalMap
@@ -56,7 +56,7 @@ public class MethodMapEnhancer<F> implements Enhancer {
     @Override
     public <N> DynamicType.Builder<N> addMethod(DynamicType.Builder<N> bbBuilder) {
         return bbBuilder
-                .defineField(fieldName, Map.class, Opcodes.ACC_PRIVATE)
+                .defineField(fieldName, Map.class, Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)
                 .define(wrapperMethod)
                 .intercept(FieldAccessor.ofField(fieldName))
                 .require(new ArrayList<>(functionalMap.values()));

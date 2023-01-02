@@ -1,12 +1,14 @@
 import com.github.antkudruk.uniformfactory.test.gradleplugin.methodlist.CallableObjectsRegistry;
 import com.github.antkudruk.uniformfactory.test.gradleplugin.methodlist.domain.Origin1;
 import com.github.antkudruk.uniformfactory.test.gradleplugin.methodlist.domain.Origin2;
+import com.github.antkudruk.uniformfactory.test.gradleplugin.methodlist.Origin;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.function.Function;
 
 import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -64,7 +66,7 @@ public class MethodListTest {
         Function<Integer, Boolean> consumerInteger = Mockito.mock(Function.class);
         Mockito.when(consumerInteger.apply(eq(EVENT_TYPE_INT))).thenReturn(false);
 
-        new Origin1(runnable);
+        Origin1 origin1 = new Origin1(runnable);
         new Origin2(consumerString, consumerInteger);
 
         assertFalse(CallableObjectsRegistry.INSTANCE.call(EVENT_TYPE_STRING));
@@ -72,6 +74,14 @@ public class MethodListTest {
         Mockito.verify(runnable, times(1)).run();
         Mockito.verify(consumerString, times(1)).apply(eq(EVENT_TYPE_STRING));
         Mockito.verify(consumerInteger, times(1)).apply(eq(EVENT_TYPE_INT));
+
+        ((Origin)origin1)
+                .getWrapper()
+                .getDescriptors()
+                .forEach(i -> i.set("10"));
+        assertEquals(10, origin1.getFontSize());
+        assertEquals(10L, origin1.getWidth().longValue());
+        assertEquals("10", origin1.getFontName());
     }
 }
 

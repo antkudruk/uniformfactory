@@ -18,6 +18,7 @@ package com.github.antkudruk.uniformfactory.methodlist.enhancers;
 
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.base.bytecode.InitListImplementation;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.FieldAccessor;
@@ -28,24 +29,13 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public class MethodListEnhancer<F> implements Enhancer {
 
     private final String fieldName;
     private final TypeDescription originType;
     private final Method wrapperMethod;
     private final List<DynamicType.Unloaded<? extends F>> functionalList;
-
-    public MethodListEnhancer(
-            String listFieldName,
-            TypeDescription originType,
-            Method wrapperMethod,
-            List<DynamicType.Unloaded<? extends F>> functionalListClasses) {
-
-        this.fieldName = listFieldName;
-        this.originType = originType;
-        this.wrapperMethod = wrapperMethod;
-        this.functionalList = functionalListClasses;
-    }
 
     @Override
     public Implementation.Composable addInitiation(
@@ -61,7 +51,7 @@ public class MethodListEnhancer<F> implements Enhancer {
     @Override
     public <N> DynamicType.Builder<N> addMethod(DynamicType.Builder<N> bbBuilder) {
         return bbBuilder
-                .defineField(fieldName, List.class, Opcodes.ACC_PRIVATE)
+                .defineField(fieldName, List.class, Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)
                 .define(wrapperMethod)
                 .intercept(FieldAccessor.ofField(fieldName))
                 .require(functionalList

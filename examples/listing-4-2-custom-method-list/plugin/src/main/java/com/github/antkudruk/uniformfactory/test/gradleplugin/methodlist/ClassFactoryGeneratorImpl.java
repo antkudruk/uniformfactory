@@ -25,7 +25,7 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
                 // Setting up element factory for the list - getters
                 .getterElementFactory(Boolean.class)
 
-                // Descrives how to map results from origin methods to the adapter methd result
+                // Describes how to map results from origin methods to the adapter methd result
                 .addResultTranslator(void.class, t -> true)
                 .addResultTranslator(Long.class, t -> t >= 0)
                 .addResultTranslator(String.class, "yes"::equalsIgnoreCase)
@@ -40,6 +40,22 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
                 .finishElementFactory()
                 .endElementSource()
                 .endMethodDescription()
+
+                .addMethodList(Wrapper.class.getMethod("getDescriptors"), CssPropertySetter.class)
+                .defaultElementSource()
+                .setMarkerAnnotation(CssProperty.class)
+                .setterElementFactory()
+                .parameterSource(String.class, 0)
+                .applyTo(new AnyParameterFilter())
+                .addExtends(Integer.class, Integer::parseInt)
+                .addExtends(Long.class, Long::parseLong)
+                .addExtends(Boolean.class, Boolean::parseBoolean)
+                .finishParameterDescription()
+
+                .finishElementFactory()
+                .endElementSource()
+                .endMethodDescription()
+
                 .build();
     }
 
