@@ -1,6 +1,7 @@
 package com.github.antkudruk.uniformfactory.stackmanipulation;
 
 import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
+import com.github.antkudruk.uniformfactory.base.EnhanceDynamicType;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
@@ -32,12 +33,17 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
     @NonNull
     private final Implementation implementation;
 
+    @NonNull
+    private final EnhanceDynamicType enhanceDynamicTypeBuilder;
+
     public BbImplementationMethodDescriptor(Method wrapperMethod,
                                             Optional<Implementation.Composable> initiation,
-                                            Implementation implementation) {
+                                            Implementation implementation,
+                                            EnhanceDynamicType enhanceDynamicTypeBuilder) {
         super(wrapperMethod);
         this.implementation = implementation;
         this.initiation = initiation;
+        this.enhanceDynamicTypeBuilder = enhanceDynamicTypeBuilder;
     }
 
     @Override
@@ -53,6 +59,7 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         private Optional<Implementation.Composable> initiation = Optional.empty();
         private Implementation implementation;
+        private EnhanceDynamicType enhanceDynamicTypeBuilder = t -> t;
 
         public AbstractBuilder(Method wrapperMethod) {
             super(wrapperMethod);
@@ -122,12 +129,18 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
             return (T) this;
         }
 
+        public <W> T enhanceDynamicTypeBuilder(EnhanceDynamicType<W> enhanceDynamicTypeBuilder) {
+            this.enhanceDynamicTypeBuilder = enhanceDynamicTypeBuilder;
+            return (T) this;
+        }
+
         @Override
         public BbImplementationMethodDescriptor build() {
             return new BbImplementationMethodDescriptor(
                     wrapperMethod,
                     initiation,
-                    implementation);
+                    implementation,
+                    enhanceDynamicTypeBuilder);
         }
     }
 
@@ -167,8 +180,10 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         @Override
         public <W> DynamicType.Builder<W> addMethod(DynamicType.Builder<W> bbBuilder) {
-            return bbBuilder.define(wrapperMethod)
-                    .intercept(implementation);
+            DynamicType.Builder<W> intermediate = bbBuilder
+                            .define(wrapperMethod)
+                            .intercept(implementation);
+            return enhanceDynamicTypeBuilder.apply(intermediate);
         }
     }
 }
