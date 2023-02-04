@@ -112,6 +112,19 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
             return (T) this;
         }
 
+        public T typeConstant(DynamicType typeDescription) {
+            if (typeDescription != null) {
+                setImplementation(new Implementation.Simple(
+                        ClassConstant.of(typeDescription.getTypeDescription()),
+                        MethodReturn.REFERENCE
+                ));
+                enhanceDynamicTypeBuilder(t -> t.require(typeDescription));
+            } else {
+                setImplementation(FixedValue.nullValue());
+            }
+            return (T) this;
+        }
+
         public T stringConstant(String text) {
             if (text != null) {
                 setImplementation(new Implementation.Simple(

@@ -3,7 +3,9 @@ package com.github.antkudruk.uniformfactory.stackmanipulation;
 import com.github.antkudruk.uniformfactory.base.MethodDescriptor;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
+import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.junit.Test;
@@ -199,6 +201,52 @@ public class BbImplementationMethodDescriptorTest {
     }
 
     @Test
+    public void givenDynamicType_whenTypeConstant_thenReturnType() throws ReflectiveOperationException, ClassGeneratorException {
+        // given
+        DynamicType.Loaded dynamicType
+                = new ByteBuddy()
+                .subclass(Object.class)
+                .make()
+                .load(getClass().getClassLoader());
+
+        // when
+        AdaptorWithType obj = getClassFactory(
+                AdaptorWithType.class,
+                new BbImplementationMethodDescriptor
+                        .Builder(AdaptorWithType.class.getMethod("get"))
+                        .typeConstant(dynamicType)
+                        .build(),
+                OriginWithMethodAndField.class
+        );
+
+        // then
+        assertEquals(dynamicType.getLoaded().getName(), obj.get().getName());
+    }
+
+    @Test(expected = NoClassDefFoundError.class)
+    public void givenDynamicTypeAsTypeDescription_whenTypeConstant_thenReturnType() throws ReflectiveOperationException, ClassGeneratorException {
+        // given
+        DynamicType dynamicType
+                = new ByteBuddy()
+                .subclass(Object.class)
+                .make()
+                .load(getClass().getClassLoader());
+
+        // when
+        AdaptorWithType obj = getClassFactory(
+                AdaptorWithType.class,
+                new BbImplementationMethodDescriptor
+                        .Builder(AdaptorWithType.class.getMethod("get"))
+                        .typeConstant(dynamicType.getTypeDescription())
+                        .build(),
+                OriginWithMethodAndField.class
+        );
+
+        // then
+        obj.get();
+    }
+
+    @Test
     public void whenText_thenReturnText() throws ReflectiveOperationException, ClassGeneratorException {
         // when
         AdaptorWithString obj = getClassFactory(
@@ -221,7 +269,7 @@ public class BbImplementationMethodDescriptorTest {
                 AdaptorWithType.class,
                 new BbImplementationMethodDescriptor
                         .Builder(AdaptorWithType.class.getMethod("get"))
-                        .typeConstant(null)
+                        .typeConstant((TypeDescription) null)
                         .build(),
                 OriginWithMethodAndField.class
         );
