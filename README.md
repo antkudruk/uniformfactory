@@ -657,8 +657,9 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 |         | Enabled getOrigin method in any Wrapper interface                 |
 | 0.6.3   | Enabled multiple lists in the same wrapper and multiple maps in   | 
 |         | the same wrapper                                                  |
-| 0.6.4   | Modification of DynamicType.Builder in the pure ByteBuddy         
-|         | implementation                                                    |
+| 0.6.4   | Modification of DynamicType.Builder in the pure ByteBuddy         |
+|         | implementation (e. g. adding required dynamic types)              |
+|         | Added required dynamic types to typeConstant BbImplementation     |
 
 ## License
 
