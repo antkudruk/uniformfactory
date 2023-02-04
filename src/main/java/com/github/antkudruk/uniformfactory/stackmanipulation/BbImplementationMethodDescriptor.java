@@ -20,7 +20,9 @@ import net.bytebuddy.implementation.bytecode.constant.TextConstant;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Allows assigning ByteBuddy implementation to the method
@@ -32,12 +34,17 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
     @NonNull
     private final Implementation implementation;
 
+    @NonNull
+    private final Set<DynamicType> requiredTypes;
+
     public BbImplementationMethodDescriptor(Method wrapperMethod,
                                             Optional<Implementation.Composable> initiation,
-                                            Implementation implementation) {
+                                            Implementation implementation,
+                                            Set<DynamicType> requiredTypes) {
         super(wrapperMethod);
         this.implementation = implementation;
         this.initiation = initiation;
+        this.requiredTypes = requiredTypes;
     }
 
     @Override
@@ -53,6 +60,7 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         private Optional<Implementation.Composable> initiation = Optional.empty();
         private Implementation implementation;
+        private Set<DynamicType> requiredTypes = new HashSet<>();
 
         public AbstractBuilder(Method wrapperMethod) {
             super(wrapperMethod);
@@ -94,11 +102,23 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         public T typeConstant(TypeDescription typeDescription) {
             if (typeDescription != null) {
-
                 setImplementation(new Implementation.Simple(
                         ClassConstant.of(typeDescription),
                         MethodReturn.REFERENCE
                 ));
+            } else {
+                setImplementation(FixedValue.nullValue());
+            }
+            return (T) this;
+        }
+
+        public T typeConstant(DynamicType typeDescription) {
+            if (typeDescription != null) {
+                setImplementation(new Implementation.Simple(
+                        ClassConstant.of(typeDescription.getTypeDescription()),
+                        MethodReturn.REFERENCE
+                ));
+                require(typeDescription);
             } else {
                 setImplementation(FixedValue.nullValue());
             }
@@ -122,12 +142,18 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
             return (T) this;
         }
 
+        public T require(DynamicType dynamicType) {
+            this.requiredTypes.add(dynamicType);
+            return (T) this;
+        }
+
         @Override
         public BbImplementationMethodDescriptor build() {
             return new BbImplementationMethodDescriptor(
                     wrapperMethod,
                     initiation,
-                    implementation);
+                    implementation,
+                    requiredTypes);
         }
     }
 
@@ -167,8 +193,10 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         @Override
         public <W> DynamicType.Builder<W> addMethod(DynamicType.Builder<W> bbBuilder) {
-            return bbBuilder.define(wrapperMethod)
-                    .intercept(implementation);
+            return bbBuilder
+                    .define(wrapperMethod)
+                    .intercept(implementation)
+                    .require(requiredTypes);
         }
     }
 }
