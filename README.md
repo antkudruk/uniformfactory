@@ -53,13 +53,11 @@ class OriginImpl {
 }
 ```      
 
-First, you should define the following interfaces to generate wrapper
+**First**, you should define the following interfaces to generate wrapper
 implementations from:
 
 * **Wrapper** interface. It's a common interface to generate the wrapper
   classes from. A wrapper class is generated for each Origin class.
-* **Origin** interface to access Wrapper interface. It contains a single
-  method returning the wrapper object.
 * **Functional** interfaces. As soon as in this example you define an
   annotation to apply to multiple class members annotated with the same
   annotation, you have to define a functional interface to access each
@@ -72,37 +70,76 @@ interface Wrapper {
     Map<String, Property> getProperties();
 }
 
-// Your origin interface
-interface Origin {
-    Wrapper getWrapper();
-}
-
 // Your functional interface.
 interface Property {
     Object get();
 }
 ```
 
-Then you should preform some settings up to let **Uniform Factory** know how
-wrappers should operate origin class members. See the further chapters to get
-an insight on the setting up procedure.
+**Second**, you should perform some settings of Uniform Factory. 
+On this step, you should decide how you're doing to use **UniformFactory** and
+set it up. You can find some explanations with examples further.
 
-After applying **Uniform Factory**, you can operate the annotated members the
+**After applying Uniform Factory**, you can operate the annotated members the
 following way.
 
 ```
-Wrapper wrapper = ((Origin)origin).getWrapper();
+Wrapper wrapper = // get the wrapper built with UniformFactory
+
 wrapper.getName();
 Property widthProperty = wrapper.getProperties().get("width");
 widthProperty.get();
 ```
 
+## Setting up ClassFactory
+
+An instance of **ClassFactory** allows you to create adapters for a needed 
+type.
+
+## Ways to Use Uniform Factory
+
+You can use Uniform Factory two ways:
+* As a Maven/Gradle plugin
+* Using an object factory. This way doesn't require any plugin
+
+|                               | Using Maven/Gradle plugin | Using oject factory |
+|-------------------------------|---------------------------|---------------------|
+| Works without applying plugin | -                         | +                   |
+| Binds Wrapper to Origin       | +                         |                     |
+
+### Using Object Factory
+
+You can create an instance of object factory.
+
+```
+Function<YourType, Wrapper> wrapper = classFactory
+    .buildWrapperFactory(OriginImpl.class); 
+```
+
+After that, you can create an adapter instance for each object of type 
+`YourType`
+
+```
+YourType object = wrapper.apply(yourObject);
+```
+
+This method doesn't require applying Maven/Gradle plugin. That makes it easier
+to debug. However, UniformFactory doesn't provide any type resolution or caching
+(they're up to you, if you decide to use them).
+
+So the next part
+
+Before classes get loaded, you can't change class format.
+
+### Using Maven/Gradle plugin
+
+Maven/Gradle plugin get applied before a class gets loaded. Thus, Maven/Gradle 
+plugin allows adding fields to the classes (e. g. a reference to the Adapter object) 
+
 The plugin does the following:
 
 * Makes the class implement `Origin` interface.
-* Generates implementation of `Wrapper` and `Property` interface **for each
-  origin class**.
-* Implements `getWrapper()` method to get the `Wrapper` implementation
+* Created the *wrapper* property and assigns it with the needed adapter implementation
 
 For instance, this class
 
@@ -144,7 +181,7 @@ Here is an example for Gradle:
 
 ```
 dependencies {
-   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.6.4'
+   compile group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.6.5'
 }
 ```
 
@@ -154,12 +191,11 @@ and for Maven:
 <dependency>
     <groupId>com.github.antkudruk</groupId>
     <artifactId>uniform-factory</artifactId>
-    <version>0.6.4</version>
+    <version>0.6.5</version>
 </dependency>
 ```
 
-**Uniform Factory** is written to be applied in ByteBuddy Gradle Plugin to
-generate uniformed **wrapper** classes. Just import and apply  
+If you choose to apply **Uniform Factory** with ByteBuddy Gradle Plugin, just import and apply  
 `byte-buddy-gradle-plugin` and specify your plugin class.
 
 Here is an example for Gradle:
@@ -167,7 +203,7 @@ Here is an example for Gradle:
 ```
 plugins {
     id 'java'
-    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.12.6"
+    id "net.bytebuddy.byte-buddy-gradle-plugin" version "1.12.18"
 }
 
 byteBuddy {
@@ -183,7 +219,7 @@ and in Maven:
     <plugin>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy-maven-plugin</artifactId>
-        <version>1.12.6</version>
+        <version>1.12.18</version>
         <executions>
             <execution>
                 <goals>
@@ -212,7 +248,7 @@ folder of this project.
 ### Empty Adapter
 
 Here is an example of an empty wrapper. Empty wrapper is an interface that
-doen't define any methods. Even though an empty wrapper is practically useless,
+doesn't define any methods. Even though an empty wrapper is practically useless,
 it's a good point to start.
 
 This plugin example adds an empty wrapper to an object satisfying a
@@ -660,6 +696,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 | 0.6.4   | Modification of DynamicType.Builder in the pure ByteBuddy         |
 |         | implementation (e. g. adding required dynamic types)              |
 |         | Added required dynamic types to typeConstant BbImplementation     |
+| 0.6.5   | Build a factory of adaptors with UniformFactory builder           | 
 
 ## License
 

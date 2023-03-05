@@ -1,3 +1,5 @@
+package com.github.antkudruk.uniformfactory.test.gradleplugin.methodlist;
+
 import com.github.antkudruk.uniformfactory.test.gradleplugin.methodlist.CallableObjectsRegistry;
 import com.github.antkudruk.uniformfactory.test.gradleplugin.methodlist.domain.Origin1;
 import com.github.antkudruk.uniformfactory.test.gradleplugin.methodlist.domain.Origin2;

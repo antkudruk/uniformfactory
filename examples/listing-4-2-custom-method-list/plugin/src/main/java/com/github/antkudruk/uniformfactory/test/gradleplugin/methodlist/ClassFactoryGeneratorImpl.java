@@ -2,12 +2,10 @@ package com.github.antkudruk.uniformfactory.test.gradleplugin.methodlist;
 
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
-import com.github.antkudruk.uniformfactory.pluginbuilder.DefaultMetaClassFactory;
 import com.github.antkudruk.uniformfactory.pluginbuilder.MetaClassFactory;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnyParameterFilter;
-import net.bytebuddy.description.type.TypeDescription;
+import lombok.SneakyThrows;
 
-import java.lang.reflect.Constructor;
 import java.util.function.Function;
 
 public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
@@ -60,31 +58,8 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
     }
 
     @Override
+    @SneakyThrows(ClassGeneratorException.class)
     public <O> Function<O, ? extends Wrapper> generateMetaClass(Class<O> originClass) {
-        try {
-            Constructor<? extends Wrapper> wrapperConstructor = classFactory
-                    .build(new TypeDescription.ForLoadedType(originClass))
-                    .load(DefaultMetaClassFactory.class.getClassLoader())
-                    .getLoaded()
-                    .getConstructor(originClass);
-
-            return new WrapperObjectGenerator<>(wrapperConstructor);
-        } catch (ClassGeneratorException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static class WrapperObjectGenerator<O> extends DefaultMetaClassFactory.WrapperObjectGenerator<O, Wrapper> {
-
-        WrapperObjectGenerator(Constructor<? extends Wrapper> wrapperConstructor) {
-            super(wrapperConstructor);
-        }
-
-        @Override
-        public Wrapper apply(O t) {
-            Wrapper w = super.apply(t);
-            CallableObjectsRegistry.INSTANCE.addObject(w);
-            return w;
-        }
+        return classFactory.buildWrapperFactory(originClass);
     }
 }
