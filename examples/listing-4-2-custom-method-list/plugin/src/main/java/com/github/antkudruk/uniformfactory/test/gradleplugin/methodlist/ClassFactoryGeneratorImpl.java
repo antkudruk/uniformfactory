@@ -23,7 +23,7 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
                 // Setting up element factory for the list - getters
                 .getterElementFactory(Boolean.class)
 
-                // Describes how to map results from origin methods to the adapter methd result
+                // Describes how to map results from origin methods to the adapter method result
                 .addResultTranslator(void.class, t -> true)
                 .addResultTranslator(Long.class, t -> t >= 0)
                 .addResultTranslator(String.class, "yes"::equalsIgnoreCase)
