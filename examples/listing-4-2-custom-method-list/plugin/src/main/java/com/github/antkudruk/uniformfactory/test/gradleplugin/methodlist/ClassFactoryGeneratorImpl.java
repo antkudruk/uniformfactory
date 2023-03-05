@@ -60,6 +60,11 @@ public class ClassFactoryGeneratorImpl implements MetaClassFactory<Wrapper> {
     @Override
     @SneakyThrows(ClassGeneratorException.class)
     public <O> Function<O, ? extends Wrapper> generateMetaClass(Class<O> originClass) {
-        return classFactory.buildWrapperFactory(originClass);
+        Function<O, ? extends Wrapper> wrapperConstructor = classFactory
+                .buildWrapperFactory(originClass);
+        return wrapperConstructor.andThen(w -> {
+            CallableObjectsRegistry.INSTANCE.addObject(w);
+            return w;
+        });
     }
 }

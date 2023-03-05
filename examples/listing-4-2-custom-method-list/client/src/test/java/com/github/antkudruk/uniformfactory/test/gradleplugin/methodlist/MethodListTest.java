@@ -13,7 +13,10 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 public class MethodListTest {
@@ -23,59 +26,62 @@ public class MethodListTest {
 
     @Test
     public void everythingReturnsTrue () {
-        Runnable runnable = Mockito.mock(Runnable.class);
-        Function<String, String> consumerString = Mockito.mock(Function.class);
-        Mockito.when(consumerString.apply(eq(EVENT_TYPE_STRING))).thenReturn("yes");
+        // given
+        Runnable runnable = mock(Runnable.class);
+        Function<String, String> consumerString = mock(Function.class);
+        when(consumerString.apply(eq(EVENT_TYPE_STRING))).thenReturn("yes");
 
-        Function<Integer, Boolean> consumerInteger = Mockito.mock(Function.class);
-        Mockito.when(consumerInteger.apply(eq(EVENT_TYPE_INT))).thenReturn(true);
+        Function<Integer, Boolean> consumerInteger = mock(Function.class);
+        when(consumerInteger.apply(eq(EVENT_TYPE_INT))).thenReturn(true);
 
+        // when
         new Origin1(runnable);
         new Origin2(consumerString, consumerInteger);
+        boolean result = CallableObjectsRegistry.INSTANCE.call(EVENT_TYPE_STRING);
 
-        assertTrue(CallableObjectsRegistry.INSTANCE.call(EVENT_TYPE_STRING));
-
-        Mockito.verify(runnable, times(1)).run();
-        Mockito.verify(consumerString, times(1)).apply(eq(EVENT_TYPE_STRING));
-        Mockito.verify(consumerInteger, times(1)).apply(eq(EVENT_TYPE_INT));
+        // then
+        assertTrue(result);
+        verify(runnable, times(1)).run();
+        verify(consumerString, times(1)).apply(eq(EVENT_TYPE_STRING));
+        verify(consumerInteger, times(1)).apply(eq(EVENT_TYPE_INT));
     }
 
     @Test
     public void everythingSecondFalse () {
-        Runnable runnable = Mockito.mock(Runnable.class);
-        Function<String, String> consumerString = Mockito.mock(Function.class);
-        Mockito.when(consumerString.apply(eq(EVENT_TYPE_STRING))).thenReturn("no");
+        Runnable runnable = mock(Runnable.class);
+        Function<String, String> consumerString = mock(Function.class);
+        when(consumerString.apply(eq(EVENT_TYPE_STRING))).thenReturn("no");
 
-        Function<Integer, Boolean> consumerInteger = Mockito.mock(Function.class);
-        Mockito.when(consumerInteger.apply(eq(EVENT_TYPE_INT))).thenReturn(true);
+        Function<Integer, Boolean> consumerInteger = mock(Function.class);
+        when(consumerInteger.apply(eq(EVENT_TYPE_INT))).thenReturn(true);
 
         new Origin1(runnable);
         new Origin2(consumerString, consumerInteger);
 
         assertFalse(CallableObjectsRegistry.INSTANCE.call(EVENT_TYPE_STRING));
 
-        Mockito.verify(runnable, times(1)).run();
-        Mockito.verify(consumerString, times(1)).apply(eq(EVENT_TYPE_STRING));
-        Mockito.verify(consumerInteger, times(1)).apply(eq(EVENT_TYPE_INT));
+        verify(runnable, times(1)).run();
+        verify(consumerString, times(1)).apply(eq(EVENT_TYPE_STRING));
+        verify(consumerInteger, times(1)).apply(eq(EVENT_TYPE_INT));
     }
 
     @Test
     public void everythingThirdFalse () {
-        Runnable runnable = Mockito.mock(Runnable.class);
-        Function<String, String> consumerString = Mockito.mock(Function.class);
-        Mockito.when(consumerString.apply(eq(EVENT_TYPE_STRING))).thenReturn("yes");
+        Runnable runnable = mock(Runnable.class);
+        Function<String, String> consumerString = mock(Function.class);
+        when(consumerString.apply(eq(EVENT_TYPE_STRING))).thenReturn("yes");
 
-        Function<Integer, Boolean> consumerInteger = Mockito.mock(Function.class);
-        Mockito.when(consumerInteger.apply(eq(EVENT_TYPE_INT))).thenReturn(false);
+        Function<Integer, Boolean> consumerInteger = mock(Function.class);
+        when(consumerInteger.apply(eq(EVENT_TYPE_INT))).thenReturn(false);
 
         Origin1 origin1 = new Origin1(runnable);
         new Origin2(consumerString, consumerInteger);
 
         assertFalse(CallableObjectsRegistry.INSTANCE.call(EVENT_TYPE_STRING));
 
-        Mockito.verify(runnable, times(1)).run();
-        Mockito.verify(consumerString, times(1)).apply(eq(EVENT_TYPE_STRING));
-        Mockito.verify(consumerInteger, times(1)).apply(eq(EVENT_TYPE_INT));
+        verify(runnable, times(1)).run();
+        verify(consumerString, times(1)).apply(eq(EVENT_TYPE_STRING));
+        verify(consumerInteger, times(1)).apply(eq(EVENT_TYPE_INT));
 
         ((Origin)origin1)
                 .getWrapper()
