@@ -116,6 +116,7 @@ def runExampleFolder(gradlewRelativePath, exampleName, projectType, publishToMav
             }
             standardOutput = stdout
         }
+        println "Output: $stdout"
     }
 }
 
@@ -130,7 +131,6 @@ task testExamples {
             runExampleFolder(gradlewRelativePath, file.name, 'client', false)
             runExampleFolder(gradlewRelativePath, file.name, 'project', false)
         }
-        println "Output: $stdout"
     }
     dependsOn(publishToMavenLocal)
 }
