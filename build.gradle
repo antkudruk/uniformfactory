@@ -98,6 +98,27 @@ javadoc {
     }
 }
 
+def runExampleFolder(gradlewRelativePath, exampleName, projectType, publishToMavenLocal) {
+    def stdout = new ByteArrayOutputStream()
+    if (new File("examples/${exampleName}/${projectType}").exists()) {
+        stdout.println("   Compiling ${projectType.capitalize()} for the listing ${exampleName}")
+        exec {
+            workingDir "examples/${exampleName}/plugin"
+            def params = [gradlewRelativePath, 'clean', 'build']
+            if(publishToMavenLocal) {
+                params.add('publishToMavenLocal')
+            }
+            if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+                params.addAll(0, ['cmd', '/c'])
+                commandLine params
+            } else {
+                commandLine params
+            }
+            standardOutput = stdout
+        }
+    }
+}
+
 task testExamples {
     doLast {
         def stdout = new ByteArrayOutputStream()
@@ -105,26 +126,9 @@ task testExamples {
         def gradlewRelativePath = ['..', '..', '..', 'gradlew'].join(File.separator)
         stdout.println("Test of examples")
         for (File file in files) {
-            stdout.println("   Compiling Plugin for the listing ${file.name}")
-            exec {
-                workingDir "examples/${file.name}/plugin"
-                if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-                    commandLine 'cmd', '/c', gradlewRelativePath, 'clean', 'test', 'publishToMavenLocal'
-                } else {
-                    commandLine gradlewRelativePath, 'clean', 'test', 'publishToMavenLocal'
-                }
-                standardOutput = stdout
-            }
-            stdout.println("   Compiling Client for the listing ${file.name}")
-            exec {
-                workingDir "examples/${file.name}/client"
-                if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-                    commandLine 'cmd', '/c', gradlewRelativePath, 'clean', 'build'
-                } else {
-                    commandLine gradlewRelativePath, 'clean', 'build'
-                }
-                standardOutput = stdout
-            }
+            runExampleFolder(gradlewRelativePath, file.name, 'plugin', true)
+            runExampleFolder(gradlewRelativePath, file.name, 'client', false)
+            runExampleFolder(gradlewRelativePath, file.name, 'project', false)
         }
         println "Output: $stdout"
     }
