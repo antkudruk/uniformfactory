@@ -103,7 +103,7 @@ def runExampleFolder(gradlewRelativePath, exampleName, projectType, publishToMav
     if (new File("examples/${exampleName}/${projectType}").exists()) {
         stdout.println("   Compiling ${projectType.capitalize()} for the listing ${exampleName}")
         exec {
-            workingDir "examples/${exampleName}/plugin"
+            workingDir "examples/${exampleName}/${projectType}"
             def params = [gradlewRelativePath, 'clean', 'build']
             if(publishToMavenLocal) {
                 params.add('publishToMavenLocal')
