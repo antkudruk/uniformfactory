@@ -1,11 +1,11 @@
-package con.github.antkudruk.example.gameexample.gameobject;
+package com.github.antkudruk.example.gameexample.gameobject;
 
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodcollection.ElementFactory;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.SpecifiedFieldSelector;
 import com.github.antkudruk.uniformfactory.methodcollection.seletor.SpecifiedMethodSelector;
-import con.github.antkudruk.example.gameexample.gameengine.Node;
+import com.github.antkudruk.example.gameexample.gameengine.Node;
 import lombok.SneakyThrows;
 import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;

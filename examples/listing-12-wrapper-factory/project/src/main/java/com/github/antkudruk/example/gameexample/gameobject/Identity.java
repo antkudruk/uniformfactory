@@ -1,4 +1,4 @@
-package con.github.antkudruk.example.gameexample.gameobject;
+package com.github.antkudruk.example.gameexample.gameobject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

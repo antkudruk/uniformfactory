@@ -1,10 +1,10 @@
-package con.github.antkudruk.example.gameexample.domain;
+package com.github.antkudruk.example.gameexample.domain;
 
-import con.github.antkudruk.example.gameexample.gameobject.Identity;
-import con.github.antkudruk.example.gameexample.gameobject.JmeObject;
-import con.github.antkudruk.example.gameexample.gameobject.Property;
-import con.github.antkudruk.example.gameexample.gameengine.Bone;
-import con.github.antkudruk.example.gameexample.gameengine.Color;
+import com.github.antkudruk.example.gameexample.gameengine.Color;
+import com.github.antkudruk.example.gameexample.gameobject.Identity;
+import com.github.antkudruk.example.gameexample.gameobject.Property;
+import com.github.antkudruk.example.gameexample.gameobject.JmeObject;
+import com.github.antkudruk.example.gameexample.gameengine.Bone;
 import lombok.Getter;
 
 import java.math.BigDecimal;
