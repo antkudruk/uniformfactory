@@ -1,3 +1,5 @@
+*Using Adapter Factory (Without Maven/Gradle Plugin)
+
 In this example, we're going to implement the adapters for arbitrary injecting 
 objects of a game engine into our domain objects. This game engine is fake, 
 even though it was inspired by JMonkey engine.
