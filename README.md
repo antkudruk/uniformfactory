@@ -83,13 +83,23 @@ set it up. You can find some explanations with examples further.
 **After applying Uniform Factory**, you can operate the annotated members the
 following way.
 
-```
-Wrapper wrapper = // get the wrapper built with UniformFactory
-
-wrapper.getName();
-Property widthProperty = wrapper.getProperties().get("width");
-widthProperty.get();
-```
+1. Get the wrapper for the **origin** object. Depending on whe way you're using
+   UniformFactory, il may look the following:
+   
+   * **Way 1**: Using Maven/Gradle plugin:   
+    ```
+    Wrapper wrapper = ((Origin)origin).getWrapper();// get the wrapper built with UniformFactory
+    ```
+   * **Way 2**: Using factory (doesn't require Maven/Gradle plugin)
+    ```
+    Wrapper wrapper = wrapperFactory.get(origin);// get the wrapper built with UniformFactory
+    ```
+2. Operate with the wrapper
+    ```
+    wrapper.getName();
+    Property widthProperty = wrapper.getProperties().get("width");
+    widthProperty.get();
+    ```
 
 ## Setting up ClassFactory
 
@@ -102,34 +112,32 @@ You can use Uniform Factory two ways:
 * As a Maven/Gradle plugin
 * Using an object factory. This way doesn't require any plugin
 
-|                               | Using Maven/Gradle plugin | Using oject factory |
-|-------------------------------|---------------------------|---------------------|
-| Works without applying plugin | -                         | +                   |
-| Binds Wrapper to Origin       | +                         |                     |
+|                                  | Using Maven/Gradle plugin | Using object factory |
+|----------------------------------|---------------------------|----------------------|
+| Works without applying plugin    | -                         | +                    |
+| Origin has a link to its Wrapper | +                         | -                    |
 
 ### Using Object Factory
 
 You can create an instance of object factory.
 
 ```
-Function<YourType, Wrapper> wrapper = classFactory
-    .buildWrapperFactory(OriginImpl.class); 
+WrapperFactory<Wrapper> wrapper = classFactory.buildWrapperFactory(); 
 ```
 
 After that, you can create an adapter instance for each object of type 
 `YourType`
 
 ```
-YourType object = wrapper.apply(yourObject);
+YourType object = wrapper.get(yourObject);
 ```
 
 This method doesn't require applying Maven/Gradle plugin. That makes it easier
-to debug. However, UniformFactory doesn't provide any type resolution or caching
-(they're up to you, if you decide to use them).
+to debug. However, UniformFactory can't change loaded classes format, and 
+therefore, can't introduce a reference to the wrapper into the origin object.
 
-So the next part
-
-Before classes get loaded, you can't change class format.
+See example for using Object Factory option 
+[here](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-12-wrapper-factory)
 
 ### Using Maven/Gradle plugin
 
@@ -172,6 +180,21 @@ class Origin implements OriginInterface {
 
 The following tutorial describes how to set up **Uniform Factory** to generate
 wrapper classes properly.
+
+### Notes on testing
+
+It's difficult to test Maven/Gradle plugin. However, both Plugin and Wrapper 
+Factory use the common classes to generate adapters. Thus, even if you chose 
+Plugin option, you still can test the generated wrapper without applying a 
+plugin.
+
+Just use the method `buildWrapperFactory` in your unit test in the Plugin:
+(example from the example [Custom method list](https://github.com/antkudruk/uniformfactory/tree/develop/examples/listing-4-2-custom-method-list))
+```
+        // when
+        Function<Origin1, ? extends Wrapper> meta = testSubject.generateMetaClass(Origin1.class);
+        Wrapper w = meta.apply(origin);
+```
 
 ## Installing Uniform Factory Into Your Project
 
