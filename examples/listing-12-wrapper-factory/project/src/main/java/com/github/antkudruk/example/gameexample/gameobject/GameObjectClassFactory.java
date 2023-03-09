@@ -57,7 +57,7 @@ public class GameObjectClassFactory {
                                         .finishParameterDescription()
                                         .endMethodDescription()
                                         .addByteBuddyImplementation(NodeSetter.class.getDeclaredMethod("nodeType"))
-                                        .typeConstant(methodDescription.getParameters().getOnly().getType().asErasure())  // TODO: describe this chain
+                                        .typeConstant(methodDescription.getParameters().getOnly().getType().asErasure())
                                         .endMethodDescription()
                                         .build();
                             }
