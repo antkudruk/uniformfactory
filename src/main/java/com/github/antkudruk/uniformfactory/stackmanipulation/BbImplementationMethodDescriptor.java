@@ -1,6 +1,7 @@
 package com.github.antkudruk.uniformfactory.stackmanipulation;
 
 import com.github.antkudruk.uniformfactory.base.AbstractMethodDescriptorImpl;
+import com.github.antkudruk.uniformfactory.base.EnhanceDynamicType;
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.classfactory.ChildMethodDescriptionBuilderWrapper;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
@@ -20,9 +21,7 @@ import net.bytebuddy.implementation.bytecode.constant.TextConstant;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
 
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Allows assigning ByteBuddy implementation to the method
@@ -35,16 +34,16 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
     private final Implementation implementation;
 
     @NonNull
-    private final Set<DynamicType> requiredTypes;
+    private final EnhanceDynamicType enhanceDynamicTypeBuilder;
 
     public BbImplementationMethodDescriptor(Method wrapperMethod,
                                             Optional<Implementation.Composable> initiation,
                                             Implementation implementation,
-                                            Set<DynamicType> requiredTypes) {
+                                            EnhanceDynamicType enhanceDynamicTypeBuilder) {
         super(wrapperMethod);
         this.implementation = implementation;
         this.initiation = initiation;
-        this.requiredTypes = requiredTypes;
+        this.enhanceDynamicTypeBuilder = enhanceDynamicTypeBuilder;
     }
 
     @Override
@@ -60,7 +59,7 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         private Optional<Implementation.Composable> initiation = Optional.empty();
         private Implementation implementation;
-        private Set<DynamicType> requiredTypes = new HashSet<>();
+        private EnhanceDynamicType enhanceDynamicTypeBuilder = t -> t;
 
         public AbstractBuilder(Method wrapperMethod) {
             super(wrapperMethod);
@@ -102,6 +101,7 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         public T typeConstant(TypeDescription typeDescription) {
             if (typeDescription != null) {
+
                 setImplementation(new Implementation.Simple(
                         ClassConstant.of(typeDescription),
                         MethodReturn.REFERENCE
@@ -118,7 +118,7 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
                         ClassConstant.of(typeDescription.getTypeDescription()),
                         MethodReturn.REFERENCE
                 ));
-                require(typeDescription);
+                enhanceDynamicTypeBuilder(t -> t.require(typeDescription));
             } else {
                 setImplementation(FixedValue.nullValue());
             }
@@ -142,8 +142,8 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
             return (T) this;
         }
 
-        public T require(DynamicType dynamicType) {
-            this.requiredTypes.add(dynamicType);
+        public <W> T enhanceDynamicTypeBuilder(EnhanceDynamicType<W> enhanceDynamicTypeBuilder) {
+            this.enhanceDynamicTypeBuilder = enhanceDynamicTypeBuilder;
             return (T) this;
         }
 
@@ -153,7 +153,7 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
                     wrapperMethod,
                     initiation,
                     implementation,
-                    requiredTypes);
+                    enhanceDynamicTypeBuilder);
         }
     }
 
@@ -193,10 +193,10 @@ public class BbImplementationMethodDescriptor extends AbstractMethodDescriptorIm
 
         @Override
         public <W> DynamicType.Builder<W> addMethod(DynamicType.Builder<W> bbBuilder) {
-            return bbBuilder
-                    .define(wrapperMethod)
-                    .intercept(implementation)
-                    .require(requiredTypes);
+            DynamicType.Builder<W> intermediate = bbBuilder
+                            .define(wrapperMethod)
+                            .intercept(implementation);
+            return enhanceDynamicTypeBuilder.apply(intermediate);
         }
     }
 }

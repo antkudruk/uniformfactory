@@ -82,7 +82,7 @@ public class PartialParameterUnion implements ParameterBindersSource {
                     .collect(Collectors.joining(",\n"));
 
             throw new ParameterTranslatorNotFound("Binders for the following arguments are not specified:\n"
-                    + missingArguments, null);
+                    + missingArguments + "\n Please, set up parameter mappers for all arguments.", null);
         }
 
         return binders;

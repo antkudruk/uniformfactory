@@ -17,6 +17,7 @@ import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -79,6 +80,9 @@ public class MethodListTest {
 
     @Test
     public void test() throws ReflectiveOperationException, ClassGeneratorException {
+        // given
+        OriginImpl origin = new OriginImpl();
+
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
                         new MethodListDescriptor.Builder<>(
@@ -103,17 +107,12 @@ public class MethodListTest {
                 )
                 .build();
 
-        Class<? extends Wrapper> wrapperClass = classFactory
-                .build(new TypeDescription.ForLoadedType(OriginImpl.class))
-                .load(getClass().getClassLoader())
-                .getLoaded();
-
-        OriginImpl origin = new OriginImpl();
-
-        Wrapper wrapper = wrapperClass.getConstructor(OriginImpl.class).newInstance(origin);
-
+        // when
+        Function<OriginImpl, Wrapper> wrapperFactory = classFactory.buildWrapperFactory(OriginImpl.class);
+        Wrapper wrapper = wrapperFactory.apply(origin);
         List<Fun> map = wrapper.getFunctionsList();
 
+        // then
         Set<String> actual = map
                 .stream()
                 .map(t -> t.getId("Foo", 10L))
@@ -130,6 +129,9 @@ public class MethodListTest {
 
     @Test
     public void test1() throws ReflectiveOperationException, ClassGeneratorException {
+        // given
+        OriginImpl origin = new OriginImpl();
+
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(new MethodListDescriptor.Builder<>(
                         Fun.class, Wrapper.class.getMethod("getFunctionsList"))
@@ -153,15 +155,12 @@ public class MethodListTest {
                 )
                 .build();
 
-        Class<? extends Wrapper> wrapperClass = classFactory
-                .build(new TypeDescription.ForLoadedType(OriginImpl.class))
-                .load(getClass().getClassLoader())
-                .getLoaded();
-
-        OriginImpl origin = new OriginImpl();
-        Wrapper wrapper = wrapperClass.getConstructor(OriginImpl.class).newInstance(origin);
+        // when
+        Function<OriginImpl, Wrapper> wrapperFactory = classFactory.buildWrapperFactory(OriginImpl.class);
+        Wrapper wrapper = wrapperFactory.apply(origin);
         List<Fun> map = wrapper.getFunctionsList();
 
+        // then
         Set<String> actual = map
                 .stream()
                 .map(t -> t.getId("Foo", 10L))
@@ -179,6 +178,9 @@ public class MethodListTest {
 
     @Test
     public void simpleBuilderTest() throws ReflectiveOperationException, ClassGeneratorException {
+        // given
+        OriginImpl origin = new OriginImpl();
+
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
                         new MethodListDescriptor.Builder<>(
@@ -210,17 +212,12 @@ public class MethodListTest {
                 )
                 .build();
 
-        Class<? extends Wrapper> wrapperClass = classFactory
-                .build(new TypeDescription.ForLoadedType(OriginImpl.class))
-                .load(getClass().getClassLoader())
-                .getLoaded();
-
-        OriginImpl origin = new OriginImpl();
-
-        Wrapper wrapper = wrapperClass.getConstructor(OriginImpl.class).newInstance(origin);
-
+        // when
+        Function<OriginImpl, Wrapper> wrapperFactory = classFactory.buildWrapperFactory(OriginImpl.class);
+        Wrapper wrapper = wrapperFactory.apply(origin);
         List<Fun> map = wrapper.getFunctionsList();
 
+        // then
         Set<String> actual = map
                 .stream()
                 .map(t -> t.getId("Foo", 10L))

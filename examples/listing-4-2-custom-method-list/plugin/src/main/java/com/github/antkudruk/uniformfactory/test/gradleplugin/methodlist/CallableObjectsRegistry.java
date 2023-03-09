@@ -14,7 +14,9 @@ public class CallableObjectsRegistry {
     }
 
     public boolean call(String eventName) {
-        return object.keySet().stream()
+        return object
+                .keySet()
+                .stream()
                 .map(Wrapper::getProcessors)
                 .flatMap(Collection::stream)
                 .map(t -> t.process(eventName))

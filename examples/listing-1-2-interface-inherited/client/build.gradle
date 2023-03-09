@@ -11,7 +11,7 @@ buildscript {
 
 plugins {
     id 'java'
-    id "net.bytebuddy.byte-buddy-gradle-plugin" version '1.12.6'
+    id "net.bytebuddy.byte-buddy-gradle-plugin" version '1.12.18'
 }
 
 group 'com.github.antkudruk'
@@ -26,8 +26,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'net.bytebuddy:byte-buddy:1.12.6'
-    implementation group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.6.3'
+    implementation 'net.bytebuddy:byte-buddy:1.12.18'
+    implementation group: 'com.github.antkudruk', name: 'uniform-factory', version: '0.6.5'
     implementation group: 'com.github.antkudruk', name: 'gradle-listing-1-2-interface-inherited', version: '1.0-SNAPSHOT'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }

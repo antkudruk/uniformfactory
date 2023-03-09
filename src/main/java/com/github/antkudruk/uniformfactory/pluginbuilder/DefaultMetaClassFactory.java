@@ -16,13 +16,11 @@
 
 package com.github.antkudruk.uniformfactory.pluginbuilder;
 
-import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
+import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import net.bytebuddy.description.type.TypeDescription;
 
-import java.lang.reflect.Constructor;
 import java.util.function.Function;
 
 /**
@@ -34,30 +32,8 @@ public class DefaultMetaClassFactory<W> implements MetaClassFactory<W> {
     private final ClassFactory<W> classFactory;
 
     @Override
-    @SneakyThrows({NoSuchMethodException.class, ClassGeneratorException.class})
+    @SneakyThrows(ClassGeneratorException.class)
     public <O> Function<O, ? extends W> generateMetaClass(Class<O> originClass) {
-        Constructor<? extends W> wrapperConstructor = classFactory
-                .build(new TypeDescription.ForLoadedType(originClass))
-                .load(DefaultMetaClassFactory.class.getClassLoader())
-                .getLoaded()
-                .getConstructor(originClass);
-
-        return new WrapperObjectGenerator<>(wrapperConstructor);
-    }
-
-    @RequiredArgsConstructor
-    public static class WrapperObjectGenerator<O, W> implements Function<O, W> {
-
-        private final Constructor<? extends W> wrapperConstructor;
-
-        @Override
-        public W apply(O t) {
-            try {
-                // TODO: Replace with MethodHandle
-                return wrapperConstructor.newInstance(t);
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException();
-            }
-        }
+        return classFactory.buildWrapperFactory(originClass);
     }
 }

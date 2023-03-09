@@ -18,6 +18,9 @@ package com.github.antkudruk.uniformfactory.classfactory;
 
 import com.github.antkudruk.uniformfactory.base.Enhancer;
 import com.github.antkudruk.uniformfactory.base.MethodDescriptor;
+import com.github.antkudruk.uniformfactory.base.bytecode.ReturnConstructedValueImplementation;
+import com.github.antkudruk.uniformfactory.container.WrapperFactory;
+import com.github.antkudruk.uniformfactory.container.WrapperMetaFactoryImpl;
 import com.github.antkudruk.uniformfactory.exception.AlienMethodException;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodlist.descriptors.MethodListDescriptor;
@@ -26,6 +29,8 @@ import com.github.antkudruk.uniformfactory.setter.descriptors.SetterDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.atomicaccessor.Constants;
 import com.github.antkudruk.uniformfactory.singleton.descriptors.MethodSingletonDescriptor;
 import com.github.antkudruk.uniformfactory.stackmanipulation.BbImplementationMethodDescriptor;
+import lombok.Getter;
+import lombok.SneakyThrows;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
@@ -34,6 +39,7 @@ import net.bytebuddy.dynamic.scaffold.subclass.ConstructorStrategy;
 import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.MethodCall;
+import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -41,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,6 +59,7 @@ import java.util.stream.Stream;
  */
 public class ClassFactory<W> {
 
+    @Getter
     private final Class<W> wrapperInterface;
     private final Map<Method, MethodDescriptor> methodDescriptorBuilders;
 
@@ -95,6 +103,58 @@ public class ClassFactory<W> {
         bbBuilder = enhancerBasedEnhancer.addMethod(bbBuilder);
 
         return bbBuilder.make();
+    }
+
+    /**
+     *
+     *
+     * @param originClass
+     * @return A function that creates an adapter for the consuming object
+     * @param <S> Origin class
+     * @throws ClassGeneratorException
+     */
+    @SneakyThrows(ReflectiveOperationException.class)
+    public <S> Function<S, W> buildWrapperFactory(Class<S> originClass) throws ClassGeneratorException {
+        TypeDescription originTypeDescription = new TypeDescription.ForLoadedType(originClass);
+        DynamicType.Unloaded<W> wrapperType = build(new TypeDescription.ForLoadedType(originClass));
+        return new ByteBuddy()
+                .subclass(Function.class, ConstructorStrategy.Default.NO_CONSTRUCTORS)
+                .defineConstructor(Visibility.PUBLIC)
+                .intercept(
+                        MethodCall.invoke(
+                                new TypeDescription.ForLoadedType(Object.class)
+                                        .getDeclaredMethods()
+                                        .filter(ElementMatchers.isConstructor())
+                                        .filter(ElementMatchers.takesNoArguments())
+                                        .getOnly()
+                        )
+                )
+                .defineMethod("apply", Object.class, Visibility.PUBLIC)
+                .withParameters(Object.class)
+                .intercept(
+                        new ReturnConstructedValueImplementation(
+                                wrapperType.getTypeDescription(),
+                                originTypeDescription
+                        )
+                )
+                .require(wrapperType)
+                .make()
+                .load(getClass().getClassLoader())
+                .getLoaded()
+                .getConstructor()
+                .newInstance();
+    }
+
+    /**
+     * A smart version of the method {@code buildWrapperFactory}
+     *
+     * Returns a factory that caches wrapper classes for each origin type.
+     *
+     * Creates container to hold adapters for your objects.
+     * @return New container instance
+     */
+    public WrapperFactory<W> buildWrapperFactory() {
+        return WrapperMetaFactoryImpl.INSTANCE.get(this);
     }
 
     private void validate() throws ClassFactoryException {
