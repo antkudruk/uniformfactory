@@ -1,12 +1,12 @@
 package com.github.antkudruk.uniformfactory.methodmap;
 
-import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
-import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.ParameterValue;
 import com.github.antkudruk.uniformfactory.base.exception.WrongTypeException;
 import com.github.antkudruk.uniformfactory.classfactory.ClassFactory;
 import com.github.antkudruk.uniformfactory.exception.ClassGeneratorException;
 import com.github.antkudruk.uniformfactory.methodmap.descriptors.MethodMapDescriptor;
 import com.github.antkudruk.uniformfactory.singleton.argument.filters.filtertypes.AnnotationParameterFilter;
+import com.github.antkudruk.uniformfactory.singleton.argument.partialbinding.PartialMapperImpl;
+import com.github.antkudruk.uniformfactory.singleton.argument.valuesource.ParameterValue;
 import net.bytebuddy.description.type.TypeDescription;
 import org.junit.Test;
 
@@ -16,6 +16,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -77,6 +78,7 @@ public class MethodMapTest {
 
     @Test
     public void test() throws ReflectiveOperationException, ClassGeneratorException {
+        OriginImpl origin = new OriginImpl();
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
                         new MethodMapDescriptor.Builder<>(Fun.class,
@@ -98,17 +100,12 @@ public class MethodMapTest {
                 )
                 .build();
 
-        Class<? extends Wrapper> wrapperClass = classFactory
-                .build(new TypeDescription.ForLoadedType(OriginImpl.class))
-                .load(getClass().getClassLoader())
-                .getLoaded();
-
-        OriginImpl origin = new OriginImpl();
-
-        Wrapper wrapper = wrapperClass.getConstructor(OriginImpl.class).newInstance(origin);
-
+        // when
+        Function<OriginImpl, Wrapper> wrapperFactory = classFactory.buildWrapperFactory(OriginImpl.class);
+        Wrapper wrapper = wrapperFactory.apply(origin);
         Map<String, Fun> map = wrapper.getFunctionsList();
 
+        // then
         assertEquals("Epsilon", map.get("epsilon").getId("Foo", 10L));
         assertEquals("Foo 10", map.get("alpha").getId("Foo", 10L));
         assertEquals("Foo Foo", map.get("beta").getId("Foo", 10L));
@@ -119,6 +116,9 @@ public class MethodMapTest {
 
     @Test
     public void test1() throws ReflectiveOperationException, ClassGeneratorException {
+        // given
+        OriginImpl origin = new OriginImpl();
+
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(new MethodMapDescriptor.Builder<>(
                         Fun.class,
@@ -147,15 +147,12 @@ public class MethodMapTest {
                 )
                 .build();
 
-        Class<? extends Wrapper> wrapperClass = classFactory
-                .build(new TypeDescription.ForLoadedType(OriginImpl.class))
-                .load(getClass().getClassLoader())
-                .getLoaded();
-
-        OriginImpl origin = new OriginImpl();
-        Wrapper wrapper = wrapperClass.getConstructor(OriginImpl.class).newInstance(origin);
+        // when
+        Function<OriginImpl, Wrapper> wrapperFactory = classFactory.buildWrapperFactory(OriginImpl.class);
+        Wrapper wrapper = wrapperFactory.apply(origin);
         Map<String, Fun> map = wrapper.getFunctionsList();
 
+        // then
         assertEquals("Test Value", map.get("alpha").getId("Foo", 10L));
         assertEquals("Test Test", map.get("beta").getId("Foo", 10L));
         assertEquals("Empty", map.get("gamma").getId("Foo", 10L));
@@ -165,6 +162,9 @@ public class MethodMapTest {
 
     @Test
     public void simpleBuilderTest() throws ReflectiveOperationException, ClassGeneratorException {
+        // given
+        OriginImpl origin = new OriginImpl();
+
         ClassFactory<Wrapper> classFactory = new ClassFactory.Builder<>(Wrapper.class)
                 .addMethodDescriptor(
                         new MethodMapDescriptor.Builder<>(
@@ -196,17 +196,12 @@ public class MethodMapTest {
                 )
                 .build();
 
-        Class<? extends Wrapper> wrapperClass = classFactory
-                .build(new TypeDescription.ForLoadedType(OriginImpl.class))
-                .load(getClass().getClassLoader())
-                .getLoaded();
-
-        OriginImpl origin = new OriginImpl();
-
-        Wrapper wrapper = wrapperClass.getConstructor(OriginImpl.class).newInstance(origin);
-
+        // when
+        Function<OriginImpl, Wrapper> wrapperFactory = classFactory.buildWrapperFactory(OriginImpl.class);
+        Wrapper wrapper = wrapperFactory.apply(origin);
         Map<String, Fun> map = wrapper.getFunctionsList();
 
+        // then
         assertEquals("Epsilon", map.get("epsilon").getId("Foo", 10L));
         assertEquals("Foo 10", map.get("alpha").getId("Foo", 10L));
         assertEquals("Foo Foo", map.get("beta").getId("Foo", 10L));
