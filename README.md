@@ -112,24 +112,23 @@ You can use Uniform Factory two ways:
 * As a Maven/Gradle plugin
 * Using an object factory. This way doesn't require any plugin
 
-|                                  | Using Maven/Gradle plugin | Using object factory |
-|----------------------------------|---------------------------|----------------------|
-| Works without applying plugin    | -                         | +                    |
-| Origin has a link to its Wrapper | +                         | -                    |
+|                                       | Using Maven/Gradle plugin | Using object factory |
+|---------------------------------------|---------------------------|----------------------|
+| Works without applying plugin         | -                         | +                    |
+| Origin has a reference to its Wrapper | +                         | -                    |
 
 ### Using Object Factory
 
 You can create an instance of object factory.
 
 ```
-WrapperFactory<Wrapper> wrapper = classFactory.buildWrapperFactory(); 
+WrapperFactory<Wrapper> wrapperFactory = classFactory.buildWrapperFactory(); 
 ```
 
-After that, you can create an adapter instance for each object of type 
-`YourType`
+After that, you can create an adapter instance for each object:
 
 ```
-YourType object = wrapper.get(yourObject);
+Wrapper wrapper = wrapperFactory.get(yourObject);
 ```
 
 This method doesn't require applying Maven/Gradle plugin. That makes it easier
