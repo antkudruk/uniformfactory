@@ -718,7 +718,7 @@ public class ClassFactoryGeneratorImpl extends DefaultMetaClassFactory<Wrapper> 
 | 0.6.4   | Modification of DynamicType.Builder in the pure ByteBuddy         |
 |         | implementation (e. g. adding required dynamic types)              |
 |         | Added required dynamic types to typeConstant BbImplementation     |
-| 0.6.5   | Enhanced adaptors creating without Maven o Gradle plugin          | 
+| 0.6.5   | Enhanced adapters creating without Maven or Gradle plugin         | 
 
 ## License
 
